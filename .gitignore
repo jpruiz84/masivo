@@ -1,0 +1,9 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
