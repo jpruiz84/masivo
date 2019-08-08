@@ -1,4 +1,4 @@
-class Bus_stop():
+class Graph_bus_stop():
   def __init__(self, capacity, x_pos, y_pos):
 
     self.capacity = capacity

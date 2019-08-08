@@ -1,6 +1,6 @@
 from direct.showbase.ShowBase import ShowBase
-from .Bus_stop import Bus_stop
-from .Bus import Bus
+from .Graph_bus_stop import Graph_bus_stop
+from .Graph_bus import Graph_bus
 
 from panda3d.core import TextNode
 from panda3d.core import *
@@ -49,11 +49,11 @@ class Graph(DirectObject):
     self.bus_stop_list = []
 
     for stop in masivo["stops_list"]:
-      bus_stop = Bus_stop(stop.max_capacity, 10 + stop.possition, 10)
+      bus_stop = Graph_bus_stop(stop.max_capacity, 10 + stop.possition, 10)
       bus_stop.set_pass(stop.pass_count())
       self.bus_stop_list.append(bus_stop)
     
-    self.bus = Bus(50, 10, 11)
+    self.bus = Graph_bus(50, 10, 11)
         
     
     self.accept("escape", sys.exit)
