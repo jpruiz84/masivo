@@ -19,7 +19,7 @@ class Graph_bus():
       pass_num = self.capacity
 
     self.indicator.setScale(1.0*pass_num/self.capacity,1,1)   
-    x_pos = -1.6*0.50*(1-1.0*pass_num/self.capacity)
+    x_pos = -3.2*0.50*(1-1.0*pass_num/self.capacity)
     self.indicator.setPos(x_pos,0,0)
 
   def set_pos(self, x_pos, y_pos):

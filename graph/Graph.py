@@ -8,7 +8,6 @@ from direct.interval.IntervalGlobal import *
 from direct.gui.DirectGui import *
 from direct.showbase.DirectObject import DirectObject
 import logging
-import threading
 import time
 import sys
 import random
@@ -16,15 +15,17 @@ import random
 
 class Graph(DirectObject):
  
-  def __init__(self, masivo):
+  def __init__(self, masivo, base):
+    print("init")
     #ShowBase.__init__(self)
+    self.base = base
 
-    base.setBackgroundColor(0, 0, 0)  # Set the background to black
+    self.base.setBackgroundColor(0.1, 0.1, 0.1)  # Set the background to black
     #base.disableMouse()  # disable mouse control of the camera
     #camera.setPos(0, 0, 45)  # Set the camera position (X, Y, Z)
     #camera.setHpr(0, -90, 0)  # Set the camera orientation
-    base.trackball.node().setPos(-70, 200, -24)
-    base.trackball.node().setHpr(0, 40, 0)
+    self.base.trackball.node().setPos(-86, 138, -24)
+    self.base.trackball.node().setHpr(0, 40, 0)
 
 
     # Create Ambient Light
@@ -47,36 +48,46 @@ class Graph(DirectObject):
     self.plane.reparentTo(render)
 
     self.bus_stop_list = []
+    self.buses_list = []
 
-    for stop in masivo["stops_list"]:
-      bus_stop = Graph_bus_stop(stop.max_capacity, 10 + stop.possition, 10)
-      bus_stop.set_pass(stop.pass_count())
-      self.bus_stop_list.append(bus_stop)
+    if "stops_list" in masivo:
+      for stop in masivo["stops_list"]:
+        bus_stop = Graph_bus_stop(stop.max_capacity, stop.possition, 10)
+        bus_stop.set_pass(stop.pass_count())
+        self.bus_stop_list.append(bus_stop)
     
-    self.bus = Graph_bus(50, 10, 11)
+    if "buses_list" in masivo:
+      for bus in masivo["buses_list"]:
+        bus = Graph_bus(bus.max_capacity, 0, 8)
+        self.buses_list.append(bus)
         
-    
     self.accept("escape", sys.exit)
     self.accept('spam',self.OnSpam)
 
 
-  def OnSpam(self, h, pos):
-    #print h
-    self.bus_stop_list[0].set_pass(h)
-    self.bus.set_pos(pos, 11)
-    self.bus.set_pass(h)
-    #print base.trackball.node().getPos()
-    #print base.trackball.node().getHpr()
+  def OnSpam(self, masivo):
+    
+    #print(self.base.trackball.node().getPos())
+    #print(self.base.trackball.node().getHpr())
 
-def panda3d_runner(masivo):
-  base = ShowBase()
-  w, h = 1440, 810
+    for i in range(0, len(self.bus_stop_list)):
+      self.bus_stop_list[i].set_pass(masivo["stops_list"][i].pass_count())
+
+    for i in range(0, len(self.buses_list)):
+      self.buses_list[i].set_pos(masivo["buses_list"][i].current_possition, 8)
+      self.buses_list[i].set_pass(masivo["buses_list"][i].pass_count())
+
+def panda3d_run(masivo, base):
+  w, h = 1900, 810
   props = WindowProperties() 
   props.setSize(w, h) 
   base.win.requestProperties(props) 
 
-  app = Graph(masivo)
+  app = Graph(masivo, base)
   base.run()
+
+  
+
 
 
   

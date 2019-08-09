@@ -30,13 +30,22 @@ class Bus:
   def get_id(self):
     return self.id
 
+  def is_full(self):
+    if self.pass_count() >= self.max_capacity:
+      return True
+    else:
+      return False
+
   def update_possition(self, time):
     # Check if bus is at any stop
     for stop in self.stop_list:
       if stop.possition == self.current_possition:
-        #print("In the stop: %s" % stop.id)
+        #print("In the stop: %s, poss %d, is full: %s" % (stop.id, self.current_possition, str(self.is_full())))
 
         for p in range(0, stop.pass_count()):
+          if self.is_full():
+            break
           self.pass_in(stop.pass_to_bus())
+          #print("Bus pass count: %d" % self.pass_count())
         
     self.current_possition = self.travel_speed*(time - self.time_offset)
