@@ -4,7 +4,7 @@ class Graph_bus_stop():
     self.capacity = capacity
     self.x_pos = x_pos
     self.y_pos = y_pos
-    self.scale = 0.02
+    self.scale = 20
 
     self.container = loader.loadModel("./graph/models/stop_base")
     self.container.setPos(self.x_pos, self.y_pos, 0)
@@ -24,4 +24,4 @@ class Graph_bus_stop():
 
     self.indicator.setScale(1.0*pass_num/self.capacity,1,1)   
     x_pos = 1.25*0.25*(1-1.0*pass_num/self.capacity)
-    self.indicator.setPos(x_pos,0,0)
+    self.indicator.setPos(x_pos, 0, 0)

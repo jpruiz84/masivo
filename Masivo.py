@@ -6,10 +6,11 @@ import csv
 
 PASSENGER_INTERVAL = 3    # In seconds, every 50 seconds
 
-BUSES_NUMBER = 1000
+BUSES_NUMBER = 100
 BUSES_TIME_SPACCING = 15
 
-SIMULATION_ACCELERATION_RATE = 100000
+SIMULATION_ACCELERATION_RATE = 10
+
 
 class Masivo():
 
@@ -33,12 +34,6 @@ class Masivo():
 
     self.open_stops_file("utils/odm1.csv")
 
-    #for i in range (0, STOPS_NUMBER):
-    #  stop_id = ("s%02d" % i)
-    #  stop = Stop(stop_id, 10 + i * STOPS_SPACCING)
-    #  self.stops_list.append(stop)
-
-
     for i in range(0, BUSES_NUMBER):
       bus_id = ("b%02d" % i)
       bus = Bus(bus_id, BUSES_TIME_SPACCING * i, self.stops_list)
@@ -51,7 +46,6 @@ class Masivo():
       time.sleep(1.0/SIMULATION_ACCELERATION_RATE)
       print("Time: %d" % i)
       messenger.send('spam',[self.masivo_data])
-      
       
       for bus in self.buses_list:
         bus.update_possition(i)
@@ -81,7 +75,7 @@ class Masivo():
       # Get stop first columns
       for row in reader:
         stop = Stop(int(row['stop_number']), row['stop_name'], 
-        int(row['x_pos'])/1000.0, int(row['y_pos'])/1000.0, int(row['max_capacity']))
+        int(row['x_pos']), int(row['y_pos']), int(row['max_capacity']))
         
         self.stops_list.append(stop)
 

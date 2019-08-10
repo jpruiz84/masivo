@@ -1,3 +1,6 @@
+STOP_BUS_WINDOW_DISTANCE = 10
+
+
 class Bus:
   
   def __init__(self, id, time_offset, stop_list):
@@ -11,6 +14,7 @@ class Bus:
     self.current_possition = 0
     self.stop_list = stop_list
     self.time_offset = time_offset
+    self.lastStopName = ""
 
   def pass_in(self, pass_id):
     if(len(self.pass_queue) < self.max_capacity):
@@ -40,13 +44,15 @@ class Bus:
   def update_possition(self, time):
     # Check if bus is at any stop
     for stop in self.stop_list:
-      if stop.possition == self.current_possition:
-        #print("In the stop: %s, poss %d, is full: %s" % (stop.id, self.current_possition, str(self.is_full())))
+      if self.lastStopName == stop.name:
+        continue
 
+      if abs(stop.possition - self.current_possition) < STOP_BUS_WINDOW_DISTANCE:
         for p in range(0, stop.pass_count()):
           if self.is_full():
             break
           self.pass_in(stop.pass_to_bus())
-          #print("Bus pass count: %d" % self.pass_count())
-        
-    self.current_possition = self.travel_speed_m_s/1000 *(time - self.time_offset)
+          print("Bus %s, in the stop: %s, poss %d, is full: %s" % (self.id, stop.name, self.current_possition, str(self.is_full())))
+        self.lastStopName = stop.name
+
+    self.current_possition = self.travel_speed_m_s *(time - self.time_offset)
