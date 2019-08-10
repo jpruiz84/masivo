@@ -1,10 +1,12 @@
+import globalConstants
+
 class GraphStop():
   def __init__(self, capacity, x_pos, y_pos):
 
     self.capacity = capacity
     self.x_pos = x_pos
     self.y_pos = y_pos
-    self.scale = 20
+    self.scale = globalConstants.BUS_AND_STOPS_SCALE
 
     self.container = loader.loadModel("./graph/models/stop_base")
     self.container.setPos(self.x_pos, self.y_pos, 0)

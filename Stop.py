@@ -1,3 +1,8 @@
+import globalConstants
+import random
+from struct import *
+import binascii
+
 class Stop:
   
   def __init__(self, number, name, x_pos, y_pos, max_capacity):
@@ -13,6 +18,7 @@ class Stop:
     self.pass_queue = []
     self.pass_out_list = []
     self.destination_vector = {}
+    self.pass_arrival_list = []
 
   def pass_in(self, pass_id):
     if len(self.pass_queue) < self.max_capacity:
@@ -43,10 +49,30 @@ class Stop:
 
   # Needs to be called each simulation second
   def runner(self, time):
-    if time != 0:
-      return
-    for i in range(0, self.total_pass_in):
-      pass_id = ("p%02d_%s" % (self.pass_id_num, self.name))
-      self.pass_id_num += 1
-      self.pass_in(pass_id)
+    for pass_pack in self.pass_arrival_list:
+      (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+      if time == arrival_time:
+        print("Pass %d \tarrived to stop %s" % (pass_id, self.name))
+        self.pass_in(pass_pack)
 
+    #print(self.pass_queue)
+
+  def generate_pass_input_queue(self):
+    print("\nStop name %s" % self.name)
+    print(self.destination_vector)
+    for key, val in self.destination_vector.items():
+      for i in range(0, val):
+        orig_stop = int(self.number)
+        dest_stop = int(key)
+        arrival_time = random.randint(0, 3600)
+        alight_time = 0
+        pass_id = globalConstants.pass_num
+        globalConstants.pass_num += 1
+        pass_packed_data = pack(globalConstants.PASS_DATA_FORMAT,
+                                alight_time, arrival_time, dest_stop, orig_stop, pass_id)
+        print("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
+              (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
+        print(binascii.b2a_hex(pass_packed_data))
+        self.pass_arrival_list.append(pass_packed_data)
+
+    return

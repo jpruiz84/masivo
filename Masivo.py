@@ -6,10 +6,10 @@ import csv
 
 PASSENGER_INTERVAL = 3  # In seconds, every 50 seconds
 
-BUSES_NUMBER = 100
+BUSES_NUMBER = 0
 BUSES_TIME_SPACCING = 15
 
-SIMULATION_ACCELERATION_RATE = 10
+SIMULATION_ACCELERATION_RATE = 1000
 
 
 class Masivo:
@@ -26,9 +26,10 @@ class Masivo:
     self.masivo_data["stops_list"] = self.stops_list
     self.masivo_data["buses_list"] = self.buses_list
 
-    # Generate buses and bus stops
-    self.open_stops_file("utils/odm1.csv")
+    # Init stops
+    self.open_stops_file("utils/odmTest.csv")
 
+    # Init Buses
     for i in range(0, BUSES_NUMBER):
       bus_id = ("b%02d" % i)
       bus = Bus(bus_id, BUSES_TIME_SPACCING * i, self.stops_list)
@@ -37,7 +38,7 @@ class Masivo:
   def run(self):
     for i in range(0, 3600):
       time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
-      sys.stdout.write("\rtime: %d" % i)
+      sys.stdout.write("\rtime: %d  " % i)
       sys.stdout.flush()
       messenger.send('spam', [self.masivo_data])
 
@@ -78,10 +79,14 @@ class Masivo:
       for row in reader:
         i = int(row['stop_number'])
         for stop in self.stops_list:
-          self.stops_list[i].destination_vector[stop.name] = int(row[stop.name])
+          self.stops_list[i].destination_vector[stop.number] = int(row[stop.name])
 
+    # Calculate total pass in
     for stop in self.stops_list:
       stop.calculate_total_pass_in()
+      stop.generate_pass_input_queue()
+
+
 
     # print(self.stops_list[0].destination_vector)
     # print(self.stops_list[0].total_pass_in)
