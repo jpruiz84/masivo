@@ -24,9 +24,12 @@ class Graph(DirectObject):
     #base.disableMouse()  # disable mouse control of the camera
     #camera.setPos(0, 0, 45)  # Set the camera position (X, Y, Z)
     #camera.setHpr(0, -90, 0)  # Set the camera orientation
-    self.base.trackball.node().setPos(-86, 138, -24)
+    self.base.trackball.node().setPos(-2.1, 3.69, -0.63)
     self.base.trackball.node().setHpr(0, 40, 0)
-
+    self.base.trackball.node().setForwardScale(0.01)
+    #self.base.trackball.node().getLens().lens.setNear(5.0)
+    print(self.base.camLens.setNear(0.2))
+    
 
     # Create Ambient Light
     ambientLight = AmbientLight('ambientLight')
@@ -44,7 +47,7 @@ class Graph(DirectObject):
 
     # Load the cartesian plane
     self.plane = loader.loadModel("./graph/models/plane")
-    self.plane.setPos(100,50,0)
+    self.plane.setPos(0,0,0)
     self.plane.reparentTo(render)
 
     self.bus_stop_list = []
@@ -52,13 +55,13 @@ class Graph(DirectObject):
 
     if "stops_list" in masivo:
       for stop in masivo["stops_list"]:
-        bus_stop = Graph_bus_stop(stop.max_capacity, stop.possition, 10)
+        bus_stop = Graph_bus_stop(stop.max_capacity, stop.x_pos, stop.y_pos)
         bus_stop.set_pass(stop.pass_count())
         self.bus_stop_list.append(bus_stop)
     
     if "buses_list" in masivo:
       for bus in masivo["buses_list"]:
-        bus = Graph_bus(bus.max_capacity, 0, 8)
+        bus = Graph_bus(bus.max_capacity, 0, 0.95)
         self.buses_list.append(bus)
         
     self.accept("escape", sys.exit)
@@ -74,7 +77,7 @@ class Graph(DirectObject):
       self.bus_stop_list[i].set_pass(masivo["stops_list"][i].pass_count())
 
     for i in range(0, len(self.buses_list)):
-      self.buses_list[i].set_pos(masivo["buses_list"][i].current_possition, 8)
+      self.buses_list[i].set_pos(masivo["buses_list"][i].current_possition, 0.95)
       self.buses_list[i].set_pass(masivo["buses_list"][i].pass_count())
 
 def panda3d_run(masivo, base):

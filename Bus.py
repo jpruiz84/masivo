@@ -2,9 +2,10 @@ class Bus:
   
   def __init__(self, id, time_offset, stop_list):
     self.id = id
-    self.max_capacity = 100
+    self.max_capacity = 200
     self.pass_queue = []
-    self.travel_speed = 1          # m/s
+    self.travel_speed_km_h = 40          # Km/h
+    self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
     self.stopping_time = 30
     self.route_frequency = 10
     self.current_possition = 0
@@ -48,4 +49,4 @@ class Bus:
           self.pass_in(stop.pass_to_bus())
           #print("Bus pass count: %d" % self.pass_count())
         
-    self.current_possition = self.travel_speed*(time - self.time_offset)
+    self.current_possition = self.travel_speed_m_s/1000 *(time - self.time_offset)
