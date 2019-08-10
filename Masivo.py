@@ -1,10 +1,10 @@
 from Stop import Stop
 from Bus import Bus
-from direct.stdpy import thread
+import sys
 import time
 import csv
 
-PASSENGER_INTERVAL = 3    # In seconds, every 50 seconds
+PASSENGER_INTERVAL = 3  # In seconds, every 50 seconds
 
 BUSES_NUMBER = 100
 BUSES_TIME_SPACCING = 15
@@ -12,18 +12,14 @@ BUSES_TIME_SPACCING = 15
 SIMULATION_ACCELERATION_RATE = 10
 
 
-class Masivo():
+class Masivo:
 
   def __init__(self):
-
     print("Starting Masivo public transport simulator")
 
     # Init variables and lists
-
     self.pass_id_num = 0
-
     self.masivo_data = {}
-
     self.stops_list = []
     self.buses_list = []
 
@@ -31,7 +27,6 @@ class Masivo():
     self.masivo_data["buses_list"] = self.buses_list
 
     # Generate buses and bus stops
-
     self.open_stops_file("utils/odm1.csv")
 
     for i in range(0, BUSES_NUMBER):
@@ -39,28 +34,25 @@ class Masivo():
       bus = Bus(bus_id, BUSES_TIME_SPACCING * i, self.stops_list)
       self.buses_list.append(bus)
 
-
   def run(self):
-    
     for i in range(0, 3600):
-      time.sleep(1.0/SIMULATION_ACCELERATION_RATE)
-      print("Time: %d" % i)
-      messenger.send('spam',[self.masivo_data])
-      
+      time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
+      sys.stdout.write("\rtime: %d" % i)
+      sys.stdout.flush()
+      messenger.send('spam', [self.masivo_data])
+
       for bus in self.buses_list:
-        bus.update_possition(i)
+        bus.runner(i)
 
       for stop in self.stops_list:
         stop.runner(i)
 
-    # Print simulation resutls
-
+    # Print simulation results
     for stop in self.masivo_data["stops_list"]:
       print("Stop %s have %d pass, and %d out" % (stop.name, stop.pass_count(), stop.pass_out_count()))
 
     for bus in self.masivo_data["buses_list"]:
       print("Bus %s have %d pass, final poss %d" % (bus.get_id(), bus.pass_count(), bus.current_possition))
-
 
     print("End simulation")
 
@@ -71,12 +63,12 @@ class Masivo():
     print("Opening stops file: %s" % file_name)
     with open(file_name, newline='') as csvfile:
       reader = csv.DictReader(csvfile)
-      
+
       # Get stop first columns
       for row in reader:
-        stop = Stop(int(row['stop_number']), row['stop_name'], 
-        int(row['x_pos']), int(row['y_pos']), int(row['max_capacity']))
-        
+        stop = Stop(int(row['stop_number']), row['stop_name'],
+                    int(row['x_pos']), int(row['y_pos']), int(row['max_capacity']))
+
         self.stops_list.append(stop)
 
     # Get stop destination vector
@@ -88,11 +80,8 @@ class Masivo():
         for stop in self.stops_list:
           self.stops_list[i].destination_vector[stop.name] = int(row[stop.name])
 
-    
     for stop in self.stops_list:
       stop.calculate_total_pass_in()
-    
-    #print(self.stops_list[0].destination_vector)
-    #print(self.stops_list[0].total_pass_in)
 
-          
+    # print(self.stops_list[0].destination_vector)
+    # print(self.stops_list[0].total_pass_in)

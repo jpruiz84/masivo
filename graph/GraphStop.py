@@ -1,4 +1,4 @@
-class Graph_bus_stop():
+class GraphStop():
   def __init__(self, capacity, x_pos, y_pos):
 
     self.capacity = capacity
@@ -17,7 +17,6 @@ class Graph_bus_stop():
     self.indicator.reparentTo(self.container)
     #print("Created Graph stop at: %f, %f" %(self.x_pos, self.y_pos))
       
-
   def set_pass(self, pass_num):
     if pass_num > self.capacity:
       pass_num = self.capacity

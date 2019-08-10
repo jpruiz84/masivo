@@ -11,20 +11,20 @@ class Bus:
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
     self.stopping_time = 30
     self.route_frequency = 10
-    self.current_possition = 0
+    self.current_position = 0
     self.stop_list = stop_list
     self.time_offset = time_offset
     self.lastStopName = ""
 
   def pass_in(self, pass_id):
-    if(len(self.pass_queue) < self.max_capacity):
+    if len(self.pass_queue) < self.max_capacity:
       self.pass_queue.append(pass_id)
       return True
     else:
       return False
 
   def pass_out(self):
-    if(len(self.pass_queue)):
+    if len(self.pass_queue):
       return self.pass_queue.pop(0)
     else:
       return ""
@@ -41,18 +41,18 @@ class Bus:
     else:
       return False
 
-  def update_possition(self, time):
+  def runner(self, time):
     # Check if bus is at any stop
     for stop in self.stop_list:
       if self.lastStopName == stop.name:
         continue
 
-      if abs(stop.possition - self.current_possition) < STOP_BUS_WINDOW_DISTANCE:
+      if abs(stop.position - self.current_position) < STOP_BUS_WINDOW_DISTANCE:
         for p in range(0, stop.pass_count()):
           if self.is_full():
             break
           self.pass_in(stop.pass_to_bus())
-          print("Bus %s, in the stop: %s, poss %d, is full: %s" % (self.id, stop.name, self.current_possition, str(self.is_full())))
+          print("Bus %s, in the stop: %s, poss %d, is full: %s" % (self.id, stop.name, self.current_position, str(self.is_full())))
         self.lastStopName = stop.name
 
-    self.current_possition = self.travel_speed_m_s *(time - self.time_offset)
+    self.current_position = self.travel_speed_m_s *(time - self.time_offset)

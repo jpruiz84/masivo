@@ -5,7 +5,7 @@ class Stop:
     self.name = name
     self.x_pos = x_pos
     self.y_pos = y_pos
-    self.possition = x_pos   # TODO: delete later, for legacy compatibility 1D
+    self.position = x_pos   # TODO: delete later, for legacy compatibility 1D
     self.max_capacity = max_capacity
     self.total_pass_in = 0
     self.pass_id_num = 0
@@ -15,14 +15,14 @@ class Stop:
     self.destination_vector = {}
 
   def pass_in(self, pass_id):
-    if(len(self.pass_queue) < self.max_capacity):
+    if len(self.pass_queue) < self.max_capacity:
       self.pass_queue.append(pass_id)
       return True
     else:
       return False
 
   def pass_to_bus(self):
-    if(len(self.pass_queue)):
+    if len(self.pass_queue):
       return self.pass_queue.pop(0)
     else:
       return ""
