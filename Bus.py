@@ -1,5 +1,6 @@
 import globalConstants
 from struct import *
+import logging
 
 
 class Bus:
@@ -61,7 +62,7 @@ class Bus:
         pass_pack = self.current_stop.pass_to_bus()
         (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
           unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-        print('BOARDING, Pass %d from stop %d into bus %s' % (pass_id, orig_stop, self.get_id()))
+        logging.info('BOARDING, Pass %d from stop %d into bus %s' % (pass_id, orig_stop, self.get_id()))
         self.pass_in(pass_pack)
 
       # Alight pass in the stop
@@ -69,7 +70,7 @@ class Bus:
         (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
           unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
         if dest_stop == self.current_stop.number:
-          print('ALIGHT, [ass %d from stop %d alighted in stop %d' % (pass_id, orig_stop, dest_stop))
+          logging.info('ALIGHT, [ass %d from stop %d alighted in stop %d' % (pass_id, orig_stop, dest_stop))
           self.current_stop.pass_alight(pass_pack)
           self.pass_queue.remove(pass_pack)
 
@@ -87,7 +88,7 @@ class Bus:
     for stop in self.stop_list:
       # Look if I am in the stop window
       if abs(stop.position - self.current_position) < globalConstants.STOP_BUS_WINDOW_DISTANCE:
-        print("Bus %s, in the stop: %s, poss %d, is full: %s" % (
+        logging.info("Bus %s, in the stop: %s, poss %d, is full: %s" % (
         self.id, stop.name, self.current_position, str(self.is_full())))
         self.current_stop = stop
         self.in_the_stop = True

@@ -1,7 +1,6 @@
 from Masivo import Masivo
 from graph.Graph import panda3d_run
 from direct.stdpy import threading
-from direct.showbase.ShowBase import ShowBase
 
 
 class MasivoRunner(threading.Thread):

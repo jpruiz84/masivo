@@ -3,19 +3,22 @@ from Bus import Bus
 import sys
 import time
 import csv
+import logging
+import globalConstants
 
-PASSENGER_INTERVAL = 3  # In seconds, every 50 seconds
 
-BUSES_NUMBER = 100
+
+BUSES_NUMBER = 10
 BUSES_TIME_SPACCING = 60
 
-SIMULATION_ACCELERATION_RATE = 10000
+SIMULATION_ACCELERATION_RATE = 100
 
 
 class Masivo:
 
   def __init__(self):
-    print("Starting Masivo public transport simulator")
+    logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
+    logging.info("Starting Masivo public transport simulator")
 
     # Init variables and lists
     self.pass_id_num = 0
@@ -27,7 +30,7 @@ class Masivo:
     self.masivo_data["buses_list"] = self.buses_list
 
     # Init stops
-    self.open_stops_file("utils/odm1.csv")
+    self.open_stops_file(globalConstants.ODM_FILE)
 
     # Init Buses
     for i in range(0, BUSES_NUMBER):
@@ -38,8 +41,9 @@ class Masivo:
   def run(self):
     for i in range(0, 3600):
       time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
-      sys.stdout.write("\rtime: %d  " % i)
-      sys.stdout.flush()
+      if (i % 100) == 0:
+        sys.stdout.write("\rtime: %d  " % i)
+        sys.stdout.flush()
 
 
       for bus in self.buses_list:
@@ -48,20 +52,20 @@ class Masivo:
       for stop in self.stops_list:
         stop.runner(i)
 
-    # Print simulation results
+    # logging.info simulation results
     for stop in self.masivo_data["stops_list"]:
-      print("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
+      logging.info("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
 
     for bus in self.masivo_data["buses_list"]:
-      print("Bus %s have %d pass, final poss %d" % (bus.get_id(), bus.pass_count(), bus.current_position))
+      logging.info("Bus %s have %d pass, final poss %d" % (bus.get_id(), bus.pass_count(), bus.current_position))
 
-    print("End simulation")
+    logging.info("End simulation")
 
   def get_masivo_data(self):
     return self.masivo_data
 
   def open_stops_file(self, file_name):
-    print("Opening stops file: %s" % file_name)
+    logging.info("Opening stops file: %s" % file_name)
 
     # Get the stops number, name, poss and max capacity
     with open(file_name, newline='') as csvfile:
@@ -89,6 +93,6 @@ class Masivo:
 
 
 
-    # print(self.stops_list[0].destination_vector)
-    # print(self.stops_list[0].total_pass_in)
-    # print(self.stops_list[0].expected_alight_pass)
+    # logging.info(self.stops_list[0].destination_vector)
+    # logging.info(self.stops_list[0].total_pass_in)
+    # logging.info(self.stops_list[0].expected_alight_pass)

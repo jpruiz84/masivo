@@ -1,6 +1,7 @@
 import globalConstants
 import random
 from struct import *
+import logging
 import binascii
 
 class Stop:
@@ -54,25 +55,25 @@ class Stop:
     for pass_pack in self.pass_arrival_list:
       (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
       if time == arrival_time:
-        #print("Pass %d \tarrived to stop %s" % (pass_id, self.name))
+        # logging.info("Pass %d \tarrived to stop %s" % (pass_id, self.name))
         self.pass_in(pass_pack)
 
   def generate_pass_input_queue(self):
-    # print("\nStop name %s" % self.name)
-    # print(self.destination_vector)
+    # logging.info("\nStop name %s" % self.name)
+    # logging.info(self.destination_vector)
     for key, val in self.destination_vector.items():
       for i in range(0, val):
         orig_stop = int(self.number)
         dest_stop = int(key)
-        arrival_time = random.randint(0, 10)
+        arrival_time = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
         alight_time = 0
         pass_id = globalConstants.pass_num
         globalConstants.pass_num += 1
         pass_packed_data = pack(globalConstants.PASS_DATA_FORMAT,
                                 alight_time, arrival_time, dest_stop, orig_stop, pass_id)
-        # print("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
+        # logging.info("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
         #      (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
-        # print(binascii.b2a_hex(pass_packed_data))
+        # logging.info(binascii.b2a_hex(pass_packed_data))
         self.pass_arrival_list.append(pass_packed_data)
 
     return
