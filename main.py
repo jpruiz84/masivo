@@ -9,9 +9,8 @@ class MasivoRunner(threading.Thread):
     masivo.run()
 
 
-base = ShowBase()
 masivo = Masivo()
 masivo_data = masivo.get_masivo_data()
 MasivoRunner().start()
 
-panda3d_run(masivo_data, base)
+panda3d_run(masivo_data)

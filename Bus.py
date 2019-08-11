@@ -6,11 +6,11 @@ class Bus:
   
   def __init__(self, id, time_offset, stop_list):
     self.id = id
-    self.max_capacity = 1000
+    self.max_capacity = 100
     self.pass_queue = []
     self.travel_speed_km_h = 40          # Km/h
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
-    self.stopping_time = 30
+    self.stopping_time = 10
     self.route_frequency = 10
     self.current_position = 0
     self.stop_list = stop_list

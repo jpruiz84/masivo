@@ -9,7 +9,7 @@ PASSENGER_INTERVAL = 3  # In seconds, every 50 seconds
 BUSES_NUMBER = 100
 BUSES_TIME_SPACCING = 60
 
-SIMULATION_ACCELERATION_RATE = 1000
+SIMULATION_ACCELERATION_RATE = 10000
 
 
 class Masivo:
@@ -40,7 +40,7 @@ class Masivo:
       time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
       sys.stdout.write("\rtime: %d  " % i)
       sys.stdout.flush()
-      messenger.send('spam', [self.masivo_data])
+
 
       for bus in self.buses_list:
         bus.runner(i)
