@@ -14,15 +14,25 @@ class GraphStop():
     self.container.reparentTo(render)
 
     self.indicator = loader.loadModel("./graph/models/stop_indicator")
-    self.indicator.setPos(0,0,0)
-    self.indicator.setScale(self.scale, self.scale, self.scale)
     self.indicator.reparentTo(self.container)
-    #print("Created Graph stop at: %f, %f" %(self.x_pos, self.y_pos))
+
+    self.indicator_alight = loader.loadModel("./graph/models/stop_indicator_alight")
+    self.indicator_alight.reparentTo(self.container)
+
+    # print("Created Graph stop at: %f, %f" %(self.x_pos, self.y_pos))
       
   def set_pass(self, pass_num):
     if pass_num > self.capacity:
       pass_num = self.capacity
 
     self.indicator.setScale(1.0*pass_num/self.capacity,1,1)   
-    x_pos = 1.25*0.25*(1-1.0*pass_num/self.capacity)
+    x_pos = 1*0.25*(1-1.0*pass_num/self.capacity)
     self.indicator.setPos(x_pos, 0, 0)
+
+  def set_alight(self, pass_alight_count, expected_pass_alight):
+    if pass_alight_count > expected_pass_alight:
+      pass_alight_count = expected_pass_alight
+
+    self.indicator_alight.setScale(1, 1, 1.0 * pass_alight_count / expected_pass_alight)
+    z_pos = 0.4 * (1 - 1.0 * pass_alight_count / expected_pass_alight)
+    self.indicator_alight.setPos(0, 0, z_pos)

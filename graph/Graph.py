@@ -12,18 +12,11 @@ BUS_Y_POS = 950
 class Graph(DirectObject):
 
   def __init__(self, masivo, base):
-    print("init")
-    # ShowBase.__init__(self)
     self.base = base
-
     self.base.setBackgroundColor(0.1, 0.1, 0.1)  # Set the background to black
-    # base.disableMouse()  # disable mouse control of the camera
-    # camera.setPos(0, 0, 45)  # Set the camera position (X, Y, Z)
-    # camera.setHpr(0, -90, 0)  # Set the camera orientation
-    self.base.trackball.node().setPos(-2100, 3500, -600)
+    self.base.trackball.node().setPos(-835, 770, -570)   # To see only first 3 stops
     self.base.trackball.node().setHpr(0, 40, 0)
     self.base.trackball.node().setForwardScale(5)
-    # self.base.trackball.node().getLens().lens.setNear(5.0)
 
     # Create Ambient Light
     ambient_light = AmbientLight('ambient_light')
@@ -68,10 +61,12 @@ class Graph(DirectObject):
       print(self.base.trackball.node().getPos())
       print(self.base.trackball.node().getHpr())
 
-
+    # Update stops graphs
     for i in range(0, len(self.bus_stop_list)):
       self.bus_stop_list[i].set_pass(masivo["stops_list"][i].pass_count())
-
+      self.bus_stop_list[i].set_alight(masivo["stops_list"][i].pass_alight_count(),
+                                       masivo["stops_list"][i].expected_alight_pass)
+    # Update buses graphs
     for i in range(0, len(self.buses_list)):
       self.buses_list[i].set_pos(masivo["buses_list"][i].current_position, BUS_Y_POS)
       self.buses_list[i].set_pass(masivo["buses_list"][i].pass_count())

@@ -6,8 +6,8 @@ import csv
 
 PASSENGER_INTERVAL = 3  # In seconds, every 50 seconds
 
-BUSES_NUMBER = 0
-BUSES_TIME_SPACCING = 15
+BUSES_NUMBER = 100
+BUSES_TIME_SPACCING = 60
 
 SIMULATION_ACCELERATION_RATE = 1000
 
@@ -27,7 +27,7 @@ class Masivo:
     self.masivo_data["buses_list"] = self.buses_list
 
     # Init stops
-    self.open_stops_file("utils/odmTest.csv")
+    self.open_stops_file("utils/odm1.csv")
 
     # Init Buses
     for i in range(0, BUSES_NUMBER):
@@ -50,10 +50,10 @@ class Masivo:
 
     # Print simulation results
     for stop in self.masivo_data["stops_list"]:
-      print("Stop %s have %d pass, and %d out" % (stop.name, stop.pass_count(), stop.pass_out_count()))
+      print("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
 
     for bus in self.masivo_data["buses_list"]:
-      print("Bus %s have %d pass, final poss %d" % (bus.get_id(), bus.pass_count(), bus.current_possition))
+      print("Bus %s have %d pass, final poss %d" % (bus.get_id(), bus.pass_count(), bus.current_position))
 
     print("End simulation")
 
@@ -62,26 +62,27 @@ class Masivo:
 
   def open_stops_file(self, file_name):
     print("Opening stops file: %s" % file_name)
+
+    # Get the stops number, name, poss and max capacity
     with open(file_name, newline='') as csvfile:
       reader = csv.DictReader(csvfile)
-
       # Get stop first columns
       for row in reader:
         stop = Stop(int(row['stop_number']), row['stop_name'],
                     int(row['x_pos']), int(row['y_pos']), int(row['max_capacity']))
-
         self.stops_list.append(stop)
 
     # Get stop destination vector
     with open(file_name, newline='') as csvfile:
       reader = csv.DictReader(csvfile)
-      # Rows have the destination of the stop users
+      # Rows have the destinations of the stop users
       for row in reader:
         i = int(row['stop_number'])
         for stop in self.stops_list:
           self.stops_list[i].destination_vector[stop.number] = int(row[stop.name])
+          self.stops_list[stop.number].expected_alight_pass += int(row[stop.name])
 
-    # Calculate total pass in
+    # Calculate total pass in and input queue
     for stop in self.stops_list:
       stop.calculate_total_pass_in()
       stop.generate_pass_input_queue()
@@ -90,3 +91,4 @@ class Masivo:
 
     # print(self.stops_list[0].destination_vector)
     # print(self.stops_list[0].total_pass_in)
+    # print(self.stops_list[0].expected_alight_pass)
