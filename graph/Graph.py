@@ -3,7 +3,6 @@ loadPrcFileData("", "window-title Masivo Public Transport Simulator")
 loadPrcFileData("", "fullscreen 0") # Set to 1 for fullscreen
 loadPrcFileData("", "win-size 1920 900")
 
-
 from direct.showbase.ShowBase import ShowBase
 from .GraphStop import GraphStop
 from .GraphBus import GraphBus
@@ -52,16 +51,16 @@ class Graph(ShowBase):
 
     # model for the camera to orbit along
     self.model = loader.loadModel('smiley')
-    self.model.setScale(100, 100, 100)
+    self.model.setScale(1, 1, 1)
     self.model.reparentTo(render)
 
-
+    # Init lists for stops and buses
     self.bus_stop_list = []
     self.buses_list = []
 
     if "stops_list" in masivo:
       for stop in masivo["stops_list"]:
-        bus_stop = GraphStop(stop.max_capacity, stop.x_pos, stop.y_pos)
+        bus_stop = GraphStop(stop)
         bus_stop.set_pass(stop.pass_count())
         self.bus_stop_list.append(bus_stop)
 

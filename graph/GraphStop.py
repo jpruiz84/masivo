@@ -1,11 +1,12 @@
 import globalConstants
+from pandac.PandaModules import TextNode, TextFont
 
 class GraphStop():
-  def __init__(self, capacity, x_pos, y_pos):
+  def __init__(self, stop):
 
-    self.capacity = capacity
-    self.x_pos = x_pos
-    self.y_pos = y_pos
+    self.capacity = stop.max_capacity
+    self.x_pos = stop.x_pos
+    self.y_pos = stop.y_pos
     self.scale = globalConstants.BUS_AND_STOPS_SCALE
 
     self.container = loader.loadModel("./graph/models/stop_base")
@@ -18,6 +19,16 @@ class GraphStop():
 
     self.indicator_alight = loader.loadModel("./graph/models/stop_indicator_alight")
     self.indicator_alight.reparentTo(self.container)
+
+    text = TextNode('node name')
+    text.setText(stop.name)
+    text.setTextColor(0, 0, 0, 1)
+
+    textNodePath = render2d.attachNewNode(text)
+    textNodePath.setScale(1)
+    textNodePath.setPos(1, -2, 0.1)
+    textNodePath.setP(textNodePath, -90)
+    textNodePath.reparentTo(self.container)
 
     # print("Created Graph stop at: %f, %f" %(self.x_pos, self.y_pos))
       
