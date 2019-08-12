@@ -36,6 +36,11 @@ class GraphStop():
     if pass_num > self.capacity:
       pass_num = self.capacity
 
+    if pass_num == 0:
+      self.indicator.hide()
+    else:
+      self.indicator.show()
+
     self.indicator.setScale(1.0*pass_num/self.capacity,1,1)   
     x_pos = 1*0.25*(1-1.0*pass_num/self.capacity)
     self.indicator.setPos(x_pos, 0, 0)
@@ -43,6 +48,11 @@ class GraphStop():
   def set_alight(self, pass_alight_count, expected_pass_alight):
     if pass_alight_count > expected_pass_alight:
       pass_alight_count = expected_pass_alight
+
+    if pass_alight_count == 0:
+      self.indicator_alight.hide()
+    else:
+      self.indicator_alight.show()
 
     self.indicator_alight.setScale(1, 1, 1.0 * pass_alight_count / expected_pass_alight)
     z_pos = 0.4 * (1 - 1.0 * pass_alight_count / expected_pass_alight)
