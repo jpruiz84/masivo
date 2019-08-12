@@ -4,19 +4,16 @@ import logging
 
 
 class Bus:
-  
-  def __init__(self, id, time_offset, stop_list):
-    self.id = id
+
+  def __init__(self, number, route):
+    self.number = number
+    self.route = route
     self.max_capacity = 100
     self.pass_queue = []
     self.travel_speed_km_h = 40          # Km/h
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
     self.stopping_time = 10
-    self.route_frequency = 10
     self.current_position = 0
-    self.stop_list = stop_list
-    self.time_offset = time_offset
-    self.lastStopName = ""
     self.in_the_stop = False
     self.in_the_stop_counter = 0
     self.current_stop = 0
@@ -37,8 +34,8 @@ class Bus:
   def pass_count(self):
     return len(self.pass_queue)
 
-  def get_id(self):
-    return self.id
+  def get_number(self):
+    return self.number
 
   def is_full(self):
     if self.pass_count() >= self.max_capacity:
@@ -47,11 +44,7 @@ class Bus:
       return False
 
   # Needs to be called each simulation second
-  def runner(self, time):
-
-    # If I have not departed yet
-    if time < self.time_offset:
-      return
+  def runner(self, stops_list):
 
     # If waiting in the stop
     if self.in_the_stop:
@@ -62,7 +55,7 @@ class Bus:
         pass_pack = self.current_stop.pass_to_bus()
         (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
           unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-        logging.info('BOARDING, Pass %d from stop %d into bus %s' % (pass_id, orig_stop, self.get_id()))
+        logging.info('BOARDING, pass %d from stop %d into bus %s' % (pass_id, orig_stop, self.get_number()))
         self.pass_in(pass_pack)
 
       # Alight pass in the stop
@@ -70,7 +63,7 @@ class Bus:
         (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
           unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
         if dest_stop == self.current_stop.number:
-          logging.info('ALIGHT, [ass %d from stop %d alighted in stop %d' % (pass_id, orig_stop, dest_stop))
+          logging.info('ALIGHT, pass %d from stop %d alighted in stop %d' % (pass_id, orig_stop, dest_stop))
           self.current_stop.pass_alight(pass_pack)
           self.pass_queue.remove(pass_pack)
 
@@ -85,15 +78,16 @@ class Bus:
       self.current_position += self.travel_speed_m_s
 
     # Check if the bus is at any stop
-    for stop in self.stop_list:
+    for stop in stops_list:
       # Look if I am in the stop window
-      if abs(stop.position - self.current_position) < globalConstants.STOP_BUS_WINDOW_DISTANCE:
-        logging.info("Bus %s, in the stop: %s, poss %d, is full: %s" % (
-        self.id, stop.name, self.current_position, str(self.is_full())))
-        self.current_stop = stop
-        self.in_the_stop = True
-        self.in_the_stop_counter = self.stopping_time
-        break
+      if (abs(stop.position - self.current_position) < globalConstants.STOP_BUS_WINDOW_DISTANCE):
+        if (stop.name in self.route.stops_table):
+          logging.info("Bus %s, in the stop: %s, poss %d, is full: %s" % (
+          self.number, stop.name, self.current_position, str(self.is_full())))
+          self.current_stop = stop
+          self.in_the_stop = True
+          self.in_the_stop_counter = self.stopping_time
+          break
 
 
 

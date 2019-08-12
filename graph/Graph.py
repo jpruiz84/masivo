@@ -90,8 +90,16 @@ class Graph(ShowBase):
       self.bus_stop_list[i].set_pass(self.masivo["stops_list"][i].pass_count())
       self.bus_stop_list[i].set_alight(self.masivo["stops_list"][i].pass_alight_count(),
                                        self.masivo["stops_list"][i].expected_alight_pass)
-    # Update buses graphs
-    for i in range(0, len(self.buses_list)):
+
+    # Update buses
+    for i in range(0, len(self.masivo["buses_list"])):
+      # Check if there is a need to create new bus
+      if len(self.buses_list) <= i:
+        bus = GraphBus(self.masivo["buses_list"][i].max_capacity,
+                       self.masivo["buses_list"][i].current_position, BUS_Y_POS)
+        self.buses_list.append(bus)
+
+      # Update bus position and count
       self.buses_list[i].set_pos(self.masivo["buses_list"][i].current_position, BUS_Y_POS)
       self.buses_list[i].set_pass(self.masivo["buses_list"][i].pass_count())
 

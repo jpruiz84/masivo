@@ -5,13 +5,9 @@ import time
 import csv
 import logging
 import globalConstants
+from BusesHandler import BusesHandler
 
-
-
-BUSES_NUMBER = 10
-BUSES_TIME_SPACCING = 60
-
-SIMULATION_ACCELERATION_RATE = 100
+SIMULATION_ACCELERATION_RATE = 1000
 
 
 class Masivo:
@@ -26,38 +22,36 @@ class Masivo:
     self.stops_list = []
     self.buses_list = []
 
-    self.masivo_data["stops_list"] = self.stops_list
-    self.masivo_data["buses_list"] = self.buses_list
 
     # Init stops
     self.open_stops_file(globalConstants.ODM_FILE)
 
-    # Init Buses
-    for i in range(0, BUSES_NUMBER):
-      bus_id = ("b%02d" % i)
-      bus = Bus(bus_id, BUSES_TIME_SPACCING * i, self.stops_list)
-      self.buses_list.append(bus)
+    # Init buses
+    self.buses_handler = BusesHandler(self.stops_list)
+    self.buses_list = self.buses_handler.get_buses_list()
+
+    self.masivo_data["stops_list"] = self.stops_list
+    self.masivo_data["buses_list"] = self.buses_list
+
 
   def run(self):
-    for i in range(0, 3600):
+    for sim_time in range(0, 4600):
       time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
-      if (i % 100) == 0:
-        sys.stdout.write("\rtime: %d  " % i)
+      if (sim_time % 10) == 0:
+        sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
-
-      for bus in self.buses_list:
-        bus.runner(i)
-
       for stop in self.stops_list:
-        stop.runner(i)
+        stop.runner(sim_time)
 
-    # logging.info simulation results
+      self.buses_handler.runner(sim_time)
+
+    # END SIMULATION, log results
     for stop in self.masivo_data["stops_list"]:
       logging.info("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
 
     for bus in self.masivo_data["buses_list"]:
-      logging.info("Bus %s have %d pass, final poss %d" % (bus.get_id(), bus.pass_count(), bus.current_position))
+      logging.info("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
 
     logging.info("End simulation")
 
@@ -90,8 +84,6 @@ class Masivo:
     for stop in self.stops_list:
       stop.calculate_total_pass_in()
       stop.generate_pass_input_queue()
-
-
 
     # logging.info(self.stops_list[0].destination_vector)
     # logging.info(self.stops_list[0].total_pass_in)
