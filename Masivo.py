@@ -1,11 +1,12 @@
 from Stop import Stop
-from Bus import Bus
+from struct import *
 import sys
 import time
 import csv
 import logging
 import globalConstants
 from BusesHandler import BusesHandler
+
 
 SIMULATION_ACCELERATION_RATE = 10000
 
@@ -41,6 +42,7 @@ class Masivo:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
+
       for stop in self.stops_list:
         stop.runner(sim_time)
 
@@ -52,8 +54,8 @@ class Masivo:
     print("Total stops: %d" % len(self.masivo_data["stops_list"]))
     print("\n\n")
     for stop in self.masivo_data["stops_list"]:
-      print("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
-
+      print("Stop %s have %d/%d pass, and %d/%d out" % (stop.name, stop.pass_count(), len(stop.pass_arrival_list),
+                                                        stop.pass_alight_count(), stop.expected_alight_pass))
     for bus in self.masivo_data["buses_list"]:
       print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
 

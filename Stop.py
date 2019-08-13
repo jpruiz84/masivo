@@ -61,13 +61,16 @@ class Stop:
 
       # Needs to be called each simulation second
 
-  def runner(self, time):
+  def runner(self, sim_time):
     # Pass arrives to the stop
-    for pass_pack in self.pass_arrival_list:
-      (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-      if time == arrival_time:
-        # logging.info("Pass %d \tarrived to stop %s" % (pass_id, self.name))
-        self.pass_in(pass_pack)
+    index = 0
+    while index < len(self.pass_arrival_list):
+      (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+        unpack(globalConstants.PASS_DATA_FORMAT, self.pass_arrival_list[index])
+      if sim_time == arrival_time:
+        self.pass_in(self.pass_arrival_list.pop(index))
+        continue
+      index += 1
 
   def generate_pass_input_queue(self):
     # logging.info("\nStop name %s" % self.name)
