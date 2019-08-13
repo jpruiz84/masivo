@@ -1,6 +1,7 @@
 import globalConstants
 from struct import *
 import logging
+import copy
 
 
 class Bus:
@@ -17,6 +18,7 @@ class Bus:
     self.in_the_stop = True
     self.in_the_stop_counter = self.stopping_time
     self.current_stop = route.start_stop
+    self.remaining_stops_num = copy.copy(self.route.stops_num_table)
 
     if route.dir == 'W-E':
       self.y_pos = 950
@@ -54,13 +56,18 @@ class Bus:
 
     # If waiting in the stop
     if self.in_the_stop:
-      # Boarding
-      for p in range(0, self.current_stop.pass_count()):
-        if self.is_full():
-          break
-        pass_pack = self.current_stop.pass_to_bus(self)
-        if pass_pack:
-          self.pass_in(pass_pack)
+      if self.current_stop.number in  self.remaining_stops_num:
+        self.remaining_stops_num.remove(self.current_stop.number)
+
+      # Only boarding if there is remaning stops
+      if len(self.remaining_stops_num) > 0:
+        # Boarding
+        for p in range(0, self.current_stop.pass_count()):
+          if self.is_full():
+            break
+          pass_pack = self.current_stop.pass_to_bus(self)
+          if pass_pack:
+            self.pass_in(pass_pack)
 
       # Alight pass in the stop
       for pass_pack in self.pass_queue:
