@@ -59,15 +59,18 @@ class Bus:
       if self.current_stop.number in  self.remaining_stops_num:
         self.remaining_stops_num.remove(self.current_stop.number)
 
-      # Only boarding if there is remaning stops
+      # Only boarding if there is remaining stops
       if len(self.remaining_stops_num) > 0:
         # Boarding
-        for p in range(0, self.current_stop.pass_count()):
+        index = 0
+        while index < self.current_stop.pass_count():
           if self.is_full():
             break
-          pass_pack = self.current_stop.pass_to_bus(self)
-          if pass_pack:
+          pass_pack = self.current_stop.pass_to_bus(self, index)
+          if pass_pack != "":
             self.pass_in(pass_pack)
+            continue
+          index += 1
 
       # Alight pass in the stop
       for pass_pack in self.pass_queue:

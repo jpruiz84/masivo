@@ -14,7 +14,7 @@ SIMULATION_ACCELERATION_RATE = 10000
 class Masivo:
 
   def __init__(self):
-    logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
+    logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
     logging.info("Starting Masivo public transport simulator")
 
     # Init variables and lists
@@ -42,7 +42,6 @@ class Masivo:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
-
       for stop in self.stops_list:
         stop.runner(sim_time)
 
@@ -58,7 +57,6 @@ class Masivo:
                                                         stop.pass_alight_count(), stop.expected_alight_pass))
     for bus in self.masivo_data["buses_list"]:
       print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
-
 
   def get_masivo_data(self):
     return self.masivo_data
