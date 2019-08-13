@@ -7,7 +7,7 @@ import logging
 import globalConstants
 from BusesHandler import BusesHandler
 
-SIMULATION_ACCELERATION_RATE = 100
+SIMULATION_ACCELERATION_RATE = 10000
 
 
 class Masivo:
@@ -35,7 +35,7 @@ class Masivo:
 
 
   def run(self):
-    for sim_time in range(0, 4600):
+    for sim_time in range(0, 6000):
       time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
       if (sim_time % 10) == 0:
         sys.stdout.write("\rtime: %d  " % sim_time)
@@ -47,13 +47,16 @@ class Masivo:
       self.buses_handler.runner(sim_time)
 
     # END SIMULATION, log results
+    print("\n\nEND SIMULATION !!!!!")
+    print("Total buses: %d" % len(self.masivo_data["buses_list"]))
+    print("Total stops: %d" % len(self.masivo_data["stops_list"]))
+    print("\n\n")
     for stop in self.masivo_data["stops_list"]:
-      logging.info("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
+      print("Stop %s have %d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.pass_alight_count(), stop.expected_alight_pass))
 
     for bus in self.masivo_data["buses_list"]:
-      logging.info("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+      print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
 
-    logging.info("End simulation")
 
   def get_masivo_data(self):
     return self.masivo_data

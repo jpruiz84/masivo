@@ -9,7 +9,6 @@ class BusesHandler:
 
   def __init__(self, stops_list):
     self.buses_list = []
-    self.buses_list
     self.stops_list = stops_list
     self.routes_list = []
 
