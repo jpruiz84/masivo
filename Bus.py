@@ -13,10 +13,10 @@ class Bus:
     self.travel_speed_km_h = 40          # Km/h
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
     self.stopping_time = 10
-    self.current_position = 0
-    self.in_the_stop = False
-    self.in_the_stop_counter = 0
-    self.current_stop = 0
+    self.current_position = route.start_stop.x_pos
+    self.in_the_stop = True
+    self.in_the_stop_counter = self.stopping_time
+    self.current_stop = route.start_stop
 
   def pass_in(self, pass_id):
     if len(self.pass_queue) < self.max_capacity:
@@ -69,17 +69,20 @@ class Bus:
       self.in_the_stop_counter -= 1
       if self.in_the_stop_counter == 0:
         self.in_the_stop = False
-      return
 
     # If I am not waiting in a stop, go ahead
     if not self.in_the_stop:
       self.current_position += self.travel_speed_m_s
 
+    # Check if the bus have leave the last stop, if not, do not check for other stop
+    if abs(self.current_stop.position - self.current_position) < globalConstants.STOP_BUS_WINDOW_DISTANCE:
+      return
+
     # Check if the bus is at any stop
     for stop in stops_list:
       # Look if I am in the stop window
-      if (abs(stop.position - self.current_position) < globalConstants.STOP_BUS_WINDOW_DISTANCE):
-        if (stop.name in self.route.stops_table):
+      if abs(stop.position - self.current_position) < globalConstants.STOP_BUS_WINDOW_DISTANCE:
+        if stop.name in self.route.stops_table:
           logging.info("Bus %s, in the stop: %s, poss %d, is full: %s" % (
           self.number, stop.name, self.current_position, str(self.is_full())))
           self.current_stop = stop

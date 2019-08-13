@@ -26,7 +26,7 @@ class BusesHandler:
       reader = csv.DictReader(csvfile)
       # Read all routes info
       for row in reader:
-        route = Route(row)
+        route = Route(row, self.stops_list)
         self.routes_list.append(route)
 
   def runner(self, sim_time):
