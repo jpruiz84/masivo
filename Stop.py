@@ -29,11 +29,20 @@ class Stop:
     else:
       return False
 
-  def pass_to_bus(self):
-    if len(self.pass_queue):
+  def pass_to_bus(self, bus):
+    if not len(self.pass_queue):
+      return ""
+
+    pass_pack = self.pass_queue[0]
+    (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+      unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+    if dest_stop in bus.route.stops_num_table:
+      logging.info('BOARDING, pass %d from stop %d into bus %s' % (pass_id, orig_stop, bus.get_number()))
       return self.pass_queue.pop(0)
     else:
       return ""
+
+
 
   def pass_alight(self, pass_id):
     self.pass_alight_list.append(pass_id)

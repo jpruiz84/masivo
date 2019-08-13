@@ -52,11 +52,9 @@ class Bus:
       for p in range(0, self.current_stop.pass_count()):
         if self.is_full():
           break
-        pass_pack = self.current_stop.pass_to_bus()
-        (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
-          unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-        logging.info('BOARDING, pass %d from stop %d into bus %s' % (pass_id, orig_stop, self.get_number()))
-        self.pass_in(pass_pack)
+        pass_pack = self.current_stop.pass_to_bus(self)
+        if pass_pack:
+          self.pass_in(pass_pack)
 
       # Alight pass in the stop
       for pass_pack in self.pass_queue:

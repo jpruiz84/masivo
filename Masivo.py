@@ -7,7 +7,7 @@ import logging
 import globalConstants
 from BusesHandler import BusesHandler
 
-SIMULATION_ACCELERATION_RATE = 1000
+SIMULATION_ACCELERATION_RATE = 10000
 
 
 class Masivo:
@@ -69,6 +69,7 @@ class Masivo:
         stop = Stop(int(row['stop_number']), row['stop_name'],
                     int(row['x_pos']), int(row['y_pos']), int(row['max_capacity']))
         self.stops_list.append(stop)
+        globalConstants.stops_name_to_num[row['stop_name']] = int(row['stop_number'])
 
     # Get stop destination vector
     with open(file_name, newline='') as csvfile:

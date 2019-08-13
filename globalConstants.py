@@ -2,6 +2,7 @@ import logging
 
 # Global variables
 pass_num = 0
+stops_name_to_num = {}
 
 # Graph configuration constants
 BUS_AND_STOPS_SCALE = 20
