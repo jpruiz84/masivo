@@ -18,6 +18,12 @@ class Bus:
     self.in_the_stop_counter = self.stopping_time
     self.current_stop = route.start_stop
 
+    if route.dir == 'W-E':
+      self.y_pos = 950
+    else:
+      self.y_pos = 1050
+      self.travel_speed_m_s *= -1
+
   def pass_in(self, pass_id):
     if len(self.pass_queue) < self.max_capacity:
       self.pass_queue.append(pass_id)

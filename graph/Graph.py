@@ -10,8 +10,6 @@ from panda3d.core import *
 import sys
 from direct.task import Task
 
-BUS_Y_POS = 950
-
 
 class Graph(ShowBase):
 
@@ -66,7 +64,7 @@ class Graph(ShowBase):
 
     if "buses_list" in masivo:
       for bus in masivo["buses_list"]:
-        bus = GraphBus(bus.max_capacity, 0, BUS_Y_POS)
+        bus = GraphBus(bus.max_capacity, bus.current_position, bus.y_pos)
         self.buses_list.append(bus)
 
     self.accept("escape", sys.exit)
@@ -96,11 +94,11 @@ class Graph(ShowBase):
       # Check if there is a need to create new bus
       if len(self.buses_list) <= i:
         bus = GraphBus(self.masivo["buses_list"][i].max_capacity,
-                       self.masivo["buses_list"][i].current_position, BUS_Y_POS)
+                       self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
         self.buses_list.append(bus)
 
       # Update bus position and count
-      self.buses_list[i].set_pos(self.masivo["buses_list"][i].current_position, BUS_Y_POS)
+      self.buses_list[i].set_pos(self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
       self.buses_list[i].set_pass(self.masivo["buses_list"][i].pass_count())
 
     return Task.cont

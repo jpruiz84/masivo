@@ -7,7 +7,7 @@ import logging
 import globalConstants
 from BusesHandler import BusesHandler
 
-SIMULATION_ACCELERATION_RATE = 10000
+SIMULATION_ACCELERATION_RATE = 100
 
 
 class Masivo:

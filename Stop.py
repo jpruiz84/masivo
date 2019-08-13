@@ -4,14 +4,15 @@ from struct import *
 import logging
 import binascii
 
+
 class Stop:
-  
+
   def __init__(self, number, name, x_pos, y_pos, max_capacity):
     self.number = number
     self.name = name
     self.x_pos = x_pos
     self.y_pos = y_pos
-    self.position = x_pos   # TODO: delete later, for legacy compatibility 1D
+    self.position = x_pos  # TODO: delete later, for legacy compatibility 1D
     self.max_capacity = max_capacity
     self.total_pass_in = 0
     self.pass_id_num = 0
@@ -33,16 +34,24 @@ class Stop:
     if not len(self.pass_queue):
       return ""
 
-    pass_pack = self.pass_queue[0]
-    (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
-      unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-    if dest_stop in bus.route.stops_num_table:
-      logging.info('BOARDING, pass %d from stop %d into bus %s' % (pass_id, orig_stop, bus.get_number()))
-      return self.pass_queue.pop(0)
-    else:
-      return ""
+    to_go_stops_num_table = []
+    append = False
+    for stop_num in bus.route.stops_num_table:
+      if stop_num == bus.current_stop.number:
+        append = True
+      if append:
+        to_go_stops_num_table.append(stop_num)
 
+    # Boarding pass in the stop
+    for pass_pack in self.pass_queue:
+      (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+        unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+      if dest_stop in to_go_stops_num_table:
+        logging.info('BOARDING, pass %d from stop %d into bus %s' % (pass_id, orig_stop, bus.get_number()))
+        self.pass_queue.remove(pass_pack)
+        return pass_pack
 
+    return ""
 
   def pass_alight(self, pass_id):
     self.pass_alight_list.append(pass_id)
@@ -56,9 +65,10 @@ class Stop:
   def calculate_total_pass_in(self):
     self.total_pass_in = 0
     for key, value in self.destination_vector.items():
-      self.total_pass_in += value 
+      self.total_pass_in += value
 
-  # Needs to be called each simulation second
+      # Needs to be called each simulation second
+
   def runner(self, time):
     # Pass arrives to the stop
     for pass_pack in self.pass_arrival_list:
