@@ -92,12 +92,14 @@ class Graph(ShowBase):
     # Update buses
     for i in range(0, len(self.masivo["buses_list"])):
       # Check if there is a need to create new bus
+      if i >= len(self.masivo["buses_list"]):
+        break
       if len(self.buses_list) <= i:
         bus = GraphBus(self.masivo["buses_list"][i].max_capacity,
                        self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
         self.buses_list.append(bus)
 
-      if len(self.masivo["buses_list"]) == 0:
+      if i >= len(self.masivo["buses_list"]):
         break
       # Update bus position and count
       self.buses_list[i].set_pos(self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
