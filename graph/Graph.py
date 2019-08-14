@@ -97,6 +97,8 @@ class Graph(ShowBase):
                        self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
         self.buses_list.append(bus)
 
+      if len(self.masivo["buses_list"]) == 0:
+        break
       # Update bus position and count
       self.buses_list[i].set_pos(self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
       self.buses_list[i].set_pass(self.masivo["buses_list"][i].pass_count())

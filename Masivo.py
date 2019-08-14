@@ -26,6 +26,7 @@ class Masivo:
     self.masivo_data = {}
     self.stops_list = []
     self.buses_list = []
+    self.finished_buses_list = []
     self.speed_up = {"time": [], "speed_up": []}
 
     # Init stops
@@ -34,6 +35,7 @@ class Masivo:
     # Init buses
     self.buses_handler = BusesHandler(self.stops_list)
     self.buses_list = self.buses_handler.get_buses_list()
+    self.finished_buses_list = self.buses_handler.get_finished_buses_list()
 
     self.masivo_data["stops_list"] = self.stops_list
     self.masivo_data["buses_list"] = self.buses_list
@@ -66,14 +68,18 @@ class Masivo:
 
     # END SIMULATION, log results
     print("\n\nEND SIMULATION !!!!!")
-    print("Total buses: %d" % len(self.masivo_data["buses_list"]))
+    print("Total present buses: %d" % len(self.buses_list))
+    print("Total finished buses: %d" % len(self.finished_buses_list))
     print("Total stops: %d" % len(self.masivo_data["stops_list"]))
     print("\n\n")
     for stop in self.masivo_data["stops_list"]:
       print("Stop %s have %d/%d pass, and %d/%d out" % (stop.name, stop.pass_count(), len(stop.pass_arrival_list),
                                                         stop.pass_alight_count(), stop.expected_alight_pass))
-    for bus in self.masivo_data["buses_list"]:
-      print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+    for bus in self.finished_buses_list:
+      print("Present Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+
+    for bus in self.finished_buses_list:
+      print("Finished bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
 
 
   def get_masivo_data(self):

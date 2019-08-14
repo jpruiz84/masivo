@@ -51,6 +51,13 @@ class Bus:
     else:
       return False
 
+  def is_finished(self):
+    if not self.in_the_stop:
+      if len(self.remaining_stops_num) == 0:
+        logging.info("Bus %d is finished" % self.number)
+        return True
+    return False
+
   # Needs to be called each simulation second
   def runner(self, stops_list):
 

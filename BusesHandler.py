@@ -9,6 +9,7 @@ class BusesHandler:
 
   def __init__(self, stops_list):
     self.buses_list = []
+    self.finished_buses_list = []
     self.stops_list = stops_list
     self.routes_list = []
 
@@ -17,6 +18,9 @@ class BusesHandler:
 
   def get_buses_list(self):
     return self.buses_list
+
+  def get_finished_buses_list(self):
+    return self.finished_buses_list
 
   def open_routes_file(self, file_name):
     logging.info("Opening routes file: %s" % file_name)
@@ -42,3 +46,7 @@ class BusesHandler:
 
     for bus in self.buses_list:
       bus.runner(self.stops_list)
+      if bus.is_finished():
+        self.finished_buses_list.append(bus)
+        self.buses_list.remove(bus)
+
