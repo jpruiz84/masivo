@@ -16,3 +16,9 @@ __pycache__/
 # Pycharm
 .idea/
 
+# Result graphs
+*.eps
+*.svg
+*.pdf
+*.png
+

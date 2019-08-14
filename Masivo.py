@@ -1,14 +1,15 @@
 from Stop import Stop
-from struct import *
 import sys
 import time
 import csv
 import logging
 import globalConstants
 from BusesHandler import BusesHandler
+from graphs2d.Graphs2d import Graphs2d
+import numpy as np
 
 
-SIMULATION_ACCELERATION_RATE = 10000
+SIMULATION_ACCELERATION_RATE = 0
 
 
 class Masivo:
@@ -17,12 +18,15 @@ class Masivo:
     logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
     logging.info("Starting Masivo public transport simulator")
 
+    # Init objects
+    self.graphs2d = Graphs2d()
+
     # Init variables and lists
     self.pass_id_num = 0
     self.masivo_data = {}
     self.stops_list = []
     self.buses_list = []
-
+    self.speed_up = {"time": [], "speed_up": []}
 
     # Init stops
     self.open_stops_file(globalConstants.ODM_FILE)
@@ -34,10 +38,12 @@ class Masivo:
     self.masivo_data["stops_list"] = self.stops_list
     self.masivo_data["buses_list"] = self.buses_list
 
-
   def run(self):
     for sim_time in range(0, 6000):
-      time.sleep(1.0 / SIMULATION_ACCELERATION_RATE)
+      start_time = time.time()
+
+
+
       if (sim_time % 10) == 0:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
@@ -46,6 +52,17 @@ class Masivo:
         stop.runner(sim_time)
 
       self.buses_handler.runner(sim_time)
+
+      if SIMULATION_ACCELERATION_RATE > 0:
+        while (time.time() - start_time) < (1 / SIMULATION_ACCELERATION_RATE):
+          pass
+
+
+      self.speed_up["time"].append(sim_time)
+      self.speed_up["speed_up"].append(1/(time.time() - start_time))
+
+    print("Average speed up: %d" % np.mean(self.speed_up["speed_up"]))
+    self.graphs2d.speed_up(self.speed_up)
 
     # END SIMULATION, log results
     print("\n\nEND SIMULATION !!!!!")
@@ -57,6 +74,7 @@ class Masivo:
                                                         stop.pass_alight_count(), stop.expected_alight_pass))
     for bus in self.masivo_data["buses_list"]:
       print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+
 
   def get_masivo_data(self):
     return self.masivo_data

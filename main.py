@@ -1,10 +1,12 @@
 from Masivo import Masivo
 from graph.Graph import panda3d_run
 from direct.stdpy import threading
+import time
 
 
 class MasivoRunner(threading.Thread):
   def run(self):
+    time.sleep(2)
     masivo.run()
 
 
