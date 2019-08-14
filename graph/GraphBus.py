@@ -6,6 +6,7 @@ class GraphBus():
     self.capacity = capacity
     self.x_pos = x_pos
     self.y_pos = y_pos
+    self.past_x_pos = 0
     self.scale = globalConstants.BUS_AND_STOPS_SCALE
 
     self.container = loader.loadModel("./graph/models/bus_base")
@@ -26,6 +27,11 @@ class GraphBus():
     self.indicator.setPos(x_pos,0,0)
 
   def set_pos(self, x_pos, y_pos):
+    self.past_x_pos = self.x_pos
     self.x_pos = x_pos
     self.y_pos = y_pos
+
     self.container.setPos(self.x_pos, self.y_pos, 0)
+    if self.x_pos < self.past_x_pos:
+      self.container.setH(180)
+
