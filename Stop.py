@@ -60,20 +60,23 @@ class Stop:
 
       # Needs to be called each simulation second
 
+  @staticmethod
+  def get_pass_arrival_time(pass_pack):
+    (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+      unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+    return arrival_time
+
   def runner(self, sim_time):
     # Pass arrives to the stop
-    index = 0
-    while index < len(self.pass_arrival_list):
-      (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
-        unpack(globalConstants.PASS_DATA_FORMAT, self.pass_arrival_list[index])
-      if sim_time == arrival_time:
-        self.pass_in(self.pass_arrival_list.pop(index))
-        continue
-      index += 1
+    if len(self.pass_arrival_list) > 0:
+      while sim_time == self.get_pass_arrival_time(self.pass_arrival_list[0]):
+        self.pass_in(self.pass_arrival_list.pop(0))
+        if len(self.pass_arrival_list) == 0:
+          break
+
 
   def generate_pass_input_queue(self):
-    # logging.info("\nStop name %s" % self.name)
-    # logging.info(self.destination_vector)
+    logging.info("Generating pass input queue for stop name %s" % self.name)
     for key, val in self.destination_vector.items():
       for i in range(0, val):
         orig_stop = int(self.number)
@@ -88,5 +91,14 @@ class Stop:
         #      (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
         # logging.info(binascii.b2a_hex(pass_packed_data))
         self.pass_arrival_list.append(pass_packed_data)
+
+    # Sort items by arrival time ascending
+    self.pass_arrival_list.sort(key=lambda x: self.get_pass_arrival_time(x))
+
+    # for pass_pack in self.pass_arrival_list:
+    #   (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+    #     unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+    #   logging.info("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
+    #       (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
 
     return
