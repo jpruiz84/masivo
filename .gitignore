@@ -22,3 +22,6 @@ __pycache__/
 *.pdf
 *.png
 
+# Result tables
+*.csv
+

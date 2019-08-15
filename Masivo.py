@@ -63,9 +63,6 @@ class Masivo:
       self.speed_up["time"].append(sim_time)
       self.speed_up["speed_up"].append(1/(time.time() - start_time))
 
-    print("Average speed up: %d" % np.mean(self.speed_up["speed_up"]))
-    self.graphs2d.speed_up(self.speed_up)
-
     # END SIMULATION, log results
     print("\n\nEND SIMULATION !!!!!")
     print("Total present buses: %d" % len(self.buses_list))
@@ -80,6 +77,11 @@ class Masivo:
 
     for bus in self.finished_buses_list:
       print("Finished bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+
+    print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
+    self.graphs2d.speed_up(self.speed_up)
+    self.graphs2d.save_speed_up_csv(self.speed_up)
+
 
 
   def get_masivo_data(self):
