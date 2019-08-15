@@ -1,5 +1,5 @@
 import globalConstants
-from pandac.PandaModules import TextNode, TextFont
+from panda3d.core import TextNode
 
 class GraphStop():
   def __init__(self, stop):

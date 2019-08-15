@@ -1,8 +1,3 @@
-from pandac.PandaModules import loadPrcFileData
-loadPrcFileData("", "window-title Masivo Public Transport Simulator")
-loadPrcFileData("", "fullscreen 0") # Set to 1 for fullscreen
-loadPrcFileData("", "win-size 1920 900")
-
 from direct.showbase.ShowBase import ShowBase
 from .GraphStop import GraphStop
 from .GraphBus import GraphBus

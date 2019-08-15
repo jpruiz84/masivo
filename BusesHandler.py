@@ -44,6 +44,7 @@ class BusesHandler:
         self.buses_list.append(bus)
         logging.info("Bus %d created with route %s", bus.number, bus.route.name)
 
+    # Run the bus runner for each bus
     for bus in self.buses_list:
       bus.runner(self.stops_list)
       if bus.is_finished():
