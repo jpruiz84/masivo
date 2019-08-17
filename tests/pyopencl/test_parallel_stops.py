@@ -6,32 +6,41 @@ import numpy as np
 import pyopencl as cl
 import time
 import pyopencl.array as cl_array
+import sys
+sys.path.append('../..')
+import globalConstants
+import random
+
 STOPS_NUM = 300
 PASS_PER_STOP = 1000
+SIM_TIME = 2000
 
-
-
-
-pass_np = np.arange(PASS_PER_STOP).astype(np.uint32)
-stop_type = np.dtype(('u4', (PASS_PER_STOP)))
-stops_list_np  = np.zeros(STOPS_NUM, dtype = stop_type)
+stop_type = np.dtype((globalConstants.PASS_TYPE, (PASS_PER_STOP)))
+stops_list_np = np.zeros(STOPS_NUM, dtype = stop_type)
 stops_list_out_np  = np.zeros(STOPS_NUM, dtype = stop_type)
 stops_list_out_py  = np.zeros(STOPS_NUM, dtype = stop_type)
 
 print(stops_list_np.nbytes)
 
-
 # Fill stops_list_np with pass unique id
 stop_num = 0
+pass_id = 0
 for i in range(0, stops_list_np.shape[0]):
-  pass_num = 0
   for j in range(0, stops_list_np.shape[1]):
-    stops_list_np[i][j] = pass_num + stop_num
-    pass_num +=1
-  stop_num += 1000000
+    stops_list_np[i][j]['pass_id'] = pass_id
+    stops_list_np[i][j]['orig_stop'] = stop_num
+    stops_list_np[i][j]['dest_stop'] = STOPS_NUM - 1
+    stops_list_np[i][j]['arrival_time'] = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
+    stops_list_np[i][j]['status'] = globalConstants.PASS_STATUS_START
 
-#print(stops_list_np)
+    pass_id += 1
+  stop_num += 1
 
+for i in range(len(stops_list_np)):
+  stops_list_np[i] = np.sort(stops_list_np[i], order='arrival_time')
+
+
+print(stops_list_np)
 
 print('load program from cl source file')
 f = open('kernels.cl', 'r', encoding='utf-8')
@@ -60,27 +69,30 @@ prg = cl.Program(ctx, kernels).build()
 startTime = time.time()
 stops_list_g = cl_array.to_device(queue, stops_list_np)
 stops_list_out_g = cl_array.to_device(queue, stops_list_out_np)
-np_stops_num = np.int32(STOPS_NUM)
-np_pass_per_stop = np.int32(PASS_PER_STOP)
+np_stops_num = np.uint32(STOPS_NUM)
+np_pass_per_stop = np.uint32(PASS_PER_STOP)
+np_sim_time = np.uint32(SIM_TIME)
 
-evt = prg.move(queue, (np_stops_num,), None, stops_list_g.data, stops_list_out_g.data, np_stops_num, np_pass_per_stop)
+evt = prg.move_pass(queue, (np_stops_num,), None,
+                    stops_list_g.data, stops_list_out_g.data, np_stops_num, np_pass_per_stop, np_sim_time)
 
 evt.wait()
 endTime = time.time()
 
 print(stops_list_out_g)
 
-print("Pyopencl process time: %s ms" % ((endTime - startTime)*1000))
-
+print("\nPyopencl process time: %s ms\n\n" % ((endTime - startTime)*1000))
 
 
 startTime = time.time()
-stop_num = 0
-for i in range(0, stops_list_np.shape[0]):
-  for j in range(0, stops_list_np.shape[1]):
-    if(stops_list_np[i][j] % 1000000) > 10:
-      stops_list_out_py[i][j] = stops_list_np[i][j]
+stops_list_out_py = np.copy(stops_list_np)
+for i in range(len(stops_list_out_py)):
+  for j in range(len(stops_list_out_py[i])):
+    if stops_list_out_py[i][j]['arrival_time'] > SIM_TIME:
+      stops_list_out_py[i][j]['status'] = 1
 endTime = time.time()
 
 print(stops_list_out_py)
-print("Python process time: %s ms" % ((endTime - startTime)*1000))
+print("\nPython process time: %s ms" % ((endTime - startTime)*1000))
+
+
