@@ -50,7 +50,11 @@ class Masivo:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
+      start_time_stops = time.time()
       self.stops_handler.runner(sim_time)
+      end_time_stops = time.time()
+      print("Stops arrival total time: %f ms" % ((end_time_stops - start_time_stops)*1000))
+      exit()
 
       self.buses_handler.runner(sim_time)
 
