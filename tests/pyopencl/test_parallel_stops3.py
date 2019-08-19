@@ -39,6 +39,8 @@ for i in range(0, stops_list_np.shape[0]):
 for i in range(len(stops_list_np)):
   stops_list_np[i] = np.sort(stops_list_np[i], order='arrival_time')
 
+# Copy for python processing
+stops_list_py = np.copy(stops_list_np)
 
 print(stops_list_np)
 
@@ -66,32 +68,34 @@ mf = cl.mem_flags
 
 prg = cl.Program(ctx, kernels).build()
 
-startTime = time.time()
-stops_list_g = cl_array.to_device(queue, stops_list_np)
-
 np_stops_num = np.uint32(STOPS_NUM)
 np_pass_per_stop = np.uint32(PASS_PER_STOP)
 np_sim_time = np.uint32(SIM_TIME)
 
-evt = prg.move_pass2(queue, (np_stops_num,), None,
-                    stops_list_g.data, np_stops_num, np_pass_per_stop, np_sim_time)
+startTime = time.time()
+for i in range(STOPS_NUM):
+  pass_list_g = cl_array.to_device(queue, stops_list_np[i])
 
-evt.wait()
+  evt = prg.move_pass3(queue, (PASS_PER_STOP, 1), None,
+                      pass_list_g.data, np_pass_per_stop, np_sim_time)
+  evt.wait()
+  stops_list_np[i] = np.copy(pass_list_g.get())
 endTime = time.time()
 
-print(stops_list_g)
+
+print(stops_list_np)
+
 
 print("\nPyopencl process time: %s ms\n\n" % ((endTime - startTime)*1000))
 
-stops_list_py = np.copy(stops_list_np)
 startTime = time.time()
 for i in range(len(stops_list_py)):
   for j in range(len(stops_list_py[i])):
     if stops_list_py[i][j]['arrival_time'] > SIM_TIME:
-      stops_list_py[i][j]['status'] = 1
+      stops_list_py[i][j]['status'] = globalConstants.PASS_STATUS_ARRIVED
 endTime = time.time()
 
 print(stops_list_py)
 print("\nPython process time: %s ms" % ((endTime - startTime)*1000))
 
-
+print("Arrays are equal: %s " % str(np.array_equal(stops_list_np, stops_list_py)))

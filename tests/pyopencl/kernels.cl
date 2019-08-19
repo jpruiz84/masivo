@@ -115,7 +115,26 @@ __kernel void move_pass2(
   for (int i = 0; i < pass_size; i++){
 
     if(stops_list[gid*pass_size + i].arrival_time > sim_time){
-      stops_list[gid*pass_size + i].status = 1;
+      stops_list[gid*pass_size + i].status = 2;
     }
+  }
+}
+
+__kernel void move_pass3(
+    __global PassType *pass_list,
+    unsigned int pass_size,
+    unsigned int sim_time
+    )
+{
+  int gid = get_global_id(0);
+  //printf("hello host from kernel #%d\n", gid);
+  
+  // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
+  if (gid >= pass_size)
+  {   
+      return; 
+  }
+  if(pass_list[gid].arrival_time > sim_time){
+    pass_list[gid].status = 2;
   }
 }
