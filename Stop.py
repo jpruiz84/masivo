@@ -2,8 +2,8 @@ import globalConstants
 import random
 from struct import *
 import logging
-import binascii
-
+import numpy as np
+from sys import getsizeof
 
 class Stop:
 
@@ -35,11 +35,10 @@ class Stop:
       return ""
 
     # Boarding pass in the stop
-    pass_pack = self.pass_queue[index]
-    (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
-      unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-    if dest_stop in bus.remaining_stops_num:
-      logging.info('BOARDING, pass %d from stop %d into bus %s' % (pass_id, orig_stop, bus.get_number()))
+    pass_data = self.pass_queue[index]
+    if pass_data['dest_stop'] in bus.remaining_stops_num:
+      logging.info('BOARDING, pass %d from stop %d into bus %s' %
+                   (pass_data['pass_id'], pass_data['orig_stop'], bus.get_number()))
       return self.pass_queue.pop(index)
 
     return ""
@@ -69,36 +68,27 @@ class Stop:
   def runner(self, sim_time):
     # Pass arrives to the stop
     if len(self.pass_arrival_list) > 0:
-      while sim_time == self.get_pass_arrival_time(self.pass_arrival_list[0]):
+      while sim_time == self.pass_arrival_list[0]['arrival_time']:
         self.pass_in(self.pass_arrival_list.pop(0))
         if len(self.pass_arrival_list) == 0:
           break
 
-
   def generate_pass_input_queue(self):
     logging.info("Generating pass input queue for stop name %s" % self.name)
+
+    # For each destination
     for key, val in self.destination_vector.items():
       for i in range(0, val):
-        orig_stop = int(self.number)
-        dest_stop = int(key)
-        arrival_time = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
-        alight_time = 0
-        pass_id = globalConstants.pass_num
+        pass_data = np.zeros(1, globalConstants.PASS_TYPE)
+        pass_data['orig_stop'] = int(self.number)
+        pass_data['dest_stop'] = int(key)
+        pass_data['arrival_time'] = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
+        pass_data['status'] = globalConstants.PASS_STATUS_TO_ARRIVE
+        pass_data['pass_id'] = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
         globalConstants.pass_num += 1
-        pass_packed_data = pack(globalConstants.PASS_DATA_FORMAT,
-                                alight_time, arrival_time, dest_stop, orig_stop, pass_id)
-        # logging.info("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
-        #      (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
-        # logging.info(binascii.b2a_hex(pass_packed_data))
-        self.pass_arrival_list.append(pass_packed_data)
+        self.pass_arrival_list.append(pass_data)
 
     # Sort items by arrival time ascending
-    self.pass_arrival_list.sort(key=lambda x: self.get_pass_arrival_time(x))
-
-    # for pass_pack in self.pass_arrival_list:
-    #   (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
-    #     unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-    #   logging.info("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
-    #       (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
+    self.pass_arrival_list.sort(key=lambda x: x['arrival_time'])
 
     return

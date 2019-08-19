@@ -11,8 +11,8 @@ sys.path.append('../..')
 import globalConstants
 import random
 
-STOPS_NUM = 300
-PASS_PER_STOP = 10000
+STOPS_NUM = 3
+PASS_PER_STOP = 100
 SIM_TIME = 2000
 
 stop_type = np.dtype((globalConstants.PASS_TYPE, (PASS_PER_STOP)))
@@ -41,6 +41,7 @@ for i in range(len(stops_list_np)):
 
 
 print(stops_list_np)
+exit()
 
 print('load program from cl source file')
 f = open('kernels.cl', 'r', encoding='utf-8')

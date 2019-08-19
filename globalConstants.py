@@ -13,7 +13,7 @@ LOGGING_LEVEL = logging.ERROR
 test_scenario = 30
 
 if test_scenario == 3:
-  ODM_FILE = 'utils/odm3.csv'
+  ODM_FILE = 'utils/odm3small.csv'
   ROUTES_FILE = 'utils/routes3.csv'
 if test_scenario == 30:
   ODM_FILE = 'utils/odm30.csv'

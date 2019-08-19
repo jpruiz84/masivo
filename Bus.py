@@ -80,13 +80,12 @@ class Bus:
           index += 1
 
       # Alight pass in the stop
-      for pass_pack in self.pass_queue:
-        (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
-          unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
-        if dest_stop == self.current_stop.number:
-          logging.info('ALIGHT, pass %d from stop %d alighted in stop %d' % (pass_id, orig_stop, dest_stop))
-          self.current_stop.pass_alight(pass_pack)
-          self.pass_queue.remove(pass_pack)
+      for pass_data in self.pass_queue:
+        if pass_data['dest_stop'] == self.current_stop.number:
+          logging.info('ALIGHT, pass %d from stop %d alighted in stop %d' %
+                       (pass_data['pass_id'], pass_data['orig_stop'], pass_data['dest_stop']))
+          self.current_stop.pass_alight(pass_data)
+          self.pass_queue.remove(pass_data)
 
       # Check if we have to depart from the stop
       self.in_the_stop_counter -= 1
