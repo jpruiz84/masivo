@@ -7,10 +7,10 @@ stops_name_to_num = {}
 
 # Graph configuration constants
 BUS_AND_STOPS_SCALE = 20
-PASS_TOTAL_ARRIVAL_TIME = 0     # In secs
-LOGGING_LEVEL = logging.INFO
+PASS_TOTAL_ARRIVAL_TIME = 3600     # In secs
+LOGGING_LEVEL = logging.ERROR
 
-test_scenario = 300
+test_scenario = 30
 
 if test_scenario == 3:
   ODM_FILE = 'utils/odm3.csv'
