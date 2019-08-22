@@ -5,24 +5,53 @@ from Stop import Stop
 import time
 import numpy as np
 import random
+import pyopencl as cl
+import pyopencl.array as cl_array
+
 
 class StopsHandler:
 
   def __init__(self):
+
+    print('load program from cl source file')
+    f = open('tests/pyopencl/kernels_struct.cl', 'r', encoding='utf-8')
+    kernels = ''.join(f.readlines())
+    f.close()
+
+    ocl_platforms = (platform.name
+                     for platform in cl.get_platforms())
+    print("\n".join(ocl_platforms))
+
+    nvidia_platform = [platform
+                       for platform in cl.get_platforms()
+                       if platform.name == "NVIDIA CUDA"][0]
+
+    nvidia_devices = nvidia_platform.get_devices()
+
+    self.ctx = cl.Context(devices=nvidia_devices)
+    self.queue = cl.CommandQueue(self.ctx)
+    self.mf = cl.mem_flags
+    self.prg = cl.Program(self.ctx, kernels).build()
+
     self.stops_list = []
     self.open_stops_file(globalConstants.ODM_FILE)
 
-    spl_type = np.dtype((globalConstants.PASS_TYPE, (globalConstants.STOP_MAX_PASS)))
-    spsl_type = np.dtype([('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', spl_type)])
-
-    self.pass_list = np.zeros(len(self.stops_list), spsl_type)
-    self.pass_arrival_list = np.zeros(len(self.stops_list), spsl_type)
-    self.pass_alight_list = np.zeros(len(self.stops_list), spsl_type)
+    self.pass_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
+    self.pass_arrival_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
+    self.pass_alight_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
 
     for i in range(len(self.stops_list)):
       self.stops_list[i].set_stop_lists(self.pass_list[i], self.pass_arrival_list[i], self.pass_alight_list[i])
 
     self.generate_pass_input()
+
+    self.pass_list_g = cl_array.to_device(self.queue, self.pass_list)
+    self.pass_arrival_list_g = cl_array.to_device(self.queue, self.pass_arrival_list)
+    self.pass_alight_list_g = cl_array.to_device(self.queue, self.pass_alight_list)
+
+    for i in range(len(self.stops_list)):
+      self.stops_list[i].set_cl_lists(self.pass_list_g[i], self.pass_arrival_list_g[i], self.pass_alight_list_g[i])
+
 
   def get_stops_list(self):
     return self.stops_list
@@ -93,43 +122,50 @@ class StopsHandler:
 
   def runner(self, sim_time):
 
-    for i in range(len(self.stops_list)):
-      if self.pass_arrival_list[i]['total'] > 0:
-        while True:
-          # Check if the list is finished
-          if self.pass_arrival_list[i]['w_index'] >= len(self.pass_arrival_list[i]['spl']):
-            break
+    if globalConstants.cl_enabled:
+      np_stops_num = np.uint32(len(self.pass_list_g))
+      np_pass_per_stop = np.uint32(globalConstants.STOP_MAX_PASS)
+      np_sim_time = np.uint32(sim_time)
 
-          # Check pass status
-          if self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']]['status'] \
-              != globalConstants.PASS_STATUS_TO_ARRIVE:
-            break
+      evt = self.prg.move_pass(self.queue, (np_stops_num,), None,
+                               self.pass_list_g.data, self.pass_arrival_list_g.data,
+                               np_stops_num, np_pass_per_stop, np_sim_time)
 
-          # Check arrival time
-          if sim_time < self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']]['arrival_time']:
-            break
+      evt.wait()
+      #np.array(self.pass_list_g[0].get(), dtype=self.spsl_type)['total']
 
-          self.pass_list[i]['spl'][self.pass_list[i]['last_empty']] = \
-            np.copy(self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']])
-          self.pass_list[i]['spl'][self.pass_list[i]['last_empty']]['status'] = globalConstants.PASS_STATUS_ARRIVED
-          self.pass_list[i]['last_empty'] += 1
-          self.pass_list[i]['total'] += 1
-
-          self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']]['status'] = \
-            globalConstants.PASS_STATUS_EMPTY
-
-          self.pass_arrival_list[i]['last_empty'] -= 1
-          self.pass_arrival_list[i]['total'] -= 1
-          self.pass_arrival_list[i]['w_index'] += 1
-
-    if 0:
+    else:
+      # For each stop
       for i in range(len(self.stops_list)):
-        # Pass arrives to the stop
-        if self.total_pass_list[i][self.stops_list[i].last_arrived_index]['status'] \
-               == globalConstants.PASS_STATUS_TO_ARRIVE:
-          while sim_time == self.total_pass_list[i][self.stops_list[i].last_arrived_index]['arrival_time']:
-            self.total_pass_list[i][self.stops_list[i].last_arrived_index]['status'] = globalConstants.PASS_STATUS_ARRIVED
-            self.stops_list[i].last_arrived_index += 1
+        if self.pass_arrival_list[i]['total'] > 0:
+          while True:
+            # Check if the list is finished
+            if self.pass_arrival_list[i]['w_index'] >= len(self.pass_arrival_list[i]['spl']):
+              break
+
+            # Check pass status
+            if self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']]['status'] \
+                != globalConstants.PASS_STATUS_TO_ARRIVE:
+              break
+
+            # Check arrival time
+            if sim_time < self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']]['arrival_time']:
+              break
+
+            self.pass_list[i]['spl'][self.pass_list[i]['last_empty']] = \
+              np.copy(self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']])
+            self.pass_list[i]['spl'][self.pass_list[i]['last_empty']]['status'] = globalConstants.PASS_STATUS_ARRIVED
+            self.pass_list[i]['last_empty'] += 1
+            self.pass_list[i]['total'] += 1
+
+            self.pass_arrival_list[i]['spl'][self.pass_arrival_list[i]['w_index']]['status'] = \
+              globalConstants.PASS_STATUS_EMPTY
+
+            self.pass_arrival_list[i]['last_empty'] -= 1
+            self.pass_arrival_list[i]['total'] -= 1
+            self.pass_arrival_list[i]['w_index'] += 1
+
+
 
 
 

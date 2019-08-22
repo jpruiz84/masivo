@@ -3,7 +3,7 @@ from graph.Graph import panda3d_run
 from direct.stdpy import threading
 import time
 
-PANDA3D_ON = True
+PANDA3D_ON = False
 
 
 class MasivoRunner(threading.Thread):

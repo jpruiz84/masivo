@@ -50,29 +50,36 @@ __kernel void move_pass(
 
 #endif
   
+  unsigned int w;
 
-/*
-    if len(self.pass_arrival_list) > 0:
-      while sim_time == self.pass_arrival_list[0]['arrival_time']:
-        self.pass_in(self.pass_arrival_list.pop(0))
-        if len(self.pass_arrival_list) == 0:
-          break
-*/
-
-
+  //printf("In gid %d total: %d\n", gid, pass_arrival_list[gid].total);
   if(pass_arrival_list[gid].total > 0){
     #if 1
     //printf("sim_time: %d\n", sim_time);
-    while(sim_time == pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].arrival_time){
-      //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].arrival_time);
+    while(1){
+      //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
       
-      
-      pass_list[gid].spl[pass_list[gid].last_empty] = pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index];
+      w = pass_arrival_list[gid].w_index;
+      if(w >= pass_size){
+        break;
+      }
+
+      if(pass_arrival_list[gid].spl[w].status != 1){
+        break;
+      }
+
+      if(sim_time < pass_arrival_list[gid].spl[w].arrival_time){
+        break;
+      }
+
+      //printf("In gid %d moving pass_id(%d): %d\n", gid, w, pass_arrival_list[gid].spl[w].pass_id);
+
+      pass_list[gid].spl[pass_list[gid].last_empty] = pass_arrival_list[gid].spl[w];
       pass_list[gid].spl[pass_list[gid].last_empty].status = 2;
       pass_list[gid].last_empty ++;
       pass_list[gid].total ++;
 
-      pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].status = 0;
+      pass_arrival_list[gid].spl[w].status = 0;
       pass_arrival_list[gid].w_index ++;
       pass_arrival_list[gid].total --;
       pass_arrival_list[gid].last_empty --;
@@ -86,76 +93,5 @@ __kernel void move_pass(
 
     }
     #endif
-  }
-
-  
-
-    /*
-  //printf("size of: %d\n", sizeof(PassType));
-  for (int i = 0; i < pass_size; i++){
-
-    //((PassType)(*(stops_out + gid*pass_size + i))).pass_id = 1;
-    //for (int j = 0; j < sizeof(PassType); j++){
-    //  stops_out[gid*pass_size + i + j] = stops_in[gid*pass_size + i + j];
-    //}
-
-    stops_out[gid*pass_size + i].pass_id = stops_in[gid*pass_size + i].pass_id;
-    stops_out[gid*pass_size + i].orig_stop = stops_in[gid*pass_size + i].orig_stop;
-    stops_out[gid*pass_size + i].dest_stop = stops_in[gid*pass_size + i].dest_stop;
-    stops_out[gid*pass_size + i].arrival_time = stops_in[gid*pass_size + i].arrival_time;
-    stops_out[gid*pass_size + i].alight_time = stops_in[gid*pass_size + i].alight_time;
-    stops_out[gid*pass_size + i].status = stops_in[gid*pass_size + i].status;
-
-
-    if(stops_out[gid*pass_size + i].arrival_time > sim_time){
-      stops_out[gid*pass_size + i].status = 1;
-    }
-
-  }
-*/  
-
-}
-
-__kernel void move_pass2(
-    __global PassType *stops_list,
-    unsigned int stops_size,  
-    unsigned int pass_size,
-    unsigned int sim_time
-    )
-{
-  int gid = get_global_id(0);
-  //printf("hello host from kernel #%d\n", gid);
-  
-  // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
-  if (gid >= stops_size)
-  {   
-      return; 
-  }
-
-  //printf("size of: %d\n", sizeof(PassType));
-  for (int i = 0; i < pass_size; i++){
-
-    if(stops_list[gid*pass_size + i].arrival_time > sim_time){
-      stops_list[gid*pass_size + i].status = 2;
-    }
-  }
-}
-
-__kernel void move_pass3(
-    __global PassType *pass_list,
-    unsigned int pass_size,
-    unsigned int sim_time
-    )
-{
-  int gid = get_global_id(0);
-  //printf("hello host from kernel #%d\n", gid);
-  
-  // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
-  if (gid >= pass_size)
-  {   
-      return; 
-  }
-  if(pass_list[gid].arrival_time > sim_time){
-    pass_list[gid].status = 2;
   }
 }

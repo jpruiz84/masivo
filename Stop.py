@@ -20,6 +20,10 @@ class Stop:
     self.pass_arrival_list = 0
     self.pass_alight_list = 0
 
+    self.pass_list_g = 0
+    self.pass_arrival_list_g = 0
+    self.pass_alight_list_g = 0
+
     self.destination_vector = {}
     self.expected_alight_pass = 0
     self.last_arrived_index = 0
@@ -30,8 +34,16 @@ class Stop:
     self.pass_arrival_list = pass_arrival_list
     self.pass_alight_list = pass_alight_list
 
+  def set_cl_lists(self, pass_list, pass_arrival_list, pass_alight_list):
+    self.pass_list_g = pass_list
+    self.pass_arrival_list_g = pass_arrival_list
+    self.pass_alight_list_g = pass_alight_list
+
   def pass_count(self):
-    return self.pass_list['total']
+    if globalConstants.cl_enabled:
+      return np.array(self.pass_list_g.get(), dtype=globalConstants.spsl_type)['total']
+    else:
+      return self.pass_list['total']
 
   def pass_alight_count(self):
     return 0

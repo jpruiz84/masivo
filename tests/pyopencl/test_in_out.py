@@ -11,10 +11,10 @@ sys.path.append('../..')
 import globalConstants
 import random
 
-STOPS_NUM = 30
-PASS_PER_STOP = 10000
+STOPS_NUM = 3
+PASS_PER_STOP = 5
 SIM_TIME = 2000
-PRINT_LIST = False
+PRINT_LIST = True
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (PASS_PER_STOP)))
 SPSL_TYPE = np.dtype([('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', SPL_TYPE)])
@@ -89,7 +89,7 @@ for sim_time in range(0, 6000):
   np_pass_per_stop = np.uint32(PASS_PER_STOP)
   np_sim_time = np.uint32(sim_time)
 
-  evt = prg.move_pass(queue, (np_stops_num,), None,
+  evt = prg.move_pass(queue, (np_stops_num,1), None,
                       pass_list_g.data, pass_arrival_list_g.data, np_stops_num, np_pass_per_stop, np_sim_time)
 
   evt.wait()
