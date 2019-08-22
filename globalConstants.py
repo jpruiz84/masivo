@@ -8,7 +8,7 @@ stops_name_to_num = {}
 # Graph configuration constants
 BUS_AND_STOPS_SCALE = 20
 PASS_TOTAL_ARRIVAL_TIME = 3600     # In secs
-LOGGING_LEVEL = logging.ERROR
+LOGGING_LEVEL = logging.INFO
 
 test_scenario = 30
 
@@ -30,8 +30,9 @@ PASS_TYPE = np.dtype([('pass_id', 'u4'), ('orig_stop', 'u2'), ('dest_stop', 'u2'
 STOP_BUS_WINDOW_DISTANCE = 10
 
 
-STOP_MAX_PASS = 8000
+STOP_MAX_PASS = 10000
 
+PASS_STATUS_EMPTY_255 = 255
 PASS_STATUS_EMPTY = 0
 PASS_STATUS_TO_ARRIVE = 1
 PASS_STATUS_ARRIVED = 2

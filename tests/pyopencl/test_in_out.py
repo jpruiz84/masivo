@@ -120,18 +120,22 @@ for sim_time in range(0, 6000):
         if pass_arrival_list[i]['w_index'] >= len(pass_arrival_list[i]['spl']):
           break
 
+        # Check pass status
+        if pass_arrival_list[i]['spl'][pass_arrival_list[i]['w_index']]['status'] \
+            != globalConstants.PASS_STATUS_TO_ARRIVE:
+          break
+
         if sim_time < pass_arrival_list[i]['spl'][pass_arrival_list[i]['w_index']]['arrival_time']:
           break
 
-
-        pass_list[i]['spl'][pass_list[i]['last_empty']] = np.copy(pass_arrival_list[i]['spl'][pass_arrival_list[i]['w_index']])
+        pass_list[i]['spl'][pass_list[i]['last_empty']] = \
+          np.copy(pass_arrival_list[i]['spl'][pass_arrival_list[i]['w_index']])
         pass_list[i]['spl'][pass_list[i]['last_empty']]['status'] = globalConstants.PASS_STATUS_ARRIVED
         pass_list[i]['last_empty'] += 1
         pass_list[i]['total'] += 1
 
-
-
-        pass_arrival_list[i]['spl'][pass_arrival_list[i]['w_index']]['status'] = globalConstants.PASS_STATUS_EMPTY
+        pass_arrival_list[i]['spl'][pass_arrival_list[i]['w_index']]['status'] = \
+          globalConstants.PASS_STATUS_EMPTY
 
         pass_arrival_list[i]['last_empty'] -= 1
         pass_arrival_list[i]['total'] -= 1
