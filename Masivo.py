@@ -10,7 +10,7 @@ from graphs2d.Graphs2d import Graphs2d
 import numpy as np
 
 
-SIMULATION_ACCELERATION_RATE = 0
+SIMULATION_ACCELERATION_RATE = 100
 
 
 class Masivo:
@@ -37,9 +37,12 @@ class Masivo:
     self.stops_pass_alight_list = self.stops_handler.get_pass_alight_list()
 
     # Init buses
-    #self.buses_handler = BusesHandler(self.stops_list, self.stops_pass_list, self.stops_alight_pass_list)
-    #self.buses_list = self.buses_handler.get_buses_list()
-    #self.finished_buses_list = self.buses_handler.get_finished_buses_list()
+    self.buses_handler = BusesHandler(self.stops_list, self.stops_pass_list, self.stops_pass_alight_list)
+    self.buses_list = self.buses_handler.get_buses_list()
+    self.buses_pass_list = self.buses_handler.get_bus_pass_list()
+
+    # Set the buses_pass_list in the stops handler
+    self.stops_handler.set_buses_pass_list(self.buses_pass_list)
 
     self.masivo_data["stops_list"] = self.stops_list
     self.masivo_data["buses_list"] = self.buses_list
@@ -54,7 +57,7 @@ class Masivo:
         sys.stdout.flush()
 
       self.stops_handler.runner(sim_time)
-      #self.buses_handler.runner(sim_time)
+      self.buses_handler.runner(sim_time)
 
       if SIMULATION_ACCELERATION_RATE > 0:
         while (time.time() - start_time) < (1 / SIMULATION_ACCELERATION_RATE):
@@ -74,14 +77,12 @@ class Masivo:
     print("Total finished buses: %d" % len(self.finished_buses_list))
     print("Total stops: %d" % len(self.masivo_data["stops_list"]))
     print("\n\n")
+    for bus in self.finished_buses_list:
+      print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+
     for stop in self.masivo_data["stops_list"]:
       print("Stop %s have %d/%d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.total_pass_in,
-                                                        stop.pass_alight_count(), stop.expected_alight_pass))
-    for bus in self.finished_buses_list:
-      print("Present Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
-
-    for bus in self.finished_buses_list:
-      print("Finished bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
+                                                          stop.pass_alight_count(), stop.expected_alight_pass))
 
     print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
     print("Total time: %f" % (total_end_time - total_start_time))

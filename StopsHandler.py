@@ -33,12 +33,16 @@ class StopsHandler:
     self.mf = cl.mem_flags
     self.prg = cl.Program(self.ctx, kernels).build()
 
+    self.buses_pass_list = 0
     self.stops_list = []
     self.open_stops_file(globalConstants.ODM_FILE)
 
     self.pass_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
     self.pass_arrival_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
     self.pass_alight_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
+
+    for i in range(len(self.stops_list)):
+      self.pass_list[i]['stop_num'] = self.stops_list[i].number
 
     for i in range(len(self.stops_list)):
       self.stops_list[i].set_stop_lists(self.pass_list[i], self.pass_arrival_list[i], self.pass_alight_list[i])
@@ -52,7 +56,6 @@ class StopsHandler:
     for i in range(len(self.stops_list)):
       self.stops_list[i].set_cl_lists(self.pass_list_g[i], self.pass_arrival_list_g[i], self.pass_alight_list_g[i])
 
-
   def get_stops_list(self):
     return self.stops_list
 
@@ -61,6 +64,9 @@ class StopsHandler:
 
   def get_pass_alight_list(self):
     return self.pass_alight_list
+
+  def set_buses_pass_list(self, buses_pass_list):
+    self.buses_pass_list = buses_pass_list
 
   def open_stops_file(self, file_name):
     logging.info("Opening stops file: %s" % file_name)
@@ -135,6 +141,8 @@ class StopsHandler:
       #np.array(self.pass_list_g[0].get(), dtype=self.spsl_type)['total']
 
     else:
+
+      # Update stop pass list from arrival list
       # For each stop
       for i in range(len(self.stops_list)):
         if self.pass_arrival_list[i]['total'] > 0:
@@ -164,6 +172,23 @@ class StopsHandler:
             self.pass_arrival_list[i]['last_empty'] -= 1
             self.pass_arrival_list[i]['total'] -= 1
             self.pass_arrival_list[i]['w_index'] += 1
+
+      # Handle the buses
+      for i in range(len(self.pass_list)):
+        for j in range(len(self.buses_pass_list)):
+          if self.pass_list[i]['stop_num'] == self.buses_pass_list[j]['curr_stop']:
+            #print('************* bus %d in stop %d' % (j, self.pass_list[i]['stop_num']))
+            # for each pass in the stop
+            for k in range(len(self.pass_list[i]['spl'])):
+              if self.pass_list[i]['spl'][k]['status'] == globalConstants.PASS_STATUS_ARRIVED:
+                for l in (range(self.buses_pass_list[j]['last_stop_i'] + 1, len(self.buses_pass_list[j]['stops_num']))):
+                  if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_pass_list[j]['stops_num'][l]:
+                    print("BOARDING pass %s" % str(self.pass_list[i]['spl'][k]))
+
+                    self.pass_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_IN_BUS
+                    self.pass_list[i]['total'] -= 1
+
+
 
 
 
