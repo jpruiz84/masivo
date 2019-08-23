@@ -1,3 +1,3 @@
 route_number,route_name,route_frequency,route_offset,route_buses,route_dir,route_notes,route_stops_table
-0,Route_00,100,100,50,W-E,all stops,"Stop_00,Stop_01,Stop_02"
+0,Route_00,100,50,50,W-E,all stops,"Stop_00,Stop_01,Stop_02"
 1,Route_01,100,100,50,E-W,all stops,"Stop_02,Stop_01,Stop_00"

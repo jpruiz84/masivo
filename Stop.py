@@ -46,7 +46,7 @@ class Stop:
       return self.pass_list['total']
 
   def pass_alight_count(self):
-    return 0
+    return self.pass_alight_list['total']
 
   def calculate_total_pass_in(self):
     self.total_pass_in = 0
