@@ -10,7 +10,7 @@ from graphs2d.Graphs2d import Graphs2d
 import numpy as np
 
 
-SIMULATION_ACCELERATION_RATE = 100
+SIMULATION_ACCELERATION_RATE = 0
 
 
 class Masivo:
@@ -43,6 +43,7 @@ class Masivo:
 
     # Set the buses_pass_list in the stops handler
     self.stops_handler.set_buses_pass_list(self.buses_pass_list)
+    self.stops_handler.set_buses_handler(self.buses_handler)
 
     self.masivo_data["stops_list"] = self.stops_list
     self.masivo_data["buses_list"] = self.buses_list
@@ -77,12 +78,16 @@ class Masivo:
     print("Total finished buses: %d" % len(self.finished_buses_list))
     print("Total stops: %d" % len(self.masivo_data["stops_list"]))
     print("\n\n")
-    for bus in self.finished_buses_list:
-      print("Bus %s have %d pass, final poss %d" % (bus.get_number(), bus.pass_count(), bus.current_position))
 
+    print('\nBuses list:')
+    for i in range(len(self.buses_pass_list)):
+      print("Bus %s have %d pass, final poss %d" %
+            (self.buses_list[i].number, self.buses_pass_list[i]['total'], self.buses_list[i].current_position))
+
+    print('\nStops list:')
     for stop in self.masivo_data["stops_list"]:
-      print("Stop %s have %d/%d pass, and %d/%d out" % (stop.name, stop.pass_count(), stop.total_pass_in,
-                                                          stop.pass_alight_count(), stop.expected_alight_pass))
+      print("Stop %s have %d/%d pass, and %d/%d out" %
+            (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(), stop.expected_alight_pass))
 
     print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
     print("Total time: %f" % (total_end_time - total_start_time))

@@ -21,7 +21,7 @@ class Graphs2d:
     ax.set(xlabel='time (s)', ylabel='Speed up',
            title='Simulation speed up')
     ax.grid()
-    ax.set_yscale('log')
+    #ax.set_yscale('log')
 
     fig.savefig("speed_up.png")
     #plt.show()

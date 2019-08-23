@@ -34,6 +34,8 @@ class StopsHandler:
     self.prg = cl.Program(self.ctx, kernels).build()
 
     self.buses_pass_list = 0
+    self.buses_handler = 0
+
     self.stops_list = []
     self.open_stops_file(globalConstants.ODM_FILE)
 
@@ -68,6 +70,9 @@ class StopsHandler:
   def set_buses_pass_list(self, buses_pass_list):
     self.buses_pass_list = buses_pass_list
 
+  def set_buses_handler(self, buses_handler):
+    self.buses_handler = buses_handler
+
   def open_stops_file(self, file_name):
     logging.info("Opening stops file: %s" % file_name)
 
@@ -101,7 +106,9 @@ class StopsHandler:
     # For each destination
     for i in range(len(self.pass_list)):
       for j in range(len(self.pass_list[i]['spl'])):
+        self.pass_list[i]['spl'][j]['status'] = globalConstants.PASS_STATUS_EMPTY_255
         self.pass_arrival_list[i]['spl'][j]['status'] = globalConstants.PASS_STATUS_EMPTY_255
+
 
     # Calculate total pass in and input queue
     for i in range(len(self.stops_list)):
@@ -174,19 +181,55 @@ class StopsHandler:
             self.pass_arrival_list[i]['w_index'] += 1
 
       # Handle the buses
-      for i in range(len(self.pass_list)):
-        for j in range(len(self.buses_pass_list)):
-          if self.pass_list[i]['stop_num'] == self.buses_pass_list[j]['curr_stop']:
-            #print('************* bus %d in stop %d' % (j, self.pass_list[i]['stop_num']))
-            # for each pass in the stop
-            for k in range(len(self.pass_list[i]['spl'])):
-              if self.pass_list[i]['spl'][k]['status'] == globalConstants.PASS_STATUS_ARRIVED:
-                for l in (range(self.buses_pass_list[j]['last_stop_i'] + 1, len(self.buses_pass_list[j]['stops_num']))):
-                  if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_pass_list[j]['stops_num'][l]:
-                    print("BOARDING pass %s" % str(self.pass_list[i]['spl'][k]))
 
-                    self.pass_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_IN_BUS
-                    self.pass_list[i]['total'] -= 1
+
+      # BOARDING
+      # For each stop
+      for i in range(len(self.pass_list)):
+        # For each bus
+        #for j in range(0, self.buses_handler):
+        for j in range(len(self.buses_pass_list)):
+          # If the bus is in the stop
+          if self.pass_list[i]['stop_num'] == self.buses_pass_list[j]['curr_stop']:
+            # If the bus is full, continue with the next bus
+            if self.buses_pass_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
+              continue
+
+            # For each pass in the stop
+            for k in range(len(self.pass_list[i]['spl'])):
+              # If we are at the end of the pass list
+              if self.pass_list[i]['spl'][k]['status'] == globalConstants.PASS_STATUS_EMPTY_255:
+                break
+
+              # If the pass have arrived to the stop
+              if self.pass_list[i]['spl'][k]['status'] == globalConstants.PASS_STATUS_ARRIVED:
+
+                # Check if the bus route has the pass destination stop
+                bus_for_dest = False
+                for l in (range(self.buses_pass_list[j]['last_stop_i'] + 1, self.buses_pass_list[j]['total_stops'])):
+                  if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_pass_list[j]['stops_num'][l]:
+                    bus_for_dest = True
+                    break
+
+                # If the bus has the destination stop, pass boards
+                if bus_for_dest:
+                  print("BOARDING pass %s to the bus %d" % (str(self.pass_list[i]['spl'][k]), j))
+
+                  self.pass_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_IN_BUS
+                  self.pass_list[i]['total'] -= 1
+
+                  m = self.buses_pass_list[j]['last_empty']
+                  self.buses_pass_list[j]['bpl'][m] = np.copy(self.pass_list[i]['spl'][k])
+                  self.buses_pass_list[j]['total'] += 1
+
+                # If bus is full break to go to the next bus in the stop
+                if self.buses_pass_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
+                  break
+
+
+
+
+
 
 
 

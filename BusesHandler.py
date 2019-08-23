@@ -20,6 +20,9 @@ class BusesHandler:
     self.open_routes_file(globalConstants.ROUTES_FILE)
 
     self.bus_pass_lists = np.zeros(len(self.buses_list), dtype=globalConstants.bpsl_type)
+    self.bl_head = 0
+    self.bl_tail = 0
+
 
     # Init empty stops table
     for i in range(len(self.bus_pass_lists)):
@@ -35,6 +38,7 @@ class BusesHandler:
     for i in range(len(self.buses_list)):
       for j in range(len(self.buses_list[i].route.stops_num_table)):
         self.bus_pass_lists[i]['stops_num'][j] = self.buses_list[i].route.stops_num_table[j]
+      self.bus_pass_lists[i]['total_stops'] = len(self.buses_list[i].route.stops_num_table)
 
   def get_buses_list(self):
     return self.buses_list
@@ -85,6 +89,7 @@ class BusesHandler:
           self.bus_pass_lists[bus.number]['curr_stop'] = bus.route.start_stop.number
           bus.current_position = bus.route.start_stop.x_pos
           logging.info("Starting bus %d with route %s, start time %d", bus.number, bus.route.name, bus.start_time)
+          self.bl_head += 1
         continue
 
       bus.update_pos(self.stops_list)

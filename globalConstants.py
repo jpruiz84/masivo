@@ -7,14 +7,22 @@ stops_name_to_num = {}
 
 # Graph configuration constants
 BUS_AND_STOPS_SCALE = 20
-PASS_TOTAL_ARRIVAL_TIME = 50     # In secs
+
+# Masivo configuration
+PASS_TOTAL_ARRIVAL_TIME = 3600     # In secs
 LOGGING_LEVEL = logging.INFO
+STOP_MAX_PASS = 10000
+BUS_MAX_PASS = 100
+TOTAL_BUSES = 100
+STOP_BUS_WINDOW_DISTANCE = 10
+MAX_STOPS = 500
+
 
 test_scenario = 3
 cl_enabled = False
 
 if test_scenario == 3:
-  ODM_FILE = 'utils/odm3small.csv'
+  ODM_FILE = 'utils/odm3.csv'
   ROUTES_FILE = 'utils/routes3small.csv'
 if test_scenario == 30:
   ODM_FILE = 'utils/odm30.csv'
@@ -23,11 +31,6 @@ if test_scenario == 300:
   ODM_FILE = 'utils/odm300.csv'
   ROUTES_FILE = 'utils/routes300.csv'
 
-STOP_MAX_PASS = 10000
-BUS_MAX_PASS = 200
-TOTAL_BUSES = 100
-STOP_BUS_WINDOW_DISTANCE = 10
-MAX_STOPS = 500
 
 BUS_NOT_STARTED_STOP = 20000
 BUS_TRAVELING = 20001
@@ -45,7 +48,7 @@ spsl_type = np.dtype([('stop_num', 'u2'), ('total', 'u4'), ('last_empty', 'u4'),
 # Bus Passengers List (BPL)
 bpl_type = np.dtype((PASS_TYPE, BUS_MAX_PASS))
 # Bus Passengers Struct List (BPSL)
-bpsl_type = np.dtype([('curr_stop', 'u2'), ('last_stop_i', 'u2'), ('stops_num', 'u2', MAX_STOPS),
+bpsl_type = np.dtype([('curr_stop', 'u2'), ('last_stop_i', 'u2'), ('total_stops', 'u2'), ('stops_num', 'u2', MAX_STOPS),
                       ('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('bpl', bpl_type)])
 
 

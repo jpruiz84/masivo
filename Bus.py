@@ -9,9 +9,9 @@ class Bus:
   def __init__(self, number, route):
     self.number = number
     self.route = route
-    self.max_capacity = 200
+    self.max_capacity = globalConstants.BUS_MAX_PASS
     self.pass_queue = []
-    self.travel_speed_km_h = 20          # Km/h
+    self.travel_speed_km_h = 40          # Km/h
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
     self.stopping_time = 10
     self.current_position = 0
