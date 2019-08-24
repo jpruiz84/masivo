@@ -13,7 +13,7 @@ class Bus:
     self.pass_queue = []
     self.travel_speed_km_h = 40          # Km/h
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
-    self.stopping_time = 50
+    self.stopping_time = 10
     self.current_position = 0
     self.in_the_stop = True
     self.in_the_stop_counter = self.stopping_time
@@ -56,7 +56,10 @@ class Bus:
       return ""
     
   def pass_count(self):
-    return self.pass_list['total']
+    if globalConstants.cl_enabled:
+      return np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)['total']
+    else:
+      return self.pass_list['total']
 
   def get_number(self):
     return self.number
@@ -87,14 +90,16 @@ class Bus:
         self.in_the_stop = False
         if self.pass_list['curr_stop'] in self.route.stops_num_table:
           self.pass_list['last_stop_i'] = self.route.stops_num_table.index(self.pass_list['curr_stop'])
+        self.pass_list['curr_stop'] = globalConstants.BUS_TRAVELING
 
         if globalConstants.cl_enabled:
           bus_g = np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)
-          bus_g['curr_stop'] = globalConstants.BUS_TRAVELING
-          self.pass_list_g.set(bus_g)
 
-        else:
-          self.pass_list['curr_stop'] = globalConstants.BUS_TRAVELING
+          if self.pass_list['curr_stop'] in self.route.stops_num_table:
+            bus_g['last_stop_i'] = self.route.stops_num_table.index(self.pass_list['curr_stop'])
+          bus_g['curr_stop'] = globalConstants.BUS_TRAVELING
+
+          self.pass_list_g.set(bus_g)
 
       return
 

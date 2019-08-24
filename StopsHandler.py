@@ -14,7 +14,7 @@ class StopsHandler:
   def __init__(self):
 
     print('load program from cl source file')
-    f = open('kernels_struct.cl', 'r', encoding='utf-8')
+    f = open('kernels_struct.c', 'r', encoding='utf-8')
     kernels = ''.join(f.readlines())
     f.close()
 
@@ -251,11 +251,12 @@ class StopsHandler:
               if self.pass_list[i]['spl'][k]['status'] == globalConstants.PASS_STATUS_EMPTY_255:
                 break
 
-              # If the pass have arrived to the stop
+              # If the pass has arrived to the stop
               if self.pass_list[i]['spl'][k]['status'] == globalConstants.PASS_STATUS_ARRIVED:
 
                 # Check if the bus route has the pass destination stop
                 bus_for_dest = False
+                # print("Bus %d in stop %d, last stop i %d" % (j, i, self.buses_pass_list[j]['last_stop_i']))
                 for l in (range(self.buses_pass_list[j]['last_stop_i'] + 1, self.buses_pass_list[j]['total_stops'])):
                   if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_pass_list[j]['stops_num'][l]:
                     bus_for_dest = True
@@ -265,7 +266,7 @@ class StopsHandler:
                 if bus_for_dest:
                   # Look for a free space in the bus
                   for n in range(self.buses_pass_list[j]['last_empty'], len(self.buses_pass_list[j]['bpl'])):
-                    # print("bus poss: %d, %s" % (n, str(self.buses_pass_list[j]['bpl'][n])))
+                    # print("bus seat: %d, %s" % (n, str(self.buses_pass_list[j]['bpl'][n])))
 
                     if self.buses_pass_list[j]['bpl'][n]['status'] == globalConstants.PASS_STATUS_IN_BUS:
                       # print("busy")

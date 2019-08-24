@@ -2,8 +2,7 @@ from Masivo import Masivo
 from graph.Graph import panda3d_run
 from direct.stdpy import threading
 import time
-
-PANDA3D_ON = False
+import globalConstants
 
 
 class MasivoRunner(threading.Thread):
@@ -12,7 +11,7 @@ class MasivoRunner(threading.Thread):
     masivo.run()
 
 
-if PANDA3D_ON:
+if globalConstants.panda3d_enabled:
   masivo = Masivo()
   masivo_data = masivo.get_masivo_data()
   MasivoRunner().start()

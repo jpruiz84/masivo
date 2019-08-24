@@ -16,7 +16,8 @@ SIMULATION_ACCELERATION_RATE = 100
 class Masivo:
 
   def __init__(self):
-    logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
+    #logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
+    logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
     logging.info("Starting Masivo public transport simulator")
 
     # Init objects
