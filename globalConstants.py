@@ -18,10 +18,11 @@ STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
 
-test_scenario = 3
+test_scenario = 300
 cl_enabled = True
-panda3d_enabled = True
+panda3d_enabled = False
 sim_accel_rate = 0
+end_sim_time = 6000
 
 if test_scenario == 3:
   ODM_FILE = 'utils/odm3small.csv'

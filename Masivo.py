@@ -49,7 +49,7 @@ class Masivo:
 
   def run(self):
     total_start_time = time.time()
-    for sim_time in range(0, 6000):
+    for sim_time in range(0, globalConstants.end_sim_time):
       start_time = time.time()
 
       if (sim_time % 10) == 0:
