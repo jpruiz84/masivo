@@ -137,12 +137,11 @@ class StopsHandler:
 
     if globalConstants.cl_enabled:
       np_stops_num = np.uint32(len(self.pass_list_g))
-      np_pass_per_stop = np.uint32(globalConstants.STOP_MAX_PASS)
       np_sim_time = np.uint32(sim_time)
 
       evt = self.prg.move_pass(self.queue, (np_stops_num,), None,
                                self.pass_list_g.data, self.pass_arrival_list_g.data,
-                               np_stops_num, np_pass_per_stop, np_sim_time)
+                               np_stops_num, np_sim_time)
 
       evt.wait()
       #np.array(self.pass_list_g[0].get(), dtype=self.spsl_type)['total']

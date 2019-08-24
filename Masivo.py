@@ -58,7 +58,7 @@ class Masivo:
         sys.stdout.flush()
 
       self.stops_handler.runner(sim_time)
-      self.buses_handler.runner(sim_time)
+      #self.buses_handler.runner(sim_time)
 
       if SIMULATION_ACCELERATION_RATE > 0:
         while (time.time() - start_time) < (1 / SIMULATION_ACCELERATION_RATE):
@@ -90,7 +90,7 @@ class Masivo:
             (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(), stop.expected_alight_pass))
 
     print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
-    print("Total time: %f" % (total_end_time - total_start_time))
+    print("Total time: %f s" % (total_end_time - total_start_time))
     self.graphs2d.speed_up(self.speed_up)
     self.graphs2d.save_speed_up_csv(self.speed_up)
 

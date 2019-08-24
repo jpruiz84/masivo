@@ -1,3 +1,7 @@
+#define STOP_MAX_PASS   10000
+#define BUS_MAX_PASS      100
+
+
 typedef struct {
   unsigned int    pass_id;
   unsigned short  orig_stop;
@@ -9,19 +13,38 @@ typedef struct {
 
 
 typedef struct {
+  unsigned short  stop_num;
   unsigned int    total;
   unsigned int    last_empty;
   unsigned int    w_index;
-  PassType        spl[10000];
+  PassType        spl[STOP_MAX_PASS];
 } __attribute__ ((packed)) SpslType;
 
+
+
+__kernel void masivo_runner(
+    __global SpslType *pass_list,
+    __global SpslType *pass_arrival_list,
+    __global SpslType *pass_alight_list,
+    unsigned int total_stops,                     // Total stops
+    unsigned int total_buses,                     // Total stops
+    unsigned int sim_time
+    )
+{
+  int gid = get_global_id(0);
+  // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
+  if (gid >= total_stops)
+  {   
+      return; 
+  }
+
+}
 
 
 __kernel void move_pass(
     __global SpslType *pass_list,
     __global SpslType *pass_arrival_list,
-    unsigned int stops_size,  
-    unsigned int pass_size,
+    unsigned int total_stops,  
     unsigned int sim_time
     )
 {
@@ -29,7 +52,7 @@ __kernel void move_pass(
   //printf("hello host from kernel #%d\n", gid);
   
   // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
-  if (gid >= stops_size)
+  if (gid >= total_stops)
   {   
       return; 
   }
@@ -60,7 +83,7 @@ __kernel void move_pass(
       //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
       
       w = pass_arrival_list[gid].w_index;
-      if(w >= pass_size){
+      if(w >= BUS_MAX_PASS){
         break;
       }
 
