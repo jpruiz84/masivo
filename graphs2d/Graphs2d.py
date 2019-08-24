@@ -23,7 +23,7 @@ class Graphs2d:
     ax.grid()
     #ax.set_yscale('log')
 
-    fig.savefig("speed_up.png")
+    fig.savefig("speed_up.eps")
     #plt.show()
 
   def save_speed_up_csv(self, speed_up_data):

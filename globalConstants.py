@@ -18,11 +18,11 @@ STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
 
-test_scenario = 3
-cl_enabled = False
+test_scenario = 30
+cl_enabled = True
 
 if test_scenario == 3:
-  ODM_FILE = 'utils/odm3.csv'
+  ODM_FILE = 'utils/odm3small.csv'
   ROUTES_FILE = 'utils/routes3small.csv'
 if test_scenario == 30:
   ODM_FILE = 'utils/odm30.csv'
@@ -34,6 +34,7 @@ if test_scenario == 300:
 
 BUS_NOT_STARTED_STOP = 20000
 BUS_TRAVELING = 20001
+BUS_FINISHED = 20002
 EMPTY_STOP_NUMBER = 20000
 
 # Masivo fixed constants, DO NOT MODIFY !!!!

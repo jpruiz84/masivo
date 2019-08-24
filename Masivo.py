@@ -37,7 +37,7 @@ class Masivo:
     self.stops_pass_alight_list = self.stops_handler.get_pass_alight_list()
 
     # Init buses
-    self.buses_handler = BusesHandler(self.stops_list, self.stops_pass_list, self.stops_pass_alight_list)
+    self.buses_handler = BusesHandler(self.stops_list)
     self.buses_list = self.buses_handler.get_buses_list()
     self.buses_pass_list = self.buses_handler.get_bus_pass_list()
 
@@ -57,8 +57,8 @@ class Masivo:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
-      self.stops_handler.runner(sim_time)
-      #self.buses_handler.runner(sim_time)
+      #self.stops_handler.runner(sim_time)
+      self.buses_handler.runner(sim_time)
 
       if SIMULATION_ACCELERATION_RATE > 0:
         while (time.time() - start_time) < (1 / SIMULATION_ACCELERATION_RATE):
