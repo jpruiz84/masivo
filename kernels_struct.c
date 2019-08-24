@@ -132,7 +132,7 @@ __kernel void masivo_runner(
 
       // For this bus, begin the free space search from the beginning
       buses_pass_list[j].last_empty = 0;
-      printf("Bus %d in the stop %d\n", j, pass_list[gid].stop_num);
+      //printf("Bus %d in the stop %d\n", j, pass_list[gid].stop_num);
 
       // For each pass in the stop
       for(k = 0; k < STOP_MAX_PASS; k++){
@@ -155,7 +155,7 @@ __kernel void masivo_runner(
           bus_for_dest = FALSE;
           for(l = buses_pass_list[j].last_stop_i + 1; l < buses_pass_list[j].total_stops; l++){
             if(l < 5){
-              printf("Stops to(%d): %d\n", l, buses_pass_list[j].stops_num[l]);
+              //printf("Stops to(%d): %d, last_stop_i %d, curr_stop %d\n", l, buses_pass_list[j].stops_num[l], buses_pass_list[j].last_stop_i, buses_pass_list[j].curr_stop);
             }
             if(pass_list[gid].spl[k].dest_stop == buses_pass_list[j].stops_num[l]){
               bus_for_dest = TRUE;
@@ -174,7 +174,7 @@ __kernel void masivo_runner(
                 continue;
               }
 
-              printf("BOARDING pass_id %d to the bus %d, in seat %d\n", pass_list[gid].spl[k].pass_id, j, n);
+              //printf("BOARDING pass_id %d to the bus %d, in seat %d\n", pass_list[gid].spl[k].pass_id, j, n);
 
               pass_list[gid].spl[k].status = PASS_STATUS_IN_BUS;
               pass_list[gid].total -= 1;

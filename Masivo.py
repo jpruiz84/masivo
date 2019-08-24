@@ -1,7 +1,6 @@
 from Stop import Stop
 import sys
 import time
-import csv
 import logging
 import globalConstants
 from BusesHandler import BusesHandler
@@ -10,11 +9,7 @@ from graphs2d.Graphs2d import Graphs2d
 import numpy as np
 
 
-SIMULATION_ACCELERATION_RATE = 100
-
-
 class Masivo:
-
   def __init__(self):
     #logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
     logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
@@ -64,8 +59,8 @@ class Masivo:
       self.stops_handler.runner(sim_time)
       self.buses_handler.runner(sim_time)
 
-      if SIMULATION_ACCELERATION_RATE > 0:
-        while (time.time() - start_time) < (1 / SIMULATION_ACCELERATION_RATE):
+      if globalConstants.sim_accel_rate > 0:
+        while (time.time() - start_time) < (1 / globalConstants.sim_accel_rate):
           pass
 
       self.speed_up["time"].append(sim_time)

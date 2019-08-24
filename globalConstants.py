@@ -20,7 +20,8 @@ MAX_STOPS = 500
 
 test_scenario = 3
 cl_enabled = True
-panda3d_enabled = False
+panda3d_enabled = True
+sim_accel_rate = 0
 
 if test_scenario == 3:
   ODM_FILE = 'utils/odm3small.csv'

@@ -144,7 +144,7 @@ class StopsHandler:
 
     if globalConstants.cl_enabled:
       np_total_stops = np.uint32(len(self.pass_list_g))
-      np_total_buses = np.uint32(len(self.pass_list_g))
+      np_total_buses = np.uint32(len(self.buses_pass_list_g))
       np_sim_time = np.uint32(sim_time)
 
       if 0:
