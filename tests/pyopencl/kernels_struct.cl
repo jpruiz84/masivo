@@ -83,7 +83,7 @@ __kernel void move_pass(
       //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
       
       w = pass_arrival_list[gid].w_index;
-      if(w >= BUS_MAX_PASS){
+      if(w >= STOP_MAX_PASS){
         break;
       }
 
