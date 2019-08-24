@@ -94,11 +94,8 @@ class Bus:
 
         if globalConstants.cl_enabled:
           bus_g = np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)
-
-          if self.pass_list['curr_stop'] in self.route.stops_num_table:
-            bus_g['last_stop_i'] = self.route.stops_num_table.index(self.pass_list['curr_stop'])
+          bus_g['last_stop_i'] = self.pass_list['last_stop_i']
           bus_g['curr_stop'] = globalConstants.BUS_TRAVELING
-
           self.pass_list_g.set(bus_g)
 
       return
@@ -120,14 +117,11 @@ class Bus:
         logging.info("Bus %s, in the stop: %s, poss %d, is full: %s" % (
                      self.number, stop.name, self.current_position, str(self.is_full())))
         self.current_stop = stop
-
+        self.pass_list['curr_stop'] = stop.number
         if globalConstants.cl_enabled:
           bus_g = np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)
           bus_g['curr_stop'] = stop.number
           self.pass_list_g.set(bus_g)
-
-        else:
-          self.pass_list['curr_stop'] = stop.number
 
         self.in_the_stop = True
         self.in_the_stop_counter = self.stopping_time
