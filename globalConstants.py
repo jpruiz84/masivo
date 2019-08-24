@@ -18,7 +18,7 @@ STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
 
-test_scenario = 30
+test_scenario = 3
 cl_enabled = True
 
 if test_scenario == 3:

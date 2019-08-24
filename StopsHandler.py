@@ -14,7 +14,7 @@ class StopsHandler:
   def __init__(self):
 
     print('load program from cl source file')
-    f = open('tests/pyopencl/kernels_struct.cl', 'r', encoding='utf-8')
+    f = open('kernels_struct.cl', 'r', encoding='utf-8')
     kernels = ''.join(f.readlines())
     f.close()
 
@@ -42,6 +42,7 @@ class StopsHandler:
     self.pass_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
     self.pass_arrival_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
     self.pass_alight_list = np.zeros(len(self.stops_list), globalConstants.spsl_type)
+    self.buses_pass_list_g = 0
 
     for i in range(len(self.stops_list)):
       self.pass_list[i]['stop_num'] = self.stops_list[i].number
@@ -58,6 +59,9 @@ class StopsHandler:
     for i in range(len(self.stops_list)):
       self.stops_list[i].set_cl_lists(self.pass_list_g[i], self.pass_arrival_list_g[i], self.pass_alight_list_g[i])
 
+  def get_cl_queue(self):
+    return self.queue
+
   def get_stops_list(self):
     return self.stops_list
 
@@ -69,6 +73,9 @@ class StopsHandler:
 
   def set_buses_pass_list(self, buses_pass_list):
     self.buses_pass_list = buses_pass_list
+
+  def set_buses_pass_list_g(self, buses_pass_list_g):
+    self.buses_pass_list_g = buses_pass_list_g
 
   def set_buses_handler(self, buses_handler):
     self.buses_handler = buses_handler
@@ -136,21 +143,34 @@ class StopsHandler:
   def runner(self, sim_time):
 
     if globalConstants.cl_enabled:
-      np_stops_num = np.uint32(len(self.pass_list_g))
+      np_total_stops = np.uint32(len(self.pass_list_g))
+      np_total_buses = np.uint32(len(self.pass_list_g))
       np_sim_time = np.uint32(sim_time)
 
-      evt = self.prg.move_pass(self.queue, (np_stops_num,), None,
-                               self.pass_list_g.data, self.pass_arrival_list_g.data,
-                               np_stops_num, np_sim_time)
+      if 0:
+        evt = self.prg.move_pass(self.queue, (np_total_stops,), None,
+                                 self.pass_list_g.data, self.pass_arrival_list_g.data,
+                                 np_total_stops, np_sim_time)
+      else:
+        evt = self.prg.masivo_runner(self.queue, (np_total_stops,), None,
+                                     self.pass_list_g.data,
+                                     self.pass_arrival_list_g.data,
+                                     self.pass_alight_list_g.data,
+                                     self.buses_pass_list_g.data,
+                                     np_total_stops, np_total_buses, np_sim_time)
+
 
       evt.wait()
       #np.array(self.pass_list_g[0].get(), dtype=self.spsl_type)['total']
 
     else:
 
+
       # Update stop pass list from arrival list
       # For each stop
       for i in range(len(self.pass_list)):
+
+        # STOPS ARRIVAL:
         if self.pass_arrival_list[i]['total'] > 0:
           while True:
             # Check if the list is finished
@@ -179,9 +199,8 @@ class StopsHandler:
             self.pass_arrival_list[i]['total'] -= 1
             self.pass_arrival_list[i]['w_index'] += 1
 
+
         # Handle the buses
-
-
         # For each bus
         for j in range(len(self.buses_pass_list)):
           # If the bus is in the stop

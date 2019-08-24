@@ -4,15 +4,19 @@ from Route import Route
 import csv
 from Bus import Bus
 import numpy as np
+import pyopencl as cl
+import pyopencl.array as cl_array
+
 
 
 class BusesHandler:
 
-  def __init__(self, stops_list):
+  def __init__(self, stops_list, cl_queue):
     self.buses_list = []
     self.finished_buses_list = []
     self.stops_list = stops_list
     self.routes_list = []
+    self.cl_queue = cl_queue
 
     self.bus_count = 0
     self.open_routes_file(globalConstants.ROUTES_FILE)
@@ -37,11 +41,21 @@ class BusesHandler:
         self.bus_pass_lists[i]['stops_num'][j] = self.buses_list[i].route.stops_num_table[j]
       self.bus_pass_lists[i]['total_stops'] = len(self.buses_list[i].route.stops_num_table)
 
+    self.bus_pass_lists_g = cl_array.to_device(self.cl_queue, self.bus_pass_lists)
+
+    # Set the CL buses list
+    for i in range(len(self.buses_list)):
+      self.buses_list[i].set_cl_list(self.bus_pass_lists_g[i])
+
   def get_buses_list(self):
     return self.buses_list
 
   def get_bus_pass_list(self):
     return self.bus_pass_lists
+
+  def get_bus_pass_list_g(self):
+    return self.bus_pass_lists_g
+
 
   def open_routes_file(self, file_name):
     logging.info("Opening routes file: %s" % file_name)
@@ -77,7 +91,16 @@ class BusesHandler:
       if bus.current_stop == globalConstants.BUS_NOT_STARTED_STOP:
         if sim_time >= bus.start_time:
           bus.current_stop = bus.route.start_stop
-          self.bus_pass_lists[bus.number]['curr_stop'] = bus.route.start_stop.number
+
+          if globalConstants.cl_enabled:
+            bus_g = np.array(self.bus_pass_lists_g[bus.number].get(), dtype=globalConstants.bpsl_type)
+            bus_g['curr_stop'] = bus.route.start_stop.number
+            self.bus_pass_lists_g[bus.number].set(bus_g)
+
+          else:
+            self.bus_pass_lists[bus.number]['curr_stop'] = bus.route.start_stop.number
+
+
           bus.current_position = bus.route.start_stop.x_pos
           logging.info("Starting bus %d with route %s, in stop %s start time %d",
                        bus.number, bus.route.name, bus.route.start_stop.name, bus.start_time)

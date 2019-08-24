@@ -1,5 +1,5 @@
 import globalConstants
-from struct import *
+import numpy as np
 import logging
 import copy
 
@@ -21,6 +21,7 @@ class Bus:
     self.remaining_stops_num = copy.copy(self.route.stops_num_table)
     self.start_time = 0
     self.pass_list = 0
+    self.pass_list_g = 0
     self.stop_inc = 1
     self.total_stops = len(stops_list)
     self.stop_index = 0
@@ -37,6 +38,9 @@ class Bus:
 
   def set_list(self, pass_list):
     self.pass_list = pass_list
+
+  def set_cl_list(self, pass_list_g):
+    self.pass_list_g = pass_list_g
 
   def pass_in(self, pass_id):
     if len(self.pass_queue) < self.max_capacity:
@@ -81,8 +85,17 @@ class Bus:
       self.in_the_stop_counter -= 1
       if self.in_the_stop_counter == 0:
         self.in_the_stop = False
-        self.pass_list['last_stop_i'] = self.route.stops_num_table.index(self.pass_list['curr_stop'])
-        self.pass_list['curr_stop'] = globalConstants.BUS_TRAVELING
+        if self.pass_list['curr_stop'] in self.route.stops_num_table:
+          self.pass_list['last_stop_i'] = self.route.stops_num_table.index(self.pass_list['curr_stop'])
+
+        if globalConstants.cl_enabled:
+          bus_g = np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)
+          bus_g['curr_stop'] = globalConstants.BUS_TRAVELING
+          self.pass_list_g.set(bus_g)
+
+        else:
+          self.pass_list['curr_stop'] = globalConstants.BUS_TRAVELING
+
       return
 
     # If I am not waiting in a stop, go ahead
@@ -102,7 +115,15 @@ class Bus:
         logging.info("Bus %s, in the stop: %s, poss %d, is full: %s" % (
                      self.number, stop.name, self.current_position, str(self.is_full())))
         self.current_stop = stop
-        self.pass_list['curr_stop'] = stop.number
+
+        if globalConstants.cl_enabled:
+          bus_g = np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)
+          bus_g['curr_stop'] = stop.number
+          self.pass_list_g.set(bus_g)
+
+        else:
+          self.pass_list['curr_stop'] = stop.number
+
         self.in_the_stop = True
         self.in_the_stop_counter = self.stopping_time
 

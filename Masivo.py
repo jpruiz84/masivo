@@ -10,7 +10,7 @@ from graphs2d.Graphs2d import Graphs2d
 import numpy as np
 
 
-SIMULATION_ACCELERATION_RATE = 0
+SIMULATION_ACCELERATION_RATE = 100
 
 
 class Masivo:
@@ -35,14 +35,17 @@ class Masivo:
     self.stops_list = self.stops_handler.get_stops_list()
     self.stops_pass_list = self.stops_handler.get_pass_list()
     self.stops_pass_alight_list = self.stops_handler.get_pass_alight_list()
+    self.cl_queue = self.stops_handler.get_cl_queue()
 
     # Init buses
-    self.buses_handler = BusesHandler(self.stops_list)
+    self.buses_handler = BusesHandler(self.stops_list, self.cl_queue)
     self.buses_list = self.buses_handler.get_buses_list()
     self.buses_pass_list = self.buses_handler.get_bus_pass_list()
+    self.buses_pass_list_g = self.buses_handler.get_bus_pass_list_g()
 
     # Set the buses_pass_list in the stops handler
     self.stops_handler.set_buses_pass_list(self.buses_pass_list)
+    self.stops_handler.set_buses_pass_list_g(self.buses_pass_list_g)
     self.stops_handler.set_buses_handler(self.buses_handler)
 
     self.masivo_data["stops_list"] = self.stops_list
@@ -57,7 +60,7 @@ class Masivo:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
-      #self.stops_handler.runner(sim_time)
+      self.stops_handler.runner(sim_time)
       self.buses_handler.runner(sim_time)
 
       if SIMULATION_ACCELERATION_RATE > 0:
