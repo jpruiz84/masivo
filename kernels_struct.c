@@ -2,7 +2,6 @@
 #define BUS_MAX_PASS      100
 #define MAX_STOPS         500
 
-
 #define PASS_STATUS_EMPTY_255   255
 #define PASS_STATUS_EMPTY         0
 #define PASS_STATUS_TO_ARRIVE     1
@@ -12,7 +11,6 @@
 
 #define FALSE  0
 #define TRUE   1
-
 
 typedef struct {
   unsigned int    pass_id;
@@ -118,6 +116,31 @@ __kernel void masivo_runner(
     // If the bus is in the stop
     if(pass_list[gid].stop_num == buses_pass_list[j].curr_stop){
 
+      // ALIGHTING
+      // Only if there are passengers in the bus
+      if(buses_pass_list[j].total > 0){
+        // For each pass in the bus
+        for(k = 0; k < BUS_MAX_PASS; k++){
+          //printf("pass id to check(%d): %d\n" k, buses_pass_list[j].bpl[k].pass_id)
+          // If the pass is in the bus
+          if(buses_pass_list[j].bpl[k].status == PASS_STATUS_IN_BUS){
+            // If the stop is the pass dest stop
+            if(buses_pass_list[j].bpl[k].dest_stop == pass_list[gid].stop_num){
+              //printf("ALIGHTING pass id %d from bus %d to stop %d\n", buses_pass_list[j].bpl[k].pass_id, j, pass_list[gid].stop_num);
+
+              buses_pass_list[j].bpl[k].status = PASS_STATUS_ALIGHTED;
+              buses_pass_list[j].total -= 1;
+              buses_pass_list[j].last_empty -= 1;
+
+              n = pass_alight_list[gid].last_empty;
+              pass_alight_list[gid].spl[n] = buses_pass_list[j].bpl[k];
+              pass_alight_list[gid].total += 1;
+              pass_alight_list[gid].last_empty += 1;
+            }
+          }
+        }// End For each pass in the bus, for(k = 0; k < BUS_MAX_PASS; k++)
+
+      } // End Only if there are passengers in the bus, if(buses_pass_list[j].total > 0)
 
       // BOARDING
       // If there are pass in the stop, do not look for more buses

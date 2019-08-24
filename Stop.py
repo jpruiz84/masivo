@@ -46,7 +46,10 @@ class Stop:
       return self.pass_list['total']
 
   def pass_alight_count(self):
-    return self.pass_alight_list['total']
+    if globalConstants.cl_enabled:
+      return np.array(self.pass_alight_list_g.get(), dtype=globalConstants.spsl_type)['total']
+    else:
+      return self.pass_alight_list['total']
 
   def calculate_total_pass_in(self):
     self.total_pass_in = 0
