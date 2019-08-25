@@ -13,7 +13,7 @@ class Bus:
     self.pass_queue = []
     self.travel_speed_km_h = 40          # Km/h
     self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
-    self.stopping_time = 10
+    self.stopping_time = 1
     self.current_position = 0
     self.in_the_stop = True
     self.in_the_stop_counter = self.stopping_time

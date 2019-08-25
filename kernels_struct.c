@@ -1,5 +1,5 @@
 #define STOP_MAX_PASS   10000
-#define BUS_MAX_PASS      100
+#define BUS_MAX_PASS      250
 #define MAX_STOPS         500
 
 #define PASS_STATUS_EMPTY_255   255
