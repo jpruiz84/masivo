@@ -9,7 +9,7 @@ stops_name_to_num = {}
 BUS_AND_STOPS_SCALE = 20
 
 # Masivo configuration
-PASS_TOTAL_ARRIVAL_TIME = 3600*12     # In secs
+PASS_TOTAL_ARRIVAL_TIME = 3600     # In secs
 LOGGING_LEVEL = logging.ERROR
 STOP_MAX_PASS = 10000
 BUS_MAX_PASS = 250
@@ -17,11 +17,11 @@ TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
-test_scenario = 300
-cl_enabled = True
+test_scenario = 3
+cl_enabled = False
 panda3d_enabled = False
 sim_accel_rate = 0
-end_sim_time = 3600*24
+end_sim_time = 6000
 
 if test_scenario == 3:
   ODM_FILE = 'utils/odm3small.csv'
@@ -61,6 +61,8 @@ PASS_STATUS_TO_ARRIVE = 1
 PASS_STATUS_ARRIVED = 2
 PASS_STATUS_IN_BUS = 3
 PASS_STATUS_ALIGHTED = 4
+
+RESULTS_FOLDER = 'results'
 
 
 

@@ -219,6 +219,7 @@ class StopsHandler:
                                    (str(self.buses_pass_list[j]['bpl'][k]), j, self.pass_list[i]['stop_num']))
 
                       self.buses_pass_list[j]['bpl'][k]['status'] = globalConstants.PASS_STATUS_ALIGHTED
+                      self.buses_pass_list[j]['bpl'][k]['alight_time'] = sim_time
                       self.buses_pass_list[j]['total'] -= 1
                       self.buses_pass_list[j]['last_empty'] -= 1
 

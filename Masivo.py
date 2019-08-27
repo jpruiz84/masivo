@@ -7,6 +7,7 @@ from BusesHandler import BusesHandler
 from StopsHandler import StopsHandler
 from graphs2d.Graphs2d import Graphs2d
 import numpy as np
+import results
 
 
 class Masivo:
@@ -92,6 +93,8 @@ class Masivo:
     print("Total time: %f s" % (total_end_time - total_start_time))
     self.graphs2d.speed_up(self.speed_up)
     self.graphs2d.save_speed_up_csv(self.speed_up)
+
+    results.pass_alight(self.stops_pass_alight_list)
 
   def get_masivo_data(self):
     return self.masivo_data

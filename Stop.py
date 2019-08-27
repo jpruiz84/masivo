@@ -70,21 +70,3 @@ class Stop:
         if len(self.pass_arrival_list) == 0:
           break
 
-  def generate_pass_input_queue(self):
-    logging.info("Generating pass input queue for stop name %s" % self.name)
-
-    self.pass_arrival_list_index = 0
-    # For each destination
-    for key, val in self.destination_vector.items():
-      for i in range(0, val):
-        self.pass_arrival_list[self.pass_arrival_list_index]['orig_stop'] = int(self.number)
-        self.pass_arrival_list[self.pass_arrival_list_index]['dest_stop'] = int(key)
-        self.pass_arrival_list[self.pass_arrival_list_index]['arrival_time'] = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
-        self.pass_arrival_list[self.pass_arrival_list_index]['status'] = globalConstants.PASS_STATUS_TO_ARRIVE
-        self.pass_arrival_list[self.pass_arrival_list_index]['pass_id'] = globalConstants.pass_num
-        globalConstants.pass_num += 1
-
-    # Sort items by arrival time ascending
-    self.pass_arrival_list = np.sort(self.pass_arrival_list, order='arrival_time')
-
-    return
