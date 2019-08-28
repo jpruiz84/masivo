@@ -147,17 +147,12 @@ class StopsHandler:
       np_total_buses = np.uint32(len(self.buses_pass_list_g))
       np_sim_time = np.uint32(sim_time)
 
-      if 0:
-        evt = self.prg.move_pass(self.queue, (np_total_stops,), None,
-                                 self.pass_list_g.data, self.pass_arrival_list_g.data,
-                                 np_total_stops, np_sim_time)
-      else:
-        evt = self.prg.masivo_runner(self.queue, (np_total_stops,), None,
-                                     self.pass_list_g.data,
-                                     self.pass_arrival_list_g.data,
-                                     self.pass_alight_list_g.data,
-                                     self.buses_pass_list_g.data,
-                                     np_total_stops, np_total_buses, np_sim_time)
+      evt = self.prg.masivo_runner(self.queue, (np_total_stops,), None,
+                                   self.pass_list_g.data,
+                                   self.pass_arrival_list_g.data,
+                                   self.pass_alight_list_g.data,
+                                   self.buses_pass_list_g.data,
+                                   np_total_stops, np_total_buses, np_sim_time)
 
 
       evt.wait()
