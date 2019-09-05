@@ -35,7 +35,10 @@
 
 ###############################################################################
 # SOURCE VARS
-CCFILES := oclUtils.cpp
+CCFILES := oclUtils.cpp \
+	linkList.cpp \
+	mergeSort.cpp
+
 
 SRCDIR := src/
 

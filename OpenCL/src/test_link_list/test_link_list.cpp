@@ -3,180 +3,15 @@
 #include <time.h>       /* time */
 #include <string.h>
 
+#include "linkList.h"
+#include "mergeSort.h"
+
 #define STOPS_NUM                    300
 #define STOP_MAX_PASS               10000
 #define SIM_TIME                  6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
 
 #define PRINT_LIST      0
-
-#define BASE_CR(Record, TYPE, Field)  ((TYPE *) ((char *) (Record) - (char *) &(((TYPE *) 0)->Field)))
-
-typedef struct _LIST_ENTRY LIST_ENTRY;
-struct _LIST_ENTRY
-{
-  LIST_ENTRY *next;
-} __attribute__ ((packed));
-
-typedef struct {
-  LIST_ENTRY *head;
-  LIST_ENTRY *tail;
-}__attribute__ ((packed))
-LIST_HT;
-
-typedef struct {
-  unsigned int passId;
-  unsigned short origStop;
-  unsigned short destStop;
-  unsigned short arrivalTime;
-  unsigned short alightTime;
-  LIST_ENTRY listEntry;
-}__attribute__ ((packed))
-PASS_TYPE;
-
-#define PASS_FROM_THIS(a) BASE_CR (a, PASS_TYPE, listEntry)
-
-typedef struct {
-  unsigned int total;
-  LIST_HT listHt;
-}__attribute__ ((packed))
-SLS_TYPE;
-
-int
-listInit(
-  LIST_HT *listHt
-  )
-{
-  if(!listHt)
-    return -1;
-
-  listHt->head = NULL;
-  listHt->tail = NULL;
-  return 0;
-}
-
-int
-listInsert(
-  LIST_HT *listHt,
-  LIST_ENTRY *entry
-  )
-{
-  if(!listHt || !entry)
-    return -1;
-
-  if(!listHt->head){
-    listHt->head = entry;
-    listHt->tail = entry;
-    entry->next = NULL;
-    return 0;
-  }
-
-  listHt->tail->next = entry;
-  listHt->tail = entry;
-  entry->next = NULL;
-  return 0;
-}
-
-int
-listIsEmpty(
-  LIST_HT *listHt
-  )
-{
-  return (listHt->tail == NULL || listHt->head == NULL);
-}
-
-LIST_ENTRY*
-listGetFirstNode(
-  LIST_HT *listHt
-  )
-{
-  return listHt->head;
-}
-
-LIST_ENTRY*
-listGetNextNode(
-  LIST_ENTRY *Node
-  )
-{
-  return Node->next;
-}
-
-int
-listIsTheLast(
-  LIST_ENTRY *Node
-  )
-{
-  return(Node->next == NULL);
-}
-
-LIST_ENTRY*
-listPop(
-  LIST_HT *listHt
-  )
-{
-
-  LIST_ENTRY* popEntry;
-
-  popEntry = listHt->head;
-  listHt->head = listHt->head->next;
-
-  return popEntry;
-}
-
-
-
-int
-swap(
-  LIST_ENTRY *nodeA,
-  LIST_ENTRY *nodeB
-  )
-{
-  PASS_TYPE passTemp;
-
-  memcpy(&passTemp, PASS_FROM_THIS(nodeA),
-    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
-
-  memcpy(PASS_FROM_THIS(nodeA), PASS_FROM_THIS(nodeB),
-    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
-
-  memcpy(PASS_FROM_THIS(nodeB), &passTemp,
-    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
-
-  return 0;
-}
-
-
-
-int
-listSortByArrivalTime(
-  LIST_HT *listHt
-  )
-{
-  int swapped;
-  int i;
-  LIST_ENTRY *ptr1;
-  LIST_ENTRY *lptr = NULL;
-
-  if(listHt == NULL){
-    return -1;
-  }
-
-  do{
-    swapped = 0;
-    ptr1 = listHt->head;
-
-    while(ptr1->next != lptr){
-      if(PASS_FROM_THIS(ptr1)->arrivalTime > PASS_FROM_THIS(ptr1->next)->arrivalTime){
-        swap(ptr1, ptr1->next);
-        swapped = 1;
-      }
-      ptr1 = ptr1->next;
-    }
-    lptr = ptr1;
-  }
-  while(swapped);
-}
-
 
 
 PASS_TYPE passList[STOPS_NUM * STOP_MAX_PASS];
@@ -248,7 +83,7 @@ main()
   // Sort all arrival list stops
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
     printf("Sorting arrival list from stop %d/%d\n", i, STOPS_NUM - 1);
-    listSortByArrivalTime(&stopsArrival[i].listHt);
+    listBubleSortByArrivalTime(&stopsArrival[i].listHt);
   }
 
 
