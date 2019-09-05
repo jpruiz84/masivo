@@ -1,13 +1,14 @@
 #include <stdio.h>      /* printf, scanf, puts, NULL */
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+#include <string.h>
 
 #define STOPS_NUM                    3
-#define STOP_MAX_PASS                10
+#define STOP_MAX_PASS               10
 #define SIM_TIME                  6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
 
-#define PRINT_LIST      1
+#define PRINT_LIST      0
 
 #define BASE_CR(Record, TYPE, Field)  ((TYPE *) ((char *) (Record) - (char *) &(((TYPE *) 0)->Field)))
 
@@ -85,7 +86,9 @@ listIsEmpty(
 }
 
 LIST_ENTRY*
-listGetFirstNode(LIST_HT *listHt)
+listGetFirstNode(
+  LIST_HT *listHt
+  )
 {
   return listHt->head;
 }
@@ -105,6 +108,60 @@ listIsTheLast(
 {
   return(Node->next == NULL);
 }
+
+
+int
+swap(
+  LIST_ENTRY *nodeA,
+  LIST_ENTRY *nodeB
+  )
+{
+  PASS_TYPE passTemp;
+
+  memcpy(&passTemp, PASS_FROM_THIS(nodeA),
+    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
+
+  memcpy(PASS_FROM_THIS(nodeA), PASS_FROM_THIS(nodeB),
+    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
+
+  memcpy(PASS_FROM_THIS(nodeB), &passTemp,
+    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
+
+  return 0;
+}
+
+
+
+int
+listSortByArrivalTime(
+  LIST_HT *listHt
+  )
+{
+    int swapped;
+  int i;
+  LIST_ENTRY *ptr1;
+  LIST_ENTRY *lptr = NULL;
+
+  if(listHt == NULL){
+    return -1;
+  }
+
+  do{
+    swapped = 0;
+    ptr1 = listHt->head;
+
+    while(ptr1->next != lptr){
+      if(PASS_FROM_THIS(ptr1)->arrivalTime > PASS_FROM_THIS(ptr1->next)->arrivalTime){
+        swap(ptr1, ptr1->next);
+        swapped = 1;
+      }
+      ptr1 = ptr1->next;
+    }
+    lptr = ptr1;
+  }
+  while(swapped);
+}
+
 
 
 PASS_TYPE passList[STOPS_NUM * STOP_MAX_PASS];
@@ -162,14 +219,45 @@ main()
     node = listGetFirstNode(&stopsArrival[i].listHt);
     do {
       passEntry = PASS_FROM_THIS(node);
-      printf("Stop %d, passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d\n",
+      printf("Stop %d, passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, next: %d\n",
         i, passEntry->passId, passEntry->origStop, passEntry->destStop,
-        passEntry->arrivalTime, passEntry->alightTime);
+        passEntry->arrivalTime, passEntry->alightTime, passEntry->listEntry.next);
 
       node = listGetNextNode(node);
 
     }while(node);
   }
 #endif
+
+  // Sort all arrival list stops
+  for (unsigned int i = 0; i < STOPS_NUM; ++i) {
+    printf("Sorting arrival list from stop %d/%d\n", i, STOPS_NUM - 1);
+    listSortByArrivalTime(&stopsArrival[i].listHt);
+  }
+
+
+
+#if PRINT_LIST
+  for (unsigned int i = 0; i < STOPS_NUM; ++i) {
+    printf("\nstopsArrival[%d], head: 0x%08X, tail: head: 0x%08X\n",
+           i, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
+
+    if(listIsEmpty (&stopsArrival[i].listHt)){
+      break;
+    }
+
+    node = listGetFirstNode(&stopsArrival[i].listHt);
+    do {
+      passEntry = PASS_FROM_THIS(node);
+      printf("Stop %d, passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, next: %d\n",
+        i, passEntry->passId, passEntry->origStop, passEntry->destStop,
+        passEntry->arrivalTime, passEntry->alightTime, passEntry->listEntry.next);
+
+      node = listGetNextNode(node);
+
+    }while(node);
+  }
+#endif
+
   return 0;
 }
