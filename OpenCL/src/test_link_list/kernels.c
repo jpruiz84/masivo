@@ -168,22 +168,8 @@ __kernel void movePass(
 
   printf("head addr: %p\n", (unsigned long)stopsArrival[gid].listHt.head + offsetAddr);
 
-  printf("head: paddId %d, arrivalTime %d, addr: %p, next: %p\n",
-    PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->passId,
-    PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->arrivalTime,
-    &PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->listEntry,
-    PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->listEntry.next);
-
-
-  for (int i = 0; i < stopsArrival[gid].total; ++i) {
-    printf("(%d) paddId %d, arrivalTime %d, addr: %p, next: %p\n",
-      i, passList[i].passId, passList[i].arrivalTime, &passList[i].listEntry, passList[i].listEntry.next);
-
-  }
-
   printf("org stopsArrival\n");
   listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
-
   printf("org stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
   listPrintPass(&stopsQueue[gid].listHt, offsetAddr);
 
@@ -198,7 +184,7 @@ __kernel void movePass(
     listPop(&stopsArrival[gid].listHt, offsetAddr), offsetAddr);
 
 
-  printf("post stopsArrival\n");
+  printf("\n\npost stopsArrival\n");
   listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
 
   printf("post stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);

@@ -202,6 +202,14 @@ main()
                              STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
                              passList, 0, NULL, NULL);
 
+   ret = clEnqueueReadBuffer(command_queue, stopsArrivalMemObj, CL_TRUE, 0,
+                             STOPS_NUM * sizeof(SLS_TYPE),
+                             stopsArrival, 0, NULL, NULL);
+
+   ret = clEnqueueReadBuffer(command_queue, stopsQueueMemObj, CL_TRUE, 0,
+                             STOPS_NUM * sizeof(SLS_TYPE),
+                             stopsQueue, 0, NULL, NULL);
+
 
    printf("4 ret: %d\n", ret);
 
@@ -244,6 +252,7 @@ main()
 
 
 #if PRINT_LIST
+  printf("\n\nAFTER SIMULATION\n");
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
     printf("\nstopsArrival[%d], head: %p, tail: %p\n",
            i, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
