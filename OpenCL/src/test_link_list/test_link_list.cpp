@@ -9,7 +9,7 @@
 #include "mergeSort.h"
 
 #define STOPS_NUM                    1
-#define STOP_MAX_PASS               10
+#define STOP_MAX_PASS                5
 #define SIM_TIME                  6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
 #define PRINT_LIST      1
@@ -74,11 +74,13 @@ main()
     }
   }
 
+
 #if PRINT_LIST
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
     printf("\nstopsArrival[%d], head: %p, tail: %p\n",
            i, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
     listPrintPass(&stopsArrival[i].listHt);
+
   }
 #endif
 
@@ -177,11 +179,13 @@ main()
                              stopsQueue, 0, NULL, NULL);
 
 
+  unsigned long offsetHost = (unsigned long)passList;
   // Set the arguments of the kernel
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&passListMemObj);
   ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&stopsArrivalMemObj);
   ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&stopsQueueMemObj);
   ret = clSetKernelArg(kernel, 3, sizeof(cl_int), (void *)&simTime);
+  ret = clSetKernelArg(kernel, 4, sizeof(cl_ulong), (void *)&offsetHost);
 
 
   // Execute the OpenCL kernel on the list
