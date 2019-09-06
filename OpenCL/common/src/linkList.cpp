@@ -81,3 +81,49 @@ listPop(
 
   return popEntry;
 }
+
+int
+listUpdateTail(
+  LIST_HT *listHt
+  )
+{
+  LIST_ENTRY* cur = listHt->head;
+
+  while(!cur->next){
+    cur = cur->next;
+  }
+
+  listHt->tail = cur;
+
+
+  return 0;
+}
+
+int
+listPrintPass(
+  LIST_HT *listHt
+  )
+{
+
+  LIST_ENTRY *node;
+  PASS_TYPE *passEntry = NULL;
+
+  if(listIsEmpty (listHt)){
+    return -1;
+  }
+
+  node = listGetFirstNode(listHt);
+  do {
+    passEntry = PASS_FROM_THIS(node);
+    printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, cur: %p, next: %p\n",
+      passEntry->passId, passEntry->origStop, passEntry->destStop,
+      passEntry->arrivalTime, passEntry->alightTime, &passEntry->listEntry, passEntry->listEntry.next);
+
+    node = listGetNextNode(node);
+
+  }while(node);
+
+  return 0;
+}
+
+

@@ -79,5 +79,15 @@ listPop(
   LIST_HT *listHt
   );
 
+int
+listUpdateTail(
+  LIST_HT *listHt
+  );
+
+int
+listPrintPass(
+  LIST_HT *listHt
+  );
+
 
 #endif // LINKLIST_H_

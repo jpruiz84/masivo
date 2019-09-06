@@ -1,54 +1,97 @@
+#include <stdio.h>      /* printf, scanf, puts, NULL */
 #include "mergeSort.h"
 
-int
-swap(
-  LIST_ENTRY *nodeA,
-  LIST_ENTRY *nodeB
+/* function prototypes */
+Node* SortedMerge(Node* a, Node* b);
+void FrontBackSplit(Node* source,
+                    Node** frontRef, Node** backRef);
+
+void
+sortByArrivalTime(
+  LIST_HT* listHt
   )
 {
-  PASS_TYPE passTemp;
-
-  memcpy(&passTemp, PASS_FROM_THIS(nodeA),
-    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
-
-  memcpy(PASS_FROM_THIS(nodeA), PASS_FROM_THIS(nodeB),
-    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
-
-  memcpy(PASS_FROM_THIS(nodeB), &passTemp,
-    sizeof(PASS_TYPE) - sizeof(LIST_ENTRY));
-
-  return 0;
+  MergeSort(&listHt->head);
+  listUpdateTail(listHt);
 }
 
 
-
-int
-listBubleSortByArrivalTime(
-  LIST_HT *listHt
-  )
+/* sorts the linked list by changing next pointers (not data) */
+void
+MergeSort(Node **headRef)
 {
-  int swapped;
-  int i;
-  LIST_ENTRY *ptr1;
-  LIST_ENTRY *lptr = NULL;
+  Node *head = *headRef;
+  Node *a;
+  Node *b;
 
-  if(listHt == NULL){
-    return -1;
+  /* Base case -- length 0 or 1 */
+  if((head == NULL) || (head->next == NULL)){
+    return;
   }
 
-  do{
-    swapped = 0;
-    ptr1 = listHt->head;
+  /* Split head into 'a' and 'b' sublists */
+  FrontBackSplit(head, &a, &b);
 
-    while(ptr1->next != lptr){
-      if(PASS_FROM_THIS(ptr1)->arrivalTime > PASS_FROM_THIS(ptr1->next)->arrivalTime){
-        swap(ptr1, ptr1->next);
-        swapped = 1;
-      }
-      ptr1 = ptr1->next;
+  /* Recursively sort the sublists */
+  MergeSort(&a);
+  MergeSort(&b);
+
+  /* answer = merge the two sorted lists together */
+  *headRef = SortedMerge(a, b);
+}
+
+/* See https:// www.geeksforgeeks.org/?p=3622 for details of this
+ function */
+Node*
+SortedMerge(Node *a, Node *b)
+{
+  Node *result = NULL;
+
+  /* Base cases */
+  if(a == NULL)
+    return (b);
+  else if(b == NULL)
+    return (a);
+
+  /* Pick either a or b, and recur */
+  //if (a->data <= b->data) {
+  if(PASS_FROM_THIS(a)->arrivalTime <= PASS_FROM_THIS(b)->arrivalTime){
+    result = a;
+    result->next = SortedMerge(a->next, b);
+  }
+  else{
+    result = b;
+    result->next = SortedMerge(a, b->next);
+  }
+  return (result);
+}
+
+/* UTILITY FUNCTIONS */
+/* Split the nodes of the given list into front and back halves,
+ and return the two lists using the reference parameters.
+ If the length is odd, the extra node should go in the front list.
+ Uses the fast/slow pointer strategy. */
+void
+FrontBackSplit(Node *source,
+Node **frontRef, Node **backRef)
+{
+  Node *fast;
+  Node *slow;
+  slow = source;
+  fast = source->next;
+
+  /* Advance 'fast' two nodes, and advance 'slow' one node */
+  while(fast != NULL){
+    fast = fast->next;
+    if(fast != NULL){
+      slow = slow->next;
+      fast = fast->next;
     }
-    lptr = ptr1;
   }
-  while(swapped);
-}
 
+  /* 'slow' is before the midpoint in the list, so split it in two
+   at that point. */
+  *frontRef = source;
+  *backRef = slow->next;
+  slow->next = NULL;
+}
