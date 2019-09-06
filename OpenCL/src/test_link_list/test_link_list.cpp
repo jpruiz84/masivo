@@ -8,11 +8,12 @@
 #include "linkList.h"
 #include "mergeSort.h"
 
-#define STOPS_NUM                    1
-#define STOP_MAX_PASS                5
+#define STOPS_NUM                    3000
+#define STOP_MAX_PASS                10000
 #define SIM_TIME                  6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
-#define PRINT_LIST      1
+#define PRINT_LIST      0
+#define USE_OPENCL      1
 
 
 PASS_TYPE passList[STOPS_NUM * STOP_MAX_PASS];
@@ -100,7 +101,7 @@ main()
   }
 #endif
 
-#if 1
+#if USE_OPENCL
 
   // Load the kernel source code into the array source_str
   FILE *fp;
@@ -163,8 +164,6 @@ main()
   // Create the OpenCL kernel
   cl_kernel kernel = clCreateKernel(program, "movePass", &ret);
 
-  unsigned int simTime = 11;
-
   // Copy the passList to memory buffers
   ret = clEnqueueWriteBuffer(command_queue, passListMemObj, CL_TRUE, 0,
                              STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
@@ -184,16 +183,22 @@ main()
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&passListMemObj);
   ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&stopsArrivalMemObj);
   ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&stopsQueueMemObj);
-  ret = clSetKernelArg(kernel, 3, sizeof(cl_int), (void *)&simTime);
   ret = clSetKernelArg(kernel, 4, sizeof(cl_ulong), (void *)&offsetHost);
 
 
   // Execute the OpenCL kernel on the list
-  size_t global_item_size = 1; // Process the entire lists
+  size_t global_item_size = STOPS_NUM; // Process the entire lists
   size_t local_item_size = 1; // Divide work items into groups of 64
 
-  ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
-          &global_item_size, &local_item_size, 0, NULL, NULL);
+
+  procTime = clock();
+  for (unsigned int simTime = 0; simTime < SIM_TIME; ++simTime) {
+    ret = clSetKernelArg(kernel, 3, sizeof(cl_int), (void *)&simTime);
+    ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
+                                 &global_item_size, &local_item_size, 0, NULL, NULL);
+  }
+  procTime = clock() - procTime;
+
 
   printf("3 ret: %d\n", ret);
 
@@ -213,17 +218,19 @@ main()
 
    printf("4 ret: %d\n", ret);
 
+   printf("\nElapsed CL: %f seconds\n", (double)(procTime) / CLOCKS_PER_SEC);
+
 #endif
 
 
 
-#if 0
+#if (USE_OPENCL == 0)
 
   procTime = clock();
   // Run the simulation
-  for (unsigned int sim_time = 0; sim_time < SIM_TIME; ++sim_time) {
-    if((sim_time % 100) == 0){
-      printf("\rtime: %d   ", sim_time);
+  for (unsigned int simTime = 0; simTime < SIM_TIME; ++simTime) {
+    if((simTime % 100) == 0){
+      printf("\rtime: %d   ", simTime);
 
     }
 
@@ -232,7 +239,7 @@ main()
 
       if(stopsArrival[i].total > 0){
 
-        while(sim_time == PASS_FROM_THIS(stopsArrival[i].listHt.head)->arrivalTime){
+        while(simTime == PASS_FROM_THIS(stopsArrival[i].listHt.head)->arrivalTime){
 
           listInsert(&stopsQueue[i].listHt, listPop(&stopsArrival[i].listHt));
           stopsArrival[i].total --;
@@ -247,6 +254,7 @@ main()
   }
 
   procTime = clock() - procTime;
+  printf("\nElapsed C++: %f seconds\n", (double)(procTime) / CLOCKS_PER_SEC);
 #endif
 
 
@@ -270,7 +278,7 @@ main()
   }
 #endif
 
-  printf("\nElapsed: %f seconds\n", (double)(procTime) / CLOCKS_PER_SEC);
+
 
   return 0;
 }
