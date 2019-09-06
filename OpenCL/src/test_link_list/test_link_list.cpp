@@ -12,8 +12,7 @@
 #define STOP_MAX_PASS               10
 #define SIM_TIME                  6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
-
-#define PRINT_LIST      0
+#define PRINT_LIST      1
 
 
 PASS_TYPE passList[STOPS_NUM * STOP_MAX_PASS];
@@ -45,43 +44,6 @@ main()
   clock_t procTime;
 
   printf("\fStarting test link list.\n");
-
-
-  // Load the kernel source code into the array source_str
-  FILE *fp;
-  char *source_str;
-  size_t source_size;
-
-  fp = fopen("src/test_link_list/kernels.c", "r");
-  if (!fp) {
-      fprintf(stderr, "Failed to load kernel.\n");
-      exit(1);
-  }
-  source_str = (char*)malloc(MAX_SOURCE_SIZE);
-  source_size = fread( source_str, 1, MAX_SOURCE_SIZE, fp);
-  fclose( fp );
-
-
-  // Get platform and device information
-  cl_platform_id platform_id = NULL;
-  cl_device_id device_id = NULL;
-  cl_uint ret_num_devices;
-  cl_uint ret_num_platforms;
-  cl_int ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
-  ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_DEFAULT, 1,
-          &device_id, &ret_num_devices);
-
-  // Create an OpenCL context
-  cl_context context = clCreateContext( NULL, 1, &device_id, NULL, NULL, &ret);
-
-  // Create a command queue
-  cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
-
-  // Create memory buffers for the pass list
-  cl_mem passListMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY,
-                                         STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
-                                         NULL, &ret);
-
 
 
   /* initialize random seed: */
@@ -137,12 +99,54 @@ main()
 #endif
 
 #if 1
-  // Copy the passList to memory buffers
-  ret = clEnqueueWriteBuffer(command_queue, passListMemObj, CL_TRUE, 0,
-                             STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
-                             passList, 0, NULL, NULL);
+
+  // Load the kernel source code into the array source_str
+  FILE *fp;
+  char *source_str;
+  size_t source_size;
+
+  fp = fopen("src/test_link_list/kernels.c", "r");
+  if (!fp) {
+      fprintf(stderr, "Failed to load kernel.\n");
+      exit(1);
+  }
+  source_str = (char*)malloc(MAX_SOURCE_SIZE);
+  source_size = fread( source_str, 1, MAX_SOURCE_SIZE, fp);
+  fclose( fp );
+
+
+  // Get platform and device information
+  cl_platform_id platform_id = NULL;
+  cl_device_id device_id = NULL;
+  cl_uint ret_num_devices;
+  cl_uint ret_num_platforms;
+  cl_int ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
+  ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_DEFAULT, 1,
+          &device_id, &ret_num_devices);
+
+  // Create an OpenCL context
+  cl_context context = clCreateContext( NULL, 1, &device_id, NULL, NULL, &ret);
+
+  // Create a command queue
+  cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+
+  // Create memory buffers for the pass list
+  cl_mem passListMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
+                                         STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
+                                         NULL, &ret);
+
+  cl_mem stopsArrivalMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
+                                         STOPS_NUM * sizeof(SLS_TYPE),
+                                         NULL, &ret);
+
+  cl_mem stopsQueueMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
+                                         STOPS_NUM * sizeof(SLS_TYPE),
+                                         NULL, &ret);
+
+
 
   printf("1 ret: %d\n", ret);
+
   // Create a program from the kernel source
   cl_program program = clCreateProgramWithSource(context, 1,
           (const char **)&source_str, (const size_t *)&source_size, &ret);
@@ -155,11 +159,30 @@ main()
 
 
   // Create the OpenCL kernel
-  cl_kernel kernel = clCreateKernel(program, "test1", &ret);
+  cl_kernel kernel = clCreateKernel(program, "movePass", &ret);
+
+  unsigned int simTime = 11;
+
+  // Copy the passList to memory buffers
+  ret = clEnqueueWriteBuffer(command_queue, passListMemObj, CL_TRUE, 0,
+                             STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
+                             passList, 0, NULL, NULL);
+
+  ret = clEnqueueWriteBuffer(command_queue, stopsArrivalMemObj, CL_TRUE, 0,
+                             STOPS_NUM * sizeof(SLS_TYPE),
+                             stopsArrival, 0, NULL, NULL);
+
+  ret = clEnqueueWriteBuffer(command_queue, stopsQueueMemObj, CL_TRUE, 0,
+                             STOPS_NUM * sizeof(SLS_TYPE),
+                             stopsQueue, 0, NULL, NULL);
 
 
   // Set the arguments of the kernel
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&passListMemObj);
+  ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&stopsArrivalMemObj);
+  ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&stopsQueueMemObj);
+  ret = clSetKernelArg(kernel, 3, sizeof(cl_int), (void *)&simTime);
+
 
   // Execute the OpenCL kernel on the list
   size_t global_item_size = 1; // Process the entire lists
@@ -182,7 +205,7 @@ main()
 
 
 
-#if 1
+#if 0
 
   procTime = clock();
   // Run the simulation

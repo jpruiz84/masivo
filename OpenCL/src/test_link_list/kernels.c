@@ -1,22 +1,7 @@
-
-#ifndef __kernel
+#ifndef __OPENCL_VERSION__
 #define __kernel
-#endif
-
-#ifndef __global
 #define __global
 #endif
-
-
-typedef struct {
-  unsigned int    pass_id;
-  unsigned short  orig_stop;
-  unsigned short  dest_stop;
-  unsigned short  arrival_time;
-  unsigned short  alight_time;
-  unsigned char  status;
-} __attribute__ ((packed)) PassType;
-
 typedef struct _LIST_ENTRY LIST_ENTRY;
 struct _LIST_ENTRY
 {
@@ -38,14 +23,42 @@ typedef struct {
   LIST_ENTRY listEntry;
 }__attribute__ ((packed)) PASS_TYPE;
 
+typedef struct {
+  unsigned int total;
+  LIST_HT listHt;
+}__attribute__ ((packed))
+SLS_TYPE;
 
-__kernel void test1(
-    __global const PASS_TYPE *stops_in
+
+__kernel void movePass(
+    __global PASS_TYPE *passList,
+    __global SLS_TYPE *stopsArrival,
+    __global SLS_TYPE *stopsQueue,
+    unsigned int simTime
     )
 {
   int gid = get_global_id(0);
-  printf("hello host from kernel #%d\n", gid);
 
+  int i = 0;
+  printf("simTime: %d\n", simTime);
+  printf("(%d) paddId %d, arrivalTime %d\n", i, passList[i].passId, passList[i].arrivalTime);
+  passList[i].passId = 8484;
+  printf("(%d) paddId %d, arrivalTime %d\n", i, passList[i].passId, passList[i].arrivalTime);
+
+}
+
+
+__kernel void test1(
+    __global PASS_TYPE *passList
+    )
+{
+  int gid = get_global_id(0);
+
+  int i = 0;
+
+  printf("(%d) paddId %d, arrivalTime %d\n", i, passList[i].passId, passList[i].arrivalTime);
+  passList[i].passId = 8484;
+  printf("(%d) paddId %d, arrivalTime %d\n", i, passList[i].passId, passList[i].arrivalTime);
 
 }
 
