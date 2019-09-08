@@ -3,7 +3,7 @@
 #define __global
 #endif
 
-#define STOPS_NUM                    3
+#define STOPS_NUM                    1
 #define STOP_MAX_PASS                10
 
 typedef unsigned int    uint32_t;
@@ -163,34 +163,38 @@ SIMULATION_DATA;
 //
 
 __kernel void movePass(
-    __global PASS_TYPE *passList,
-    __global SLS_TYPE *stopsArrival,
-    __global SLS_TYPE *stopsQueue,
-    unsigned int simTime,
+    __global SIMULATION_DATA *data,
     unsigned long offsetHost
     )
 {
   int gid = get_global_id(0);
-  unsigned long offsetDev = (unsigned long)passList;
+  unsigned long offsetDev = (unsigned long)data;
   unsigned long offsetAddr = offsetDev - offsetHost;
 
+  __global SLS_TYPE *stopsArrival = data->stopsArrival;
+  __global SLS_TYPE *stopsQueue = data->stopsQueue;
 
 #if 1
   printf("\n\n************* START KERNEL *************************************\n");
-  printf("stopsArrival[gid].total: %d\n", stopsArrival[gid].total);
-  printf("stopsArrival[gid].listHt.head: %p\n", stopsArrival[gid].listHt.head);
-  printf("head addr: %p\n", (unsigned long)stopsArrival[gid].listHt.head + offsetAddr);
-  printf("org stopsArrival\n");
+
+  printf("simTime %d/%d\n", data->simTime, data->cMaxSimTime);
+
+  printf("org stopsArrival[%d], total: %d head %p, tail %p\n",
+    gid, stopsArrival[gid].total, stopsArrival[gid].listHt.head, stopsArrival[gid].listHt.tail);
+
+  printf("org data->stopsArrival[%d], total: %d head %p, tail %p\n",
+    gid, data->stopsArrival[gid].total, data->stopsArrival[gid].listHt.head, data->stopsArrival[gid].listHt.tail);
+
+
   listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
   printf("org stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
   listPrintPass(&stopsQueue[gid].listHt, offsetAddr);
-  printf("simTime: %d\n", simTime);
+  printf("simTime: %d\n", data->simTime);
 #endif
-
 
   if(stopsArrival[gid].total > 0){
 
-    while(simTime == PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->arrivalTime){
+    while(data->simTime == PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->arrivalTime){
       listInsert(&stopsQueue[gid].listHt, listPop(&stopsArrival[gid].listHt, offsetAddr), offsetAddr);
       stopsArrival[gid].total--;
       stopsQueue[gid].total++;
@@ -201,8 +205,8 @@ __kernel void movePass(
     }
   }
 
-#if 1
 
+#if 1
   printf("\n\npost stopsArrival\n");
   listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
 
@@ -211,7 +215,13 @@ __kernel void movePass(
   printf("************* END KERNEL **************************************\n\n");
 #endif
 
+  if(gid == STOPS_NUM - 1){
+    data->simTime ++;
+  }
+
 }
+
+
 
 __kernel void test3(
     __global PASS_TYPE *passList,
@@ -232,8 +242,6 @@ __kernel void test3(
 
   unsigned long offsetAddr = offsetDev - offsetHost;
   printf("offsetAddr: %p\n", offsetAddr);
-
-
 
   printf("stopsArrival[gid].total: %d\n", stopsArrival[gid].total);
 

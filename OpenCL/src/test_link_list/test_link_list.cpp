@@ -10,17 +10,15 @@
 
 #define STOPS_NUM                    1
 #define STOP_MAX_PASS                10
-#define SIM_TIME                  6000     // In secs
-#define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
+#define MAX_SIM_TIME               6000     // In secs
+#define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 #define PRINT_LIST      1
 #define USE_OPENCL      1
 
 
-PASS_TYPE passList[STOPS_NUM * STOP_MAX_PASS];
 
-SLS_TYPE stopsArrival[STOPS_NUM];
-SLS_TYPE stopsQueue[STOPS_NUM];
-SLS_TYPE stopsAlight[STOPS_NUM];
+
+
 
 typedef struct {
   PASS_TYPE  passList[STOPS_NUM * STOP_MAX_PASS];
@@ -33,7 +31,10 @@ typedef struct {
 SIMULATION_DATA;
 
 SIMULATION_DATA data;
-
+PASS_TYPE* passList;
+SLS_TYPE* stopsArrival;
+SLS_TYPE* stopsQueue;
+SLS_TYPE* stopsAlight;
 
 
 #define MAX_SOURCE_SIZE (0x100000)
@@ -57,6 +58,11 @@ main()
   clock_t procTime;
 
   printf("\fStarting test link list.\n");
+
+  passList = data.passList;
+  stopsArrival = data.stopsArrival;
+  stopsQueue = data.stopsQueue;
+  stopsAlight = data.stopsAlight;
 
 
   /* initialize random seed: */
@@ -118,6 +124,10 @@ main()
   size_t szGlobalWorkSize;        // 1D var for Total # of work items
   size_t szLocalWorkSize;       // 1D var for # of work items in the work group
 
+  data.simTime = 0;
+  data.cMaxSimTime = MAX_SIM_TIME;
+
+
   shrLog("Starting...\n\n# of elements (STOPS_NUM) \t= %i\n", STOPS_NUM);
   // set and log Global and Local work size dimensions
   szLocalWorkSize = 1;
@@ -157,19 +167,14 @@ main()
   // Create a command queue
   cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 
+  printf("sizeof(data): %d\n", sizeof(data));
+  printf("sizeof(data.passList): %d\n", sizeof(data.passList));
+  printf("sizeof(data.stopsArrival): %d\n", sizeof(data.stopsArrival));
+
   // Create memory buffers for the pass list
-  cl_mem passListMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
-                                         STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
+  cl_mem dataMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
+                                         sizeof(SIMULATION_DATA),
                                          NULL, &ret);
-
-  cl_mem stopsArrivalMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
-                                         STOPS_NUM * sizeof(SLS_TYPE),
-                                         NULL, &ret);
-
-  cl_mem stopsQueueMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
-                                         STOPS_NUM * sizeof(SLS_TYPE),
-                                         NULL, &ret);
-
 
 
   printf("1 ret: %d\n", ret);
@@ -189,29 +194,19 @@ main()
   cl_kernel kernel = clCreateKernel(program, "movePass", &ret);
 
   // Copy the passList to memory buffers
-  ret = clEnqueueWriteBuffer(command_queue, passListMemObj, CL_TRUE, 0,
-                             STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
-                             passList, 0, NULL, NULL);
-
-  ret = clEnqueueWriteBuffer(command_queue, stopsArrivalMemObj, CL_TRUE, 0,
-                             STOPS_NUM * sizeof(SLS_TYPE),
-                             stopsArrival, 0, NULL, NULL);
-
-  ret = clEnqueueWriteBuffer(command_queue, stopsQueueMemObj, CL_TRUE, 0,
-                             STOPS_NUM * sizeof(SLS_TYPE),
-                             stopsQueue, 0, NULL, NULL);
+  ret = clEnqueueWriteBuffer(command_queue, dataMemObj, CL_TRUE, 0,
+                             sizeof(SIMULATION_DATA),
+                             &data, 0, NULL, NULL);
 
 
-  unsigned long offsetHost = (unsigned long)passList;
+
+  unsigned long offsetHost = (unsigned long)&data;
   // Set the arguments of the kernel
-  ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&passListMemObj);
-  ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&stopsArrivalMemObj);
-  ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&stopsQueueMemObj);
-  ret = clSetKernelArg(kernel, 4, sizeof(cl_ulong), (void *)&offsetHost);
+  ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&dataMemObj);
+  ret = clSetKernelArg(kernel, 1, sizeof(cl_ulong), (void *)&offsetHost);
 
- procTime = clock();
-  for (unsigned int simTime = 0; simTime < 1; ++simTime) {
-    ret = clSetKernelArg(kernel, 3, sizeof(cl_int), (void *)&simTime);
+  procTime = clock();
+  for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
                                  &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
   }
@@ -221,17 +216,9 @@ main()
   printf("3 ret: %d\n", ret);
 
 
-   ret = clEnqueueReadBuffer(command_queue, passListMemObj, CL_TRUE, 0,
-                             STOPS_NUM * STOP_MAX_PASS * sizeof(PASS_TYPE),
-                             passList, 0, NULL, NULL);
-
-   ret = clEnqueueReadBuffer(command_queue, stopsArrivalMemObj, CL_TRUE, 0,
-                             STOPS_NUM * sizeof(SLS_TYPE),
-                             stopsArrival, 0, NULL, NULL);
-
-   ret = clEnqueueReadBuffer(command_queue, stopsQueueMemObj, CL_TRUE, 0,
-                             STOPS_NUM * sizeof(SLS_TYPE),
-                             stopsQueue, 0, NULL, NULL);
+   ret = clEnqueueReadBuffer(command_queue, dataMemObj, CL_TRUE, 0,
+                             sizeof(SIMULATION_DATA),
+                             &data, 0, NULL, NULL);
 
 
    printf("4 ret: %d\n", ret);
