@@ -3,6 +3,10 @@
 #define __global
 #endif
 
+#define STOPS_NUM                    3
+#define STOP_MAX_PASS                10
+
+typedef unsigned int    uint32_t;
 
 #define NULL 0
 #define BASE_CR(Record, TYPE, Field)  ((TYPE *) ((char *) (Record) - (char *) &(((TYPE *) 0)->Field)))
@@ -140,6 +144,24 @@ listPrintPass(
 }
 
 
+typedef struct {
+  PASS_TYPE  passList[STOPS_NUM * STOP_MAX_PASS];
+  SLS_TYPE   stopsArrival[STOPS_NUM];
+  SLS_TYPE   stopsQueue[STOPS_NUM];
+  SLS_TYPE   stopsAlight[STOPS_NUM];
+  uint32_t   simTime;
+  uint32_t   cMaxSimTime;
+}__attribute__ ((packed))
+SIMULATION_DATA;
+
+
+
+//    ___ _____ _   ___ _____ ___ _  _  ___     _  _____ ___ _  _ ___ _
+//   / __|_   _/_\ | _ \_   _|_ _| \| |/ __|   | |/ / __| _ \ \| | __| |
+//   \__ \ | |/ _ \|   / | |  | || .` | (_ |   | ' <| _||   / .` | _|| |__
+//   |___/ |_/_/ \_\_|_\ |_| |___|_|\_|\___|   |_|\_\___|_|_\_|\_|___|____|
+//
+
 __kernel void movePass(
     __global PASS_TYPE *passList,
     __global SLS_TYPE *stopsArrival,
@@ -153,7 +175,7 @@ __kernel void movePass(
   unsigned long offsetAddr = offsetDev - offsetHost;
 
 
-#if 0
+#if 1
   printf("\n\n************* START KERNEL *************************************\n");
   printf("stopsArrival[gid].total: %d\n", stopsArrival[gid].total);
   printf("stopsArrival[gid].listHt.head: %p\n", stopsArrival[gid].listHt.head);
@@ -179,7 +201,7 @@ __kernel void movePass(
     }
   }
 
-#if 0
+#if 1
 
   printf("\n\npost stopsArrival\n");
   listPrintPass(&stopsArrival[gid].listHt, offsetAddr);

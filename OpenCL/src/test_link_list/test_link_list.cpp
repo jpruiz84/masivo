@@ -8,11 +8,11 @@
 #include "linkList.h"
 #include "mergeSort.h"
 
-#define STOPS_NUM                    3000
-#define STOP_MAX_PASS                10000
+#define STOPS_NUM                    1
+#define STOP_MAX_PASS                10
 #define SIM_TIME                  6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME   3600     // In secs
-#define PRINT_LIST      0
+#define PRINT_LIST      1
 #define USE_OPENCL      1
 
 
@@ -21,6 +21,18 @@ PASS_TYPE passList[STOPS_NUM * STOP_MAX_PASS];
 SLS_TYPE stopsArrival[STOPS_NUM];
 SLS_TYPE stopsQueue[STOPS_NUM];
 SLS_TYPE stopsAlight[STOPS_NUM];
+
+typedef struct {
+  PASS_TYPE  passList[STOPS_NUM * STOP_MAX_PASS];
+  SLS_TYPE   stopsArrival[STOPS_NUM];
+  SLS_TYPE   stopsQueue[STOPS_NUM];
+  SLS_TYPE   stopsAlight[STOPS_NUM];
+  uint32_t   simTime;
+  uint32_t   cMaxSimTime;
+}__attribute__ ((packed))
+SIMULATION_DATA;
+
+SIMULATION_DATA data;
 
 
 
@@ -102,6 +114,18 @@ main()
 #endif
 
 #if USE_OPENCL
+
+  size_t szGlobalWorkSize;        // 1D var for Total # of work items
+  size_t szLocalWorkSize;       // 1D var for # of work items in the work group
+
+  shrLog("Starting...\n\n# of elements (STOPS_NUM) \t= %i\n", STOPS_NUM);
+  // set and log Global and Local work size dimensions
+  szLocalWorkSize = 1;
+  szGlobalWorkSize = shrRoundUp((int)szLocalWorkSize, STOPS_NUM);  // rounded up to the nearest multiple of the LocalWorkSize
+  printf("Global Work Size \t\t= %u\nLocal Work Size \t\t= %u\n# of Work Groups \t\t= %u\n\n",
+         szGlobalWorkSize, szLocalWorkSize, (szGlobalWorkSize % szLocalWorkSize + szGlobalWorkSize/szLocalWorkSize));
+
+
 
   // Load the kernel source code into the array source_str
   FILE *fp;
@@ -185,17 +209,11 @@ main()
   ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&stopsQueueMemObj);
   ret = clSetKernelArg(kernel, 4, sizeof(cl_ulong), (void *)&offsetHost);
 
-
-  // Execute the OpenCL kernel on the list
-  size_t global_item_size = STOPS_NUM; // Process the entire lists
-  size_t local_item_size = 1; // Divide work items into groups of 64
-
-
-  procTime = clock();
-  for (unsigned int simTime = 0; simTime < SIM_TIME; ++simTime) {
+ procTime = clock();
+  for (unsigned int simTime = 0; simTime < 1; ++simTime) {
     ret = clSetKernelArg(kernel, 3, sizeof(cl_int), (void *)&simTime);
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
-                                 &global_item_size, &local_item_size, 0, NULL, NULL);
+                                 &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
   }
   procTime = clock() - procTime;
 
