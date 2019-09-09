@@ -12,13 +12,8 @@
 #define STOP_MAX_PASS                10
 #define MAX_SIM_TIME               6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
-#define PRINT_LIST      1
+#define PRINT_LIST      0
 #define USE_OPENCL      1
-
-
-
-
-
 
 typedef struct {
   PASS_TYPE  passList[STOPS_NUM * STOP_MAX_PASS];
@@ -55,7 +50,8 @@ void print_build_log(cl_program program, cl_device_id dev) {
 int
 main()
 {
-  clock_t procTime;
+
+
 
   printf("\fStarting test link list.\n");
 
@@ -74,7 +70,6 @@ main()
     listInit(&stopsQueue[i].listHt);
     listInit(&stopsAlight[i].listHt);
   }
-
   // Filling the stops arrival list with random pass arrival time
   unsigned int passId = 0;
   for(unsigned int i = 0; i < STOPS_NUM; i++){
@@ -85,8 +80,8 @@ main()
       passList[i * STOP_MAX_PASS + j].arrivalTime =
           rand() % PASS_TOTAL_ARRIVAL_TIME;
       passList[i * STOP_MAX_PASS + j].alightTime = 0;
-      listInsert(&stopsArrival[i].listHt,
-                 &passList[i * STOP_MAX_PASS + j].listEntry);
+      listInsert(passList, &stopsArrival[i].listHt,
+                 i * STOP_MAX_PASS + j);
       stopsArrival[i].total ++;
 
       passId++;
@@ -96,9 +91,9 @@ main()
 
 #if PRINT_LIST
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
-    printf("\nstopsArrival[%d], head: %p, tail: %p\n",
-           i, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
-    listPrintPass(&stopsArrival[i].listHt);
+    printf("\nstopsArrival[%d], total: %d, head: %d, tail: %d\n",
+           i, stopsArrival[i].total, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
+    listPrintPass(passList, &stopsArrival[i].listHt);
 
   }
 #endif
@@ -106,33 +101,34 @@ main()
   // Sort all arrival list stops
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
     printf("Sorting arrival list from stop %d/%d\n", i, STOPS_NUM - 1);
-    sortByArrivalTime(&stopsArrival[i].listHt);
+    sortByArrivalTime(passList, &stopsArrival[i].listHt);
   }
 
 
 
 #if PRINT_LIST
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
-    printf("\nstopsArrival[%d], head: %p, tail: %p\n",
-           i, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
-    listPrintPass(&stopsArrival[i].listHt);
+    printf("\nstopsArrival[%d], total: %d, head: %d, tail: %d\n",
+           i, stopsArrival[i].total, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
+    listPrintPass(passList, &stopsArrival[i].listHt);
   }
 #endif
 
-#if USE_OPENCL
 
+
+#if USE_OPENCL
+  clock_t procTimeCL;
   size_t szGlobalWorkSize;        // 1D var for Total # of work items
   size_t szLocalWorkSize;       // 1D var for # of work items in the work group
 
   data.simTime = 0;
   data.cMaxSimTime = MAX_SIM_TIME;
 
-
   shrLog("Starting...\n\n# of elements (STOPS_NUM) \t= %i\n", STOPS_NUM);
   // set and log Global and Local work size dimensions
   szLocalWorkSize = 1;
   szGlobalWorkSize = shrRoundUp((int)szLocalWorkSize, STOPS_NUM);  // rounded up to the nearest multiple of the LocalWorkSize
-  printf("Global Work Size \t\t= %u\nLocal Work Size \t\t= %u\n# of Work Groups \t\t= %u\n\n",
+  printf("Global Work Size \t\t= %zu\nLocal Work Size \t\t= %zu\n# of Work Groups \t\t= %zu\n\n",
          szGlobalWorkSize, szLocalWorkSize, (szGlobalWorkSize % szLocalWorkSize + szGlobalWorkSize/szLocalWorkSize));
 
 
@@ -167,9 +163,10 @@ main()
   // Create a command queue
   cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 
-  printf("sizeof(data): %d\n", sizeof(data));
-  printf("sizeof(data.passList): %d\n", sizeof(data.passList));
-  printf("sizeof(data.stopsArrival): %d\n", sizeof(data.stopsArrival));
+  printf("sizeof(data): %zu\n", sizeof(data));
+  printf("sizeof(SIMULATION_DATA): %zu\n", sizeof(SIMULATION_DATA));
+  printf("sizeof(data.passList): %zu\n", sizeof(data.passList));
+  printf("sizeof(data.stopsArrival): %zu\n", sizeof(data.stopsArrival));
 
   // Create memory buffers for the pass list
   cl_mem dataMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
@@ -185,32 +182,34 @@ main()
 
   // Build the program
   ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
-
   printf("2 ret: %d\n", ret);
+
+  // Print build log
   print_build_log(program, device_id);
 
 
   // Create the OpenCL kernel
   cl_kernel kernel = clCreateKernel(program, "movePass", &ret);
 
-  // Copy the passList to memory buffers
+  // Copy the data to memory buffers
   ret = clEnqueueWriteBuffer(command_queue, dataMemObj, CL_TRUE, 0,
                              sizeof(SIMULATION_DATA),
                              &data, 0, NULL, NULL);
 
-
-
-  unsigned long offsetHost = (unsigned long)&data;
   // Set the arguments of the kernel
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&dataMemObj);
-  ret = clSetKernelArg(kernel, 1, sizeof(cl_ulong), (void *)&offsetHost);
 
-  procTime = clock();
+  szLocalWorkSize = 1;
+  szGlobalWorkSize = STOPS_NUM;
+
+  procTimeCL = clock();
   for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
+    ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
                                  &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
+
   }
-  procTime = clock() - procTime;
+  procTimeCL = clock() - procTimeCL;
 
 
   printf("3 ret: %d\n", ret);
@@ -223,30 +222,26 @@ main()
 
    printf("4 ret: %d\n", ret);
 
-   printf("\nElapsed CL: %f seconds\n", (double)(procTime) / CLOCKS_PER_SEC);
-
 #endif
 
 
 
 #if (USE_OPENCL == 0)
 
-  procTime = clock();
+   clock_t procTimeC;
+   procTimeC = clock();
   // Run the simulation
-  for (unsigned int simTime = 0; simTime < SIM_TIME; ++simTime) {
+  for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
     if((simTime % 100) == 0){
       printf("\rtime: %d   ", simTime);
 
     }
-
     // For each stop
     for (unsigned int i = 0; i < STOPS_NUM; ++i) {
 
       if(stopsArrival[i].total > 0){
-
-        while(simTime == PASS_FROM_THIS(stopsArrival[i].listHt.head)->arrivalTime){
-
-          listInsert(&stopsQueue[i].listHt, listPop(&stopsArrival[i].listHt));
+        while(simTime == passList[stopsArrival[i].listHt.head].arrivalTime){
+          listInsert(passList, &stopsQueue[i].listHt, listPop(passList, &stopsArrival[i].listHt));
           stopsArrival[i].total --;
           stopsQueue[i].total ++;
 
@@ -258,8 +253,8 @@ main()
     }
   }
 
-  procTime = clock() - procTime;
-  printf("\nElapsed C++: %f seconds\n", (double)(procTime) / CLOCKS_PER_SEC);
+  procTimeC = clock() - procTimeC;
+
 #endif
 
 
@@ -267,22 +262,37 @@ main()
 #if PRINT_LIST
   printf("\n\nAFTER SIMULATION\n");
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
-    printf("\nstopsArrival[%d], head: %p, tail: %p\n",
-           i, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
+    printf("\nstopsArrival[%d], total: %d, head: %d, tail: %d\n",
+           i, stopsArrival[i].total, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
 
-    listPrintPass(&stopsArrival[i].listHt);
+    listPrintPass(passList, &stopsArrival[i].listHt);
 
   }
 
 
   for (unsigned int i = 0; i < STOPS_NUM; ++i) {
-    printf("\nstopsQueue[%d], head: %p, tail: %p\n",
-           i, stopsQueue[i].listHt.head, stopsQueue[i].listHt.tail);
+    printf("\nstopsQueue[%d], total: %d, head: %d, tail: %d\n",
+           i, stopsQueue[i].total, stopsQueue[i].listHt.head, stopsQueue[i].listHt.tail);
 
-    listPrintPass(&stopsQueue[i].listHt);
+    listPrintPass(passList, &stopsQueue[i].listHt);
   }
 #endif
 
+  for (unsigned int i = 0; i < STOPS_NUM; ++i) {
+    printf("stopsArrival[%d], total: %d, head: %d, tail: %d\n",
+           i, stopsArrival[i].total, stopsArrival[i].listHt.head, stopsArrival[i].listHt.tail);
+
+  }
+
+
+  for (unsigned int i = 0; i < STOPS_NUM; ++i) {
+    printf("stopsQueue[%d], total: %d, head: %d, tail: %d\n",
+           i, stopsQueue[i].total, stopsQueue[i].listHt.head, stopsQueue[i].listHt.tail);
+
+  }
+
+  //printf("\nElapsed C++: %f seconds\n", (double)(procTimeC) / CLOCKS_PER_SEC);
+  printf("\nElapsed CL: %f seconds\n", (double)(procTimeCL) / CLOCKS_PER_SEC);
 
 
   return 0;

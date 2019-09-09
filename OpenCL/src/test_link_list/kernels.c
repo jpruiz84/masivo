@@ -3,8 +3,13 @@
 #define __global
 #endif
 
-#define STOPS_NUM                    1
-#define STOP_MAX_PASS                10
+#define STOPS_NUM               1
+#define STOP_MAX_PASS           10
+#define PRINT_LIST              0
+
+#define EMPTY_LIST   (unsigned int)4294967295
+#define END_LIST     (unsigned int)4294967295
+
 
 typedef unsigned int    uint32_t;
 
@@ -15,12 +20,12 @@ typedef unsigned int    uint32_t;
 typedef struct _LIST_ENTRY LIST_ENTRY;
 struct _LIST_ENTRY
 {
-  LIST_ENTRY *next;
+  unsigned int next;
 } __attribute__ ((packed));
 
 typedef struct {
-  LIST_ENTRY *head;
-  LIST_ENTRY *tail;
+  unsigned int head;
+  unsigned int tail;
 }__attribute__ ((packed))
 LIST_HT;
 
@@ -31,7 +36,9 @@ typedef struct {
   unsigned short arrivalTime;
   unsigned short alightTime;
   LIST_ENTRY listEntry;
-}__attribute__ ((packed)) PASS_TYPE;
+}__attribute__ ((packed))
+PASS_TYPE;
+
 
 typedef struct {
   unsigned int total;
@@ -39,106 +46,121 @@ typedef struct {
 }__attribute__ ((packed))
 SLS_TYPE;
 
-#define PASS_FROM_THIS(a) BASE_CR (a, PASS_TYPE, listEntry)
 
+int
+listInsert(
+  __global PASS_TYPE *pl,
+  __global LIST_HT *listHt,
+  unsigned int entry
+  )
+{
+
+  if(listHt->head == EMPTY_LIST){
+    listHt->head = entry;
+    listHt->tail = entry;
+    pl[entry].listEntry.next = END_LIST;
+    return 0;
+  }
+
+  pl[listHt->tail].listEntry.next = entry;
+  listHt->tail = entry;
+  pl[entry].listEntry.next = END_LIST;
+  return 0;
+}
 
 int
 listIsEmpty(
   __global LIST_HT *listHt
   )
 {
-  return (listHt->tail == NULL || listHt->head == NULL);
+  return (listHt->tail == EMPTY_LIST || listHt->head == EMPTY_LIST);
 }
 
-
-LIST_ENTRY*
-listPop(
-  __global LIST_HT *listHt,
-  unsigned long offsetAddr
+unsigned int
+listGetFirstNode(
+  __global LIST_HT *listHt
   )
 {
-  LIST_ENTRY* popEntry;
-  LIST_ENTRY* returnEntry;
+  return listHt->head;
+}
 
-  returnEntry = listHt->head;
-  popEntry = (LIST_ENTRY*)((unsigned long)listHt->head + offsetAddr);
-  listHt->head = popEntry->next;
-
-  return returnEntry;
+unsigned int
+listGetNextNode(
+  __global PASS_TYPE *pl,
+  unsigned int node
+  )
+{
+  return pl[node].listEntry.next;
 }
 
 int
-listInsert(
-  __global LIST_HT *listHt,
-  LIST_ENTRY *entry,
-  unsigned long offsetAddr
+listIsTheLast(
+  __global PASS_TYPE *pl,
+  unsigned int node
   )
 {
-  LIST_ENTRY* tailEntry;
-  LIST_ENTRY* entryFull;
 
-  entryFull = (LIST_ENTRY*)((unsigned long)entry + offsetAddr);
+  return(pl[node].listEntry.next == END_LIST);
+}
 
-  // If empty
-  if(!listHt->head){
-    listHt->head = entry;
-    listHt->tail = entry;
-    entryFull->next = NULL;
-    return 0;
+unsigned int
+listPop(
+  __global PASS_TYPE *pl,
+  __global LIST_HT *listHt
+  )
+{
+
+  unsigned int popEntry;
+
+  popEntry = listHt->head;
+  listHt->head = pl[listHt->head].listEntry.next;
+
+  return popEntry;
+}
+
+int
+listUpdateTail(
+  __global PASS_TYPE *pl,
+  __global LIST_HT *listHt
+  )
+{
+  unsigned int cur = listHt->head;
+
+
+  while(pl[cur].listEntry.next != END_LIST){
+    cur = pl[cur].listEntry.next;
   }
 
-  tailEntry = (LIST_ENTRY*)((unsigned long)listHt->tail+ offsetAddr);
+  listHt->tail = cur;
 
-  tailEntry->next = entry;
-  listHt->tail = entry;
-  entryFull->next = NULL;
+
   return 0;
-}
-
-LIST_ENTRY*
-listGetFirstNode(
-  __global LIST_HT *listHt,
-  unsigned long offsetAddr
-  )
-{
-  return (LIST_ENTRY*)((unsigned long)listHt->head + offsetAddr);
-}
-
-LIST_ENTRY*
-listGetNextNode(
-  LIST_ENTRY *Node,
-  unsigned long offsetAddr
-  )
-{
-  return (LIST_ENTRY*)((unsigned long)Node->next + offsetAddr);
 }
 
 int
 listPrintPass(
-  __global LIST_HT *listHt,
-  unsigned long offsetAddr
+  __global PASS_TYPE *pl,
+  __global LIST_HT *listHt
   )
 {
 
-  LIST_ENTRY *node;
-  PASS_TYPE *passEntry = NULL;
+  unsigned int node;
+  __global PASS_TYPE *passEntry = NULL;
 
   if(listIsEmpty (listHt)){
     return -1;
   }
 
-  node = listGetFirstNode(listHt, offsetAddr);
-  while(1){
-    passEntry = PASS_FROM_THIS(node);
-    printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, cur: %p, next: %p\n",
+  node = listGetFirstNode(listHt);
+  do {
+    passEntry = &pl[node];
+    printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, cur: %d, next: %d\n",
       passEntry->passId, passEntry->origStop, passEntry->destStop,
-      passEntry->arrivalTime, passEntry->alightTime, &passEntry->listEntry, passEntry->listEntry.next);
+      passEntry->arrivalTime, passEntry->alightTime,node, passEntry->listEntry.next);
 
-    if(!node->next){
-      break;
-    }
-    node = listGetNextNode(node, offsetAddr);
-  }
+    node = listGetNextNode(pl, node);
+
+  }while(node != EMPTY_LIST);
 
   return 0;
 }
@@ -164,38 +186,44 @@ SIMULATION_DATA;
 
 __kernel void movePass(
     __global SIMULATION_DATA *data,
-    unsigned long offsetHost
+    unsigned int simTime
     )
 {
   int gid = get_global_id(0);
-  unsigned long offsetDev = (unsigned long)data;
-  unsigned long offsetAddr = offsetDev - offsetHost;
 
   __global SLS_TYPE *stopsArrival = data->stopsArrival;
   __global SLS_TYPE *stopsQueue = data->stopsQueue;
 
-#if 1
+#if PRINT_LIST
   printf("\n\n************* START KERNEL *************************************\n");
 
-  printf("simTime %d/%d\n", data->simTime, data->cMaxSimTime);
 
-  printf("org stopsArrival[%d], total: %d head %p, tail %p\n",
+  printf("data: %p\n", data);
+  printf("sizeof(SIMULATION_DATA): %d\n", sizeof(SIMULATION_DATA));
+  printf("data->stopsArrival[0].listHt.head: %d\n", data->stopsArrival[0].listHt.head);
+  printf("data->stopsArrival[0].listHt.tail: %d\n", data->stopsArrival[0].listHt.tail);
+  printf("data->passList[0].passId: %d\n", data->passList[0].passId);
+  printf("&data->passList[0].passId: %p\n", &data->passList[0].passId);
+  printf("data->passList[1].passId: %d\n", data->passList[1].passId);
+
+
+
+
+  printf("simTime %d/%d\n", simTime, data->cMaxSimTime);
+
+  printf("org stopsArrival[%d], total: %d head %d, tail %d\n",
     gid, stopsArrival[gid].total, stopsArrival[gid].listHt.head, stopsArrival[gid].listHt.tail);
+  listPrintPass(data->passList, &stopsArrival[gid].listHt);
+  printf("org stopsQueue[%d], total: %d head %d, tail %d\n",
+    gid, stopsQueue[gid].total, stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
+  listPrintPass(data->passList, &stopsQueue[gid].listHt);
 
-  printf("org data->stopsArrival[%d], total: %d head %p, tail %p\n",
-    gid, data->stopsArrival[gid].total, data->stopsArrival[gid].listHt.head, data->stopsArrival[gid].listHt.tail);
-
-
-  listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
-  printf("org stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
-  listPrintPass(&stopsQueue[gid].listHt, offsetAddr);
-  printf("simTime: %d\n", data->simTime);
 #endif
 
   if(stopsArrival[gid].total > 0){
-
-    while(data->simTime == PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->arrivalTime){
-      listInsert(&stopsQueue[gid].listHt, listPop(&stopsArrival[gid].listHt, offsetAddr), offsetAddr);
+    while(simTime == data->passList[stopsArrival[gid].listHt.head].arrivalTime){
+      listInsert(data->passList, &stopsQueue[gid].listHt,
+                 listPop(data->passList, &stopsArrival[gid].listHt));
       stopsArrival[gid].total--;
       stopsQueue[gid].total++;
 
@@ -206,141 +234,17 @@ __kernel void movePass(
   }
 
 
-#if 1
-  printf("\n\npost stopsArrival\n");
-  listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
+#if PRINT_LIST
+  printf("post stopsArrival[%d], total: %d head %d, tail %d\n",
+    gid, stopsArrival[gid].total, stopsArrival[gid].listHt.head, stopsArrival[gid].listHt.tail);
+  listPrintPass(data->passList, &stopsArrival[gid].listHt);
 
-  printf("post stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
-  listPrintPass(&stopsQueue[gid].listHt, offsetAddr);
+  printf("post stopsQueue[%d], total: %d head %d, tail %d\n",
+    gid, stopsQueue[gid].total, stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
+  listPrintPass(data->passList, &stopsQueue[gid].listHt);
   printf("************* END KERNEL **************************************\n\n");
 #endif
 
-  if(gid == STOPS_NUM - 1){
-    data->simTime ++;
-  }
-
-}
-
-
-
-__kernel void test3(
-    __global PASS_TYPE *passList,
-    __global SLS_TYPE *stopsArrival,
-    __global SLS_TYPE *stopsQueue,
-    unsigned int simTime,
-    unsigned long offsetHost
-    )
-{
-  int gid = get_global_id(0);
-  unsigned long offsetDev = (unsigned long)passList;
-
-
-
-  printf("\n\nSTART KERNEL *************************************\n");
-  printf("offsetDev: %p\n", offsetDev);
-  printf("offsetHost: %p\n", offsetHost);
-
-  unsigned long offsetAddr = offsetDev - offsetHost;
-  printf("offsetAddr: %p\n", offsetAddr);
-
-  printf("stopsArrival[gid].total: %d\n", stopsArrival[gid].total);
-
-  printf("stopsArrival[gid].listHt.head: %p\n", stopsArrival[gid].listHt.head);
-
-
-  printf("head addr: %p\n", (unsigned long)stopsArrival[gid].listHt.head + offsetAddr);
-
-  printf("org stopsArrival\n");
-  listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
-  printf("org stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
-  listPrintPass(&stopsQueue[gid].listHt, offsetAddr);
-
-
-  listInsert(&stopsQueue[gid].listHt,
-    listPop(&stopsArrival[gid].listHt, offsetAddr), offsetAddr);
-
-  listInsert(&stopsQueue[gid].listHt,
-    listPop(&stopsArrival[gid].listHt, offsetAddr), offsetAddr);
-
-  listInsert(&stopsQueue[gid].listHt,
-    listPop(&stopsArrival[gid].listHt, offsetAddr), offsetAddr);
-
-
-  printf("\n\npost stopsArrival\n");
-  listPrintPass(&stopsArrival[gid].listHt, offsetAddr);
-
-  printf("post stopsQueue, head %p, tail %p\n", stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
-  listPrintPass(&stopsQueue[gid].listHt, offsetAddr);
-
-
-
-
-
-  printf("END KERNEL **************************************\n\n");
-
-}
-
-
-__kernel void test2(
-    __global PASS_TYPE *passList,
-    __global SLS_TYPE *stopsArrival,
-    __global SLS_TYPE *stopsQueue,
-    unsigned int simTime,
-    unsigned long offsetHost
-    )
-{
-  int gid = get_global_id(0);
-  unsigned long offsetDev = (unsigned long)passList;
-
-
-
-  printf("\n\nSTART KERNEL *************************************\n");
-  printf("offsetDev: %p\n", offsetDev);
-  printf("offsetHost: %p\n", offsetHost);
-
-  unsigned long offsetAddr = offsetDev - offsetHost;
-  printf("offsetAddr: %p\n", offsetAddr);
-
-
-
-  printf("stopsArrival[gid].total: %d\n", stopsArrival[gid].total);
-
-  printf("stopsArrival[gid].listHt.head: %p\n", stopsArrival[gid].listHt.head);
-
-
-  printf("head addr: %p\n", (unsigned long)stopsArrival[gid].listHt.head + offsetAddr);
-
-  printf("head: paddId %d, arrivalTime %d, addr: %p, next: %p\n",
-    PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->passId,
-    PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->arrivalTime,
-    &PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->listEntry,
-    PASS_FROM_THIS((unsigned long)stopsArrival[gid].listHt.head + offsetAddr)->listEntry.next);
-
-
-  for (int i = 0; i < stopsArrival[gid].total; ++i) {
-    printf("(%d) paddId %d, arrivalTime %d, addr: %p, next: %p\n",
-      i, passList[i].passId, passList[i].arrivalTime, &passList[i].listEntry, passList[i].listEntry.next);
-
-  }
-
-
-
-  printf("END KERNEL **************************************\n\n");
-
-}
-
-
-__kernel void test1(
-    __global PASS_TYPE *passList
-    )
-{
-  int gid = get_global_id(0);
-
-  int i = 0;
-
-  printf("(%d) paddId %d, arrivalTime %d\n", i, passList[i].passId, passList[i].arrivalTime);
-  passList[i].passId = 8484;
-  printf("(%d) paddId %d, arrivalTime %d\n", i, passList[i].passId, passList[i].arrivalTime);
 
 }
 
