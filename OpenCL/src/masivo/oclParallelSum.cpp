@@ -156,7 +156,7 @@ int main(int argc, char **argv)
     #ifdef MAC
         char* flags = "-cl-fast-relaxed-math -DMAC";
     #else
-        char* flags = "-cl-fast-relaxed-math";
+        //char* flags = "-cl-fast-relaxed-math";
     #endif
     ciErr1 = clBuildProgram(cpProgram, 0, NULL, NULL, NULL, NULL);
     shrLog("clBuildProgram...\n"); 
@@ -204,7 +204,8 @@ int main(int argc, char **argv)
     for (int i = 0; i < COUNTER_MAX; i++)
     {
         // Launch kernel
-        ciErr1 != clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1, NULL, &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
+        ciErr1 = clEnqueueNDRangeKernel(cqCommandQueue, ckKernel, 1,
+                                         NULL, &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
     
     }
 
@@ -234,7 +235,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < 3; i++)
     {
-     shrLog("Counters(%d): %d \n", i, *(int*)(counters + i*sizeof(int)));
+     shrLog("Counters(%d): %d \n", i, *(int*)((int*)counters + i*sizeof(int)));
     }
     
 
