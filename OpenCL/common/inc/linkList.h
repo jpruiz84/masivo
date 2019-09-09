@@ -5,6 +5,8 @@
 #include <stdio.h>      /* printf, scanf, puts, NULL */
 #include <stdlib.h>     /* srand, rand */
 
+#define EMPTY_LIST   (unsigned int)4294967295
+#define END_LIST     (unsigned int)4294967295
 
 
 #define BASE_CR(Record, TYPE, Field)  ((TYPE *) ((char *) (Record) - (char *) &(((TYPE *) 0)->Field)))
@@ -12,12 +14,12 @@
 typedef struct _LIST_ENTRY LIST_ENTRY;
 struct _LIST_ENTRY
 {
-  LIST_ENTRY *next;
+  unsigned int next;
 } __attribute__ ((packed));
 
 typedef struct {
-  LIST_ENTRY *head;
-  LIST_ENTRY *tail;
+  unsigned int head;
+  unsigned int tail;
 }__attribute__ ((packed))
 LIST_HT;
 
@@ -48,8 +50,9 @@ listInit(
 
 int
 listInsert(
+  PASS_TYPE *pl,
   LIST_HT *listHt,
-  LIST_ENTRY *entry
+  unsigned int entry
   );
 
 int
@@ -58,34 +61,39 @@ listIsEmpty(
   );
 
 
-LIST_ENTRY*
+unsigned int
 listGetFirstNode(
   LIST_HT *listHt
   );
 
 
-LIST_ENTRY*
+unsigned int
 listGetNextNode(
-  LIST_ENTRY *Node
+  PASS_TYPE *pl,
+  unsigned int node
   );
 
 int
 listIsTheLast(
-  LIST_ENTRY *Node
+  PASS_TYPE *pl,
+  unsigned int node
   );
 
-LIST_ENTRY*
+unsigned int
 listPop(
+  PASS_TYPE *pl,
   LIST_HT *listHt
   );
 
 int
 listUpdateTail(
+  PASS_TYPE *pl,
   LIST_HT *listHt
   );
 
 int
 listPrintPass(
+  PASS_TYPE *pl,
   LIST_HT *listHt
   );
 

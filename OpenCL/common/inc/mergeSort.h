@@ -5,31 +5,16 @@
 #include <string.h>
 #include "linkList.h"
 
-#define Node LIST_ENTRY
+#define Node unsigned int
 
-int
-swap(
-  LIST_ENTRY *nodeA,
-  LIST_ENTRY *nodeB
-  );
-
-
-int
-listBubleSortByArrivalTime(
-  LIST_HT *listHt
-  );
-
-
-
-int
-getLength(
-  LIST_ENTRY *listHt
-  );
-
-void MergeSort(Node** headRef);
+void
+MergeSort(
+  PASS_TYPE *pl,
+  Node *headRef);
 
 void
 sortByArrivalTime(
+  PASS_TYPE *pl,
   LIST_HT* listHt
   );
 

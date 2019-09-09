@@ -9,30 +9,29 @@ listInit(
   if(!listHt)
     return -1;
 
-  listHt->head = NULL;
-  listHt->tail = NULL;
+  listHt->head = EMPTY_LIST;
+  listHt->tail = EMPTY_LIST;
   return 0;
 }
 
 int
 listInsert(
+  PASS_TYPE *pl,
   LIST_HT *listHt,
-  LIST_ENTRY *entry
+  unsigned int entry
   )
 {
-  if(!listHt || !entry)
-    return -1;
 
-  if(!listHt->head){
+  if(listHt->head == EMPTY_LIST){
     listHt->head = entry;
     listHt->tail = entry;
-    entry->next = NULL;
+    pl[entry].listEntry.next = END_LIST;
     return 0;
   }
 
-  listHt->tail->next = entry;
+  pl[listHt->tail].listEntry.next = entry;
   listHt->tail = entry;
-  entry->next = NULL;
+  pl[entry].listEntry.next = END_LIST;
   return 0;
 }
 
@@ -41,10 +40,10 @@ listIsEmpty(
   LIST_HT *listHt
   )
 {
-  return (listHt->tail == NULL || listHt->head == NULL);
+  return (listHt->tail == EMPTY_LIST || listHt->head == EMPTY_LIST);
 }
 
-LIST_ENTRY*
+unsigned int
 listGetFirstNode(
   LIST_HT *listHt
   )
@@ -52,45 +51,51 @@ listGetFirstNode(
   return listHt->head;
 }
 
-LIST_ENTRY*
+unsigned int
 listGetNextNode(
-  LIST_ENTRY *Node
+  PASS_TYPE *pl,
+  unsigned int node
   )
 {
-  return Node->next;
+  return pl[node].listEntry.next;
 }
 
 int
 listIsTheLast(
-  LIST_ENTRY *Node
+  PASS_TYPE *pl,
+  unsigned int node
   )
 {
-  return(Node->next == NULL);
+
+  return(pl[node].listEntry.next == END_LIST);
 }
 
-LIST_ENTRY*
+unsigned int
 listPop(
+  PASS_TYPE *pl,
   LIST_HT *listHt
   )
 {
 
-  LIST_ENTRY* popEntry;
+  unsigned int popEntry;
 
   popEntry = listHt->head;
-  listHt->head = listHt->head->next;
+  listHt->head = pl[listHt->head].listEntry.next;
 
   return popEntry;
 }
 
 int
 listUpdateTail(
+  PASS_TYPE *pl,
   LIST_HT *listHt
   )
 {
-  LIST_ENTRY* cur = listHt->head;
+  unsigned int cur = listHt->head;
 
-  while(!cur->next){
-    cur = cur->next;
+
+  while(pl[cur].listEntry.next != END_LIST){
+    cur = pl[cur].listEntry.next;
   }
 
   listHt->tail = cur;
@@ -101,11 +106,12 @@ listUpdateTail(
 
 int
 listPrintPass(
+  PASS_TYPE *pl,
   LIST_HT *listHt
   )
 {
 
-  LIST_ENTRY *node;
+  unsigned int node;
   PASS_TYPE *passEntry = NULL;
 
   if(listIsEmpty (listHt)){
@@ -114,14 +120,14 @@ listPrintPass(
 
   node = listGetFirstNode(listHt);
   do {
-    passEntry = PASS_FROM_THIS(node);
-    printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, cur: %p, next: %p\n",
+    passEntry = &pl[node];
+    printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, cur: %d, next: %d\n",
       passEntry->passId, passEntry->origStop, passEntry->destStop,
-      passEntry->arrivalTime, passEntry->alightTime, &passEntry->listEntry, passEntry->listEntry.next);
+      passEntry->arrivalTime, passEntry->alightTime,node, passEntry->listEntry.next);
 
-    node = listGetNextNode(node);
+    node = listGetNextNode(pl, node);
 
-  }while(node);
+  }while(node != EMPTY_LIST);
 
   return 0;
 }

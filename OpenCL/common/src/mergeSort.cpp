@@ -2,66 +2,84 @@
 #include "mergeSort.h"
 
 /* function prototypes */
-Node* SortedMerge(Node* a, Node* b);
-void FrontBackSplit(Node* source,
-                    Node** frontRef, Node** backRef);
+Node
+SortedMerge(
+  PASS_TYPE *pl,
+  Node *a,
+  Node *b);
+
+void FrontBackSplit(
+  PASS_TYPE *pl,
+  Node source,
+  Node *frontRef,
+  Node *backRef);
 
 void
 sortByArrivalTime(
+  PASS_TYPE *pl,
   LIST_HT* listHt
   )
 {
-  MergeSort(&listHt->head);
-  listUpdateTail(listHt);
+  MergeSort(pl, &listHt->head);
+  listUpdateTail(pl, listHt);
 }
 
 
 /* sorts the linked list by changing next pointers (not data) */
 void
-MergeSort(Node **headRef)
+MergeSort(
+  PASS_TYPE *pl,
+  Node *headRef)
 {
-  Node *head = *headRef;
-  Node *a;
-  Node *b;
+  Node head = *headRef;
+  Node a;
+  Node b;
 
   /* Base case -- length 0 or 1 */
-  if((head == NULL) || (head->next == NULL)){
+  if((head == END_LIST) || (pl[head].listEntry.next == END_LIST)){
     return;
   }
 
+
   /* Split head into 'a' and 'b' sublists */
-  FrontBackSplit(head, &a, &b);
+  FrontBackSplit(pl, head, &a, &b);
 
   /* Recursively sort the sublists */
-  MergeSort(&a);
-  MergeSort(&b);
+  MergeSort(pl, &a);
+  MergeSort(pl, &b);
 
   /* answer = merge the two sorted lists together */
-  *headRef = SortedMerge(a, b);
+  *headRef = SortedMerge(pl, &a, &b);
 }
 
 /* See https:// www.geeksforgeeks.org/?p=3622 for details of this
  function */
-Node*
-SortedMerge(Node *a, Node *b)
+Node
+SortedMerge(
+  PASS_TYPE *pl,
+  Node *a,
+  Node *b
+  )
 {
-  Node *result = NULL;
+  Node result = END_LIST;
 
   /* Base cases */
-  if(a == NULL)
-    return (b);
-  else if(b == NULL)
-    return (a);
+  if(*a == END_LIST)
+    return (*b);
+  else if(*b == END_LIST)
+    return (*a);
 
   /* Pick either a or b, and recur */
   //if (a->data <= b->data) {
-  if(PASS_FROM_THIS(a)->arrivalTime <= PASS_FROM_THIS(b)->arrivalTime){
-    result = a;
-    result->next = SortedMerge(a->next, b);
+  if(pl[*a].arrivalTime <= pl[*b].arrivalTime){
+
+    result = *a;
+    pl[result].listEntry.next = SortedMerge(pl, &pl[*a].listEntry.next, b);
   }
   else{
-    result = b;
-    result->next = SortedMerge(a, b->next);
+
+    result = *b;
+    pl[result].listEntry.next = SortedMerge(pl, a, &pl[*b].listEntry.next);
   }
   return (result);
 }
@@ -72,26 +90,30 @@ SortedMerge(Node *a, Node *b)
  If the length is odd, the extra node should go in the front list.
  Uses the fast/slow pointer strategy. */
 void
-FrontBackSplit(Node *source,
-Node **frontRef, Node **backRef)
+FrontBackSplit(
+  PASS_TYPE *pl,
+  Node source,
+  Node *frontRef,
+  Node *backRef
+  )
 {
-  Node *fast;
-  Node *slow;
+  Node fast;
+  Node slow;
   slow = source;
-  fast = source->next;
+  fast = pl[source].listEntry.next;
 
   /* Advance 'fast' two nodes, and advance 'slow' one node */
-  while(fast != NULL){
-    fast = fast->next;
-    if(fast != NULL){
-      slow = slow->next;
-      fast = fast->next;
+  while(fast != END_LIST){
+    fast = pl[fast].listEntry.next;
+    if(fast != END_LIST){
+      slow = pl[slow].listEntry.next;
+      fast = pl[fast].listEntry.next;
     }
   }
 
   /* 'slow' is before the midpoint in the list, so split it in two
    at that point. */
   *frontRef = source;
-  *backRef = slow->next;
-  slow->next = NULL;
+  *backRef = pl[slow].listEntry.next;
+  pl[slow].listEntry.next = END_LIST;
 }
