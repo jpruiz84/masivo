@@ -12,6 +12,7 @@
 #define STOP_MAX_PASS                10000
 #define MAX_SIM_TIME               6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
+
 #define PRINT_LIST      0
 #define USE_OPENCL      1
 
@@ -118,9 +119,10 @@ main()
 #if USE_OPENCL
   clock_t procTimeCL;
   size_t szGlobalWorkSize;        // 1D var for Total # of work items
+  size_t szGlobalWorkSizeOne;        // 1D var for Total # of work items
   size_t szLocalWorkSize;       // 1D var for # of work items in the work group
 
-  data.simTime = 0;
+  data.simTime = EMPTY_LIST;
   data.cMaxSimTime = MAX_SIM_TIME;
 
   shrLog("Starting...\n\n# of elements (STOPS_NUM) \t= %i\n", STOPS_NUM);
@@ -189,6 +191,9 @@ main()
 
   // Create the OpenCL kernel
   cl_kernel kernel = clCreateKernel(program, "movePass", &ret);
+  printf("2a ret: %d\n", ret);
+  cl_kernel updateSim = clCreateKernel(program, "updateSim", &ret);
+  printf("2b ret: %d\n", ret);
 
   // Copy the data to memory buffers
   ret = clEnqueueWriteBuffer(command_queue, dataMemObj, CL_TRUE, 0,
@@ -198,21 +203,34 @@ main()
   // Set the arguments of the kernel
   unsigned int simTime = 0;
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&dataMemObj);
+  printf("3a ret: %d\n", ret);
+  ret = clSetKernelArg(updateSim, 0, sizeof(cl_mem), (void *)&dataMemObj);
+  printf("3b ret: %d\n", ret);
+
+  ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
+  ret = clSetKernelArg(updateSim, 1, sizeof(cl_uint), (void *)&simTime);
+
 
   szLocalWorkSize = 1;
   szGlobalWorkSize = STOPS_NUM;
+  szGlobalWorkSizeOne = 1;
+  cl_event updateSimEvent;
 
   procTimeCL = clock();
   for (simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
-    ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
+    ret = clEnqueueNDRangeKernel(command_queue, updateSim, 1, NULL,
+                                 &szGlobalWorkSizeOne, &szLocalWorkSize, 0, NULL, NULL);
+
+
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
                                  &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
+
 
   }
   procTimeCL = clock() - procTimeCL;
 
 
-  printf("3 ret: %d\n", ret);
+  printf("4 ret: %d\n", ret);
 
 
    ret = clEnqueueReadBuffer(command_queue, dataMemObj, CL_TRUE, 0,

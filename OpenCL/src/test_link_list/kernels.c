@@ -206,19 +206,21 @@ __kernel void movePass(
 
 
 
-  printf("simTime %d/%d\n", simTime, data->cMaxSimTime);
+  printf("simTime %d/%d, %d\n", simTime, data->cMaxSimTime, data->simTime);
 
   printf("org stopsArrival[%d], total: %d head %d, tail %d\n",
-    gid, stopsArrival[gid].total, stopsArrival[gid].listHt.head, stopsArrival[gid].listHt.tail);
-  listPrintPass(data->passList, &stopsArrival[gid].listHt);
+    gid, data->stopsArrival[gid].total, data->stopsArrival[gid].listHt.head,
+    data->stopsArrival[gid].listHt.tail);
+  listPrintPass(data->passList, &data->stopsArrival[gid].listHt);
   printf("org stopsQueue[%d], total: %d head %d, tail %d\n",
-    gid, stopsQueue[gid].total, stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
-  listPrintPass(data->passList, &stopsQueue[gid].listHt);
+    gid, data->stopsQueue[gid].total, data->stopsQueue[gid].listHt.head,
+    data->stopsQueue[gid].listHt.tail);
+  listPrintPass(data->passList, &data->stopsQueue[gid].listHt);
 
 #endif
 
   if(data->stopsArrival[gid].total > 0){
-    while(simTime == data->passList[data->stopsArrival[gid].listHt.head].arrivalTime){
+    while(data->simTime == data->passList[data->stopsArrival[gid].listHt.head].arrivalTime){
       listInsert(data->passList, &data->stopsQueue[gid].listHt,
                  listPop(data->passList, &data->stopsArrival[gid].listHt));
       data->stopsArrival[gid].total--;
@@ -233,15 +235,31 @@ __kernel void movePass(
 
 #if PRINT_LIST
   printf("post stopsArrival[%d], total: %d head %d, tail %d\n",
-    gid, stopsArrival[gid].total, stopsArrival[gid].listHt.head, stopsArrival[gid].listHt.tail);
-  listPrintPass(data->passList, &stopsArrival[gid].listHt);
+    gid, data->stopsArrival[gid].total, data->stopsArrival[gid].listHt.head,
+    data->stopsArrival[gid].listHt.tail);
+  listPrintPass(data->passList, &data->stopsArrival[gid].listHt);
 
   printf("post stopsQueue[%d], total: %d head %d, tail %d\n",
-    gid, stopsQueue[gid].total, stopsQueue[gid].listHt.head, stopsQueue[gid].listHt.tail);
-  listPrintPass(data->passList, &stopsQueue[gid].listHt);
+    gid, data->stopsQueue[gid].total, data->stopsQueue[gid].listHt.head,
+    data->stopsQueue[gid].listHt.tail);
+  listPrintPass(data->passList, &data->stopsQueue[gid].listHt);
   printf("************* END KERNEL **************************************\n\n");
 #endif
 
 
 }
 
+
+__kernel void updateSim(
+    __global SIMULATION_DATA *data,
+    unsigned int simTime
+    )
+{
+  int gid = get_global_id(0);
+  //printf("\n\n************* START KERNEL UPDATE SIM ***************************\n");
+  data->simTime ++;
+  //printf("simTime updated to: %d\n", data->simTime);
+  //printf("\n\n************* END KERNEL UPDATE SIM ***************************\n");
+
+
+}
