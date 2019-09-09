@@ -3,7 +3,7 @@
 #define __global
 #endif
 
-#define STOPS_NUM               300
+#define STOPS_NUM               3000
 #define STOP_MAX_PASS           10000
 #define PRINT_LIST              0
 

@@ -14,7 +14,7 @@
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 
 #define PRINT_LIST      0
-#define USE_OPENCL      1
+#define USE_OPENCL      0
 
 typedef struct {
   PASS_TYPE  passList[STOPS_NUM * STOP_MAX_PASS];
@@ -77,8 +77,8 @@ main()
       passList[i * STOP_MAX_PASS + j].passId = passId;
       passList[i * STOP_MAX_PASS + j].origStop = i;
       passList[i * STOP_MAX_PASS + j].destStop = STOPS_NUM - 1;
-      passList[i * STOP_MAX_PASS + j].arrivalTime =
-          rand() % PASS_TOTAL_ARRIVAL_TIME;
+      passList[i * STOP_MAX_PASS + j].arrivalTime = j / 3;
+
       passList[i * STOP_MAX_PASS + j].alightTime = 0;
       listInsert(passList, &stopsArrival[i].listHt,
                  i * STOP_MAX_PASS + j);
@@ -309,8 +309,12 @@ main()
 
   }
 
-  //printf("\nElapsed C++: %f seconds\n", (double)(procTimeC) / CLOCKS_PER_SEC);
+#if USE_OPENCL
   printf("\nElapsed CL: %f seconds\n", (double)(procTimeCL) / CLOCKS_PER_SEC);
+#else
+  printf("\nElapsed C++: %f seconds\n", (double)(procTimeC) / CLOCKS_PER_SEC);
+#endif
+
 
 
   return 0;
