@@ -8,8 +8,8 @@
 #include "linkList.h"
 #include "mergeSort.h"
 
-#define STOPS_NUM                    1
-#define STOP_MAX_PASS                10
+#define STOPS_NUM                    300
+#define STOP_MAX_PASS                10000
 #define MAX_SIM_TIME               6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 #define PRINT_LIST      0
@@ -22,8 +22,7 @@ typedef struct {
   SLS_TYPE   stopsAlight[STOPS_NUM];
   uint32_t   simTime;
   uint32_t   cMaxSimTime;
-}__attribute__ ((packed))
-SIMULATION_DATA;
+} SIMULATION_DATA;
 
 SIMULATION_DATA data;
 PASS_TYPE* passList;
@@ -197,13 +196,14 @@ main()
                              &data, 0, NULL, NULL);
 
   // Set the arguments of the kernel
+  unsigned int simTime = 0;
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&dataMemObj);
 
   szLocalWorkSize = 1;
   szGlobalWorkSize = STOPS_NUM;
 
   procTimeCL = clock();
-  for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
+  for (simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
     ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
                                  &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);

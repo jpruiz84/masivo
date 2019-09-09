@@ -3,8 +3,8 @@
 #define __global
 #endif
 
-#define STOPS_NUM               1
-#define STOP_MAX_PASS           10
+#define STOPS_NUM               300
+#define STOP_MAX_PASS           10000
 #define PRINT_LIST              0
 
 #define EMPTY_LIST   (unsigned int)4294967295
@@ -21,12 +21,12 @@ typedef struct _LIST_ENTRY LIST_ENTRY;
 struct _LIST_ENTRY
 {
   unsigned int next;
-} __attribute__ ((packed));
+};
 
 typedef struct {
   unsigned int head;
   unsigned int tail;
-}__attribute__ ((packed))
+}
 LIST_HT;
 
 typedef struct {
@@ -36,14 +36,14 @@ typedef struct {
   unsigned short arrivalTime;
   unsigned short alightTime;
   LIST_ENTRY listEntry;
-}__attribute__ ((packed))
+}
 PASS_TYPE;
 
 
 typedef struct {
   unsigned int total;
   LIST_HT listHt;
-}__attribute__ ((packed))
+}
 SLS_TYPE;
 
 
@@ -191,9 +191,6 @@ __kernel void movePass(
 {
   int gid = get_global_id(0);
 
-  __global SLS_TYPE *stopsArrival = data->stopsArrival;
-  __global SLS_TYPE *stopsQueue = data->stopsQueue;
-
 #if PRINT_LIST
   printf("\n\n************* START KERNEL *************************************\n");
 
@@ -220,14 +217,14 @@ __kernel void movePass(
 
 #endif
 
-  if(stopsArrival[gid].total > 0){
-    while(simTime == data->passList[stopsArrival[gid].listHt.head].arrivalTime){
-      listInsert(data->passList, &stopsQueue[gid].listHt,
-                 listPop(data->passList, &stopsArrival[gid].listHt));
-      stopsArrival[gid].total--;
-      stopsQueue[gid].total++;
+  if(data->stopsArrival[gid].total > 0){
+    while(simTime == data->passList[data->stopsArrival[gid].listHt.head].arrivalTime){
+      listInsert(data->passList, &data->stopsQueue[gid].listHt,
+                 listPop(data->passList, &data->stopsArrival[gid].listHt));
+      data->stopsArrival[gid].total--;
+      data->stopsQueue[gid].total++;
 
-      if(stopsArrival[gid].total == 0){
+      if(data->stopsArrival[gid].total == 0){
         break;
       }
     }

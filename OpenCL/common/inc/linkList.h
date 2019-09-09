@@ -15,13 +15,12 @@ typedef struct _LIST_ENTRY LIST_ENTRY;
 struct _LIST_ENTRY
 {
   unsigned int next;
-} __attribute__ ((packed));
+};
 
 typedef struct {
   unsigned int head;
   unsigned int tail;
-}__attribute__ ((packed))
-LIST_HT;
+} LIST_HT;
 
 typedef struct {
   unsigned int passId;
@@ -30,15 +29,13 @@ typedef struct {
   unsigned short arrivalTime;
   unsigned short alightTime;
   LIST_ENTRY listEntry;
-}__attribute__ ((packed))
-PASS_TYPE;
+} PASS_TYPE;
 
 
 typedef struct {
   unsigned int total;
   LIST_HT listHt;
-}__attribute__ ((packed))
-SLS_TYPE;
+} SLS_TYPE;
 
 #define PASS_FROM_THIS(a) BASE_CR (a, PASS_TYPE, listEntry)
 
