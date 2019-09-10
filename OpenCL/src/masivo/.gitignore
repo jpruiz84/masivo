@@ -1,0 +1,7 @@
+# Build folders
+./obj
+
+# Results logs
+*.txt
+
+
