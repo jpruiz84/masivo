@@ -51,6 +51,11 @@ __kernel void test1(
 {
   int i = get_global_id(0);
 
+  // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
+  if (i >= STOPS_NUM){
+    return;
+  }
+
 #if PRINT_LIST
   printf("\n\n************* START KERNEL *************************************\n");
   printf("simTime: %d\n", simTime);
@@ -68,15 +73,36 @@ __kernel void test1(
   }
 #endif
 
-  unsigned long iter = 0;
-  for (int j = 0; j < STOP_MAX_PASS; ++j) {
-    if(simTime > stopsArrivalList[i].pass[j].arrivalTime){
-      stopsArrivalList[i].pass[j].status = PASS_STATUS_ARRIVED;
+  stopsArrivalList[i].wIndex = 0;
+  for (unsigned iSimTime = 0; iSimTime < simTime; ++iSimTime) {
+    while(1){
+      if(simTime == stopsArrivalList[i].pass[stopsArrivalList[i].wIndex].arrivalTime){
+        stopsArrivalList[i].pass[stopsArrivalList[i].wIndex].status = PASS_STATUS_ARRIVED;
+        stopsArrivalList[i].wIndex ++;
+        if(stopsArrivalList[i].wIndex >= stopsArrivalList[i].total){
+          break;
+        }
+      }else{
+        break;
+      }
     }
-    iter ++;
   }
 
+
+
 #if PRINT_LIST
+  printf("\nPost stop %d, total %d\n" ,
+         stopsArrivalList[i].stopNum, stopsArrivalList[i].total);
+  for (int j = 0; j < STOP_MAX_PASS; ++j) {
+    printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, status %d\n",
+           stopsArrivalList[i].pass[j].passId,
+           stopsArrivalList[i].pass[j].origStop,
+           stopsArrivalList[i].pass[j].destStop,
+           stopsArrivalList[i].pass[j].arrivalTime,
+           stopsArrivalList[i].pass[j].alightTime,
+           stopsArrivalList[i].pass[j].status);
+  }
+
   printf("************* END KERNEL **************************************\n\n");
 #endif
 

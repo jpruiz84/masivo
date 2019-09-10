@@ -11,7 +11,7 @@
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 
 #define PRINT_LIST      0
-#define USE_OPENCL      0
+#define USE_OPENCL      1
 
 typedef struct {
   unsigned int    passId;
@@ -73,11 +73,13 @@ main()
   for (int i = 0; i < STOPS_NUM; ++i) {
     printf("Generating stop: %d\n" , i);
     stopsArrivalList[i].stopNum = i;
+    stopsArrivalList[i].wIndex = 0;
     for (int j = 0; j < STOP_MAX_PASS; ++j) {
       stopsArrivalList[i].pass[j].passId = passId;
       stopsArrivalList[i].pass[j].origStop = i;
       stopsArrivalList[i].pass[j].destStop = STOPS_NUM - 1;
-      stopsArrivalList[i].pass[j].arrivalTime = rand() % PASS_TOTAL_ARRIVAL_TIME;;
+      //stopsArrivalList[i].pass[j].arrivalTime = rand() % PASS_TOTAL_ARRIVAL_TIME;
+      stopsArrivalList[i].pass[j].arrivalTime = j/3;
       stopsArrivalList[i].pass[j].alightTime = 0;
       stopsArrivalList[i].pass[j].status = PASS_STATUS_TO_ARRIVE;
       stopsArrivalList[i].total ++;
@@ -113,10 +115,13 @@ main()
 
   shrLog("Starting...\n\n# of elements (STOPS_NUM) \t= %i\n", STOPS_NUM);
   // set and log Global and Local work size dimensions
-  szLocalWorkSize = 1;
-  szGlobalWorkSize = shrRoundUp((int)szLocalWorkSize, STOPS_NUM);  // rounded up to the nearest multiple of the LocalWorkSize
-  printf("Global Work Size \t\t= %zu\nLocal Work Size \t\t= %zu\n# of Work Groups \t\t= %zu\n\n",
-         szGlobalWorkSize, szLocalWorkSize, (szGlobalWorkSize % szLocalWorkSize + szGlobalWorkSize/szLocalWorkSize));
+  szLocalWorkSize = 300;
+  szGlobalWorkSize = shrRoundUp((int) szLocalWorkSize, STOPS_NUM); // rounded up to the nearest multiple of the LocalWorkSize
+  shrLog(
+      "Global Work Size \t\t= %u\nLocal Work Size \t\t= %u\n# of Work Groups \t\t= %u\n\n",
+      szGlobalWorkSize,
+      szLocalWorkSize,
+      (szGlobalWorkSize % szLocalWorkSize + szGlobalWorkSize / szLocalWorkSize));
 
 
 
@@ -176,42 +181,38 @@ main()
   cl_kernel kernel = clCreateKernel(program, "test1", &ret);
   printf("2a ret: %d\n", ret);
 
+
+
   // Copy the data to memory buffers
   ret = clEnqueueWriteBuffer(command_queue, stopsArrivalListMemObj, CL_TRUE, 0,
                              sizeof(SL_TYPE) * STOPS_NUM,
                              stopsArrivalList, 0, NULL, NULL);
 
   // Set the arguments of the kernel
-  unsigned int simTime = 0;
+  unsigned int simTime = MAX_SIM_TIME;
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&stopsArrivalListMemObj);
   printf("3a ret: %d\n", ret);
 
 
-  szLocalWorkSize = 1;
-  szGlobalWorkSize = STOPS_NUM;
-  szGlobalWorkSizeOne = 1;
-  cl_event updateSimEvent;
+  ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
 
   procTimeCL = clock();
-  for (simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
-    ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
-    ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
-                                 &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
+  ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
+                               &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
 
 
-  }
+  clFinish(command_queue);
+
   procTimeCL = clock() - procTimeCL;
-
 
   printf("4 ret: %d\n", ret);
 
 
-   ret = clEnqueueReadBuffer(command_queue, stopsArrivalListMemObj, CL_TRUE, 0,
-                             sizeof(SL_TYPE) * STOPS_NUM,
-                             stopsArrivalList, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(command_queue, stopsArrivalListMemObj, CL_TRUE, 0,
+                           sizeof(SL_TYPE) * STOPS_NUM,
+                           stopsArrivalList, 0, NULL, NULL);
 
-
-   printf("4 ret: %d\n", ret);
+  printf("5 ret: %d\n", ret);
 
 #endif
 
@@ -219,15 +220,26 @@ main()
   clock_t procTimeC;
   procTimeC = clock();
 
-  unsigned int temp;
   unsigned long iter = 0;
+
   for (int i = 0; i < STOPS_NUM; ++i) {
+
+    stopsArrivalList[i].wIndex = 0;
     for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
-      for (int j = 0; j < STOP_MAX_PASS; ++j) {
-        if(simTime > stopsArrivalList[i].pass[j].arrivalTime){
-          stopsArrivalList[i].pass[j].status = PASS_STATUS_ARRIVED;
+
+      while(1){
+        if(simTime == stopsArrivalList[i].pass[stopsArrivalList[i].wIndex].arrivalTime){
+          stopsArrivalList[i].pass[stopsArrivalList[i].wIndex].status = PASS_STATUS_ARRIVED;
+          stopsArrivalList[i].wIndex ++;
+          if(stopsArrivalList[i].wIndex >= stopsArrivalList[i].total){
+            break;
+          }
+          iter ++;
+        }else{
+          break;
         }
-        iter ++;
+
+
       }
     }
   }
@@ -237,8 +249,8 @@ main()
 
 #if PRINT_LIST
   for (int i = 0; i < STOPS_NUM; ++i) {
-    printf("\nStop %d, total %d\n" ,
-           stopsArrivalList[i].stopNum, stopsArrivalList[i].total);
+    printf("\nPost stop %d, total %d, wIndex %d\n" ,
+           stopsArrivalList[i].stopNum, stopsArrivalList[i].total, stopsArrivalList[i].wIndex);
 
     for (int j = 0; j < STOP_MAX_PASS; ++j) {
       printf("passId %d, origStop %d, destStop %d, arrivalTime %d, alightTime %d, status %d\n",
