@@ -32,8 +32,6 @@ const char *cSourceFile = "VarInc.c";
 
 // Host buffers for demo
 // *********************************************************************
-void *counters;
-void *counters2;        // Host buffers for OpenCL test
 
 // OpenCL Vars
 cl_context cxGPUContext;        // OpenCL context
@@ -56,9 +54,13 @@ const char *cExecutableName = NULL;
 shrBOOL bNoPrompt = shrFALSE;
 
 #define COUNTER_MAX  1000000
-#define COUNTER_NUM      300
+#define COUNTER_NUM      100
 unsigned int counterNum = COUNTER_NUM;
 unsigned int counterMax = COUNTER_MAX;
+
+void *counters;
+unsigned int counters2[COUNTER_NUM];        // Host buffers for OpenCL test
+
 
 void
 Cleanup(int argc, char **argv, int iExitCode);
@@ -95,7 +97,6 @@ main(int argc, char **argv)
   // Allocate and initialize host arrays
   shrLog("Allocate and Init Host Mem...\n");
   counters = (void*) malloc(sizeof(cl_int) * szGlobalWorkSize);
-  counters2 = (void*) malloc(sizeof(cl_int) * szGlobalWorkSize);
 
   //Get an OpenCL platform
   ciErr1 = clGetPlatformIDs(1, &cpPlatform, NULL);
@@ -257,13 +258,13 @@ main(int argc, char **argv)
 
   for(int i = 0; i < COUNTER_MAX; i++){
     for(int j = 0; j < COUNTER_NUM; j++){
-      ((int*)counters2)[j] = ((int*)counters2)[j] + 1;
+      counters2[j] = counters2[j] + 1;
     }
   }
   procTimeC = clock() - procTimeC;
 
   for(int i = 0; i < 3; i++){
-    shrLog("counters2(%d): %d \n", i, *(int*) (counters2 + i * sizeof(int)));
+    shrLog("counters2(%d): %d \n", i, counters2[i]);
   }
 
   printf("\nElapsed CL: %f seconds\n", (double)(procTimeCL) / CLOCKS_PER_SEC);
