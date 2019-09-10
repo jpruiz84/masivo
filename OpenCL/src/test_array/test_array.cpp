@@ -5,7 +5,7 @@
 #include <oclUtils.h>
 #include <shrQATest.h>
 
-#define STOPS_NUM                    300
+#define STOPS_NUM                    10000
 #define STOP_MAX_PASS                10000
 #define MAX_SIM_TIME               8*3600     // In secs, 8 hours
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
@@ -115,7 +115,7 @@ main()
 
   shrLog("Starting...\n\n# of elements (STOPS_NUM) \t= %i\n", STOPS_NUM);
   // set and log Global and Local work size dimensions
-  szLocalWorkSize = 300;
+  szLocalWorkSize = 1000;
   szGlobalWorkSize = shrRoundUp((int) szLocalWorkSize, STOPS_NUM); // rounded up to the nearest multiple of the LocalWorkSize
   shrLog(
       "Global Work Size \t\t= %u\nLocal Work Size \t\t= %u\n# of Work Groups \t\t= %u\n\n",
