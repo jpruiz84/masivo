@@ -11,7 +11,7 @@
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 
 #define PRINT_LIST      0
-#define USE_OPENCL      1
+#define USE_OPENCL      0
 
 typedef struct {
   unsigned int    passId;
