@@ -5,13 +5,13 @@
 #include <oclUtils.h>
 #include <shrQATest.h>
 
-#define STOPS_NUM                    30
+#define STOPS_NUM                    300
 #define STOP_MAX_PASS                10000
 #define MAX_SIM_TIME               6000     // In secs
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 
-#define PRINT_LIST      1
-#define USE_OPENCL      1
+#define PRINT_LIST      0
+#define USE_OPENCL      0
 
 typedef struct {
   unsigned int    passId;
@@ -193,7 +193,8 @@ main()
   cl_event updateSimEvent;
 
   procTimeCL = clock();
-  for (simTime = 0; simTime < 1; ++simTime) {
+  for (simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
+    ret = clSetKernelArg(kernel, 1, sizeof(cl_uint), (void *)&simTime);
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
                                  &szGlobalWorkSize, &szLocalWorkSize, 0, NULL, NULL);
 

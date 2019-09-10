@@ -3,7 +3,7 @@
 #define __global
 #endif
 
-#define STOPS_NUM               30
+#define STOPS_NUM               300
 #define STOP_MAX_PASS           10000
 #define PRINT_LIST              0
 
@@ -45,13 +45,15 @@ enum PASS_STATUS{
 //
 
 __kernel void test1(
-    __global SL_TYPE* stopsArrivalList
+    __global SL_TYPE* stopsArrivalList,
+    unsigned int simTime
     )
 {
   int i = get_global_id(0);
 
 #if PRINT_LIST
   printf("\n\n************* START KERNEL *************************************\n");
+  printf("simTime: %d\n", simTime);
 
   printf("\nStop %d, total %d\n" ,
          stopsArrivalList[i].stopNum, stopsArrivalList[i].total);
@@ -68,7 +70,7 @@ __kernel void test1(
 
   unsigned long iter = 0;
   for (int j = 0; j < STOP_MAX_PASS; ++j) {
-    if(2000 > stopsArrivalList[i].pass[j].arrivalTime){
+    if(simTime > stopsArrivalList[i].pass[j].arrivalTime){
       stopsArrivalList[i].pass[j].status = PASS_STATUS_ARRIVED;
     }
     iter ++;
