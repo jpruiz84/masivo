@@ -10,17 +10,28 @@
  */
  
  // OpenCL Kernel Function for element by element vector addition
-__kernel void VectorAdd(__global const float* a, __global const float* b, __global float* c, int iNumElements)
-{
-    // get index into global data array
-    int iGID = get_global_id(0);
+#ifndef __OPENCL_VERSION__
+#define __kernel
+#define __global
+#endif
 
-    // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
-    if (iGID >= iNumElements)
-    {   
-        return; 
-    }
-    
-    // add the vector elements
-    c[iGID] = a[iGID] + b[iGID];
+
+
+__kernel void VarInc(
+    __global unsigned int *counters,
+    unsigned int count_to,
+    unsigned int iNumElements
+    )
+{
+  int gid = get_global_id(0);
+
+  // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
+  if (gid >= iNumElements)
+  {
+    return;
+  }
+
+  for(int j = 0; j < count_to; j++){
+    counters[gid] = counters[gid] + 1;
+  }
 }
