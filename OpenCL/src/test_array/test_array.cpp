@@ -7,11 +7,11 @@
 
 #define STOPS_NUM                    300
 #define STOP_MAX_PASS                10000
-#define MAX_SIM_TIME               6000     // In secs
+#define MAX_SIM_TIME               8*3600     // In secs, 8 hours
 #define PASS_TOTAL_ARRIVAL_TIME    3600     // In secs
 
 #define PRINT_LIST      0
-#define USE_OPENCL      0
+#define USE_OPENCL      1
 
 typedef struct {
   unsigned int    passId;
@@ -222,11 +222,9 @@ main()
 
   unsigned long iter = 0;
 
-  for (int i = 0; i < STOPS_NUM; ++i) {
+  for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
 
-    stopsArrivalList[i].wIndex = 0;
-    for (unsigned int simTime = 0; simTime < MAX_SIM_TIME; ++simTime) {
-
+    for (unsigned int i = 0; i < STOPS_NUM; ++i) {
       while(1){
         if(simTime == stopsArrivalList[i].pass[stopsArrivalList[i].wIndex].arrivalTime){
           stopsArrivalList[i].pass[stopsArrivalList[i].wIndex].status = PASS_STATUS_ARRIVED;
@@ -234,14 +232,13 @@ main()
           if(stopsArrivalList[i].wIndex >= stopsArrivalList[i].total){
             break;
           }
-          iter ++;
         }else{
           break;
         }
-
-
       }
     }
+
+
   }
   procTimeC = clock() - procTimeC;
 #endif
