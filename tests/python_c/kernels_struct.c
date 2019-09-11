@@ -1,3 +1,6 @@
+#define STOP_MAX_PASS   1000
+
+
 typedef struct {
   unsigned int    pass_id;
   unsigned short  orig_stop;
@@ -20,7 +23,6 @@ __kernel void move_pass(
     __global SpslType *pass_list,
     __global SpslType *pass_arrival_list,
     unsigned int stops_size,
-    unsigned int pass_size,
     unsigned int sim_time
     )
 {
@@ -59,7 +61,7 @@ __kernel void move_pass(
       //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
 
       w = pass_arrival_list[gid].w_index;
-      if(w >= pass_size){
+      if(w >= STOP_MAX_PASS){
         break;
       }
 

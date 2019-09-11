@@ -11,10 +11,10 @@ sys.path.append('../..')
 import globalConstants
 import random
 
-STOPS_NUM = 3
-PASS_PER_STOP = 5
+STOPS_NUM = 30
+PASS_PER_STOP = 1000
 SIM_TIME = 2000
-PRINT_LIST = True
+PRINT_LIST = False
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (PASS_PER_STOP)))
 SPSL_TYPE = np.dtype([('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', SPL_TYPE)])
