@@ -16,7 +16,6 @@
     #include <OpenCL/opencl.h>
 #else
     #include <CL/opencl.h>
-    #include <CL/cl.hpp>
 #endif
 
 
