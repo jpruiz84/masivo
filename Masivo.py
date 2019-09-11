@@ -77,7 +77,7 @@ class Masivo:
     print("Total present buses: %d" % len(self.buses_list))
     print("Total finished buses: %d" % len(self.finished_buses_list))
     print("Total stops: %d" % len(self.masivo_data["stops_list"]))
-    print("\n\n")
+    print("\n")
 
     print('\nBuses list:')
     for i in range(len(self.buses_pass_list)):
@@ -86,15 +86,22 @@ class Masivo:
 
     print('\nStops list:')
     for stop in self.masivo_data["stops_list"]:
-      print("Stop %s have %d/%d pass, and %d/%d out" %
+      print("Stop %s have %d/%d pass, and alighted %d/%d out" %
             (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(), stop.expected_alight_pass))
 
     print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
-    print("Total time: %f s" % (total_end_time - total_start_time))
+
     self.graphs2d.speed_up(self.speed_up)
     self.graphs2d.save_speed_up_csv(self.speed_up)
 
     results.pass_alight(self.stops_pass_alight_list)
+
+    if globalConstants.cl_enabled:
+      print("PyCL Total time: %f s" % (total_end_time - total_start_time))
+    else:
+      print("Py Total time: %f s" % (total_end_time - total_start_time))
+
+
 
   def get_masivo_data(self):
     return self.masivo_data

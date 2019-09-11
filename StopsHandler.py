@@ -119,7 +119,7 @@ class StopsHandler:
 
     # Calculate total pass in and input queue
     for i in range(len(self.stops_list)):
-      logging.info("Generating pass input queue for stop name %s" % self.stops_list[i].name)
+      print("Generating pass input queue for stop name %s" % self.stops_list[i].name)
       # For each destination
       for key, val in self.stops_list[i].destination_vector.items():
         for j in range(val):
