@@ -16,6 +16,7 @@ class Stop:
     self.max_capacity = max_capacity
     self.total_pass_in = 0
     self.pass_id_num = 0
+
     self.pass_list = 0
     self.pass_arrival_list = 0
     self.pass_alight_list = 0
