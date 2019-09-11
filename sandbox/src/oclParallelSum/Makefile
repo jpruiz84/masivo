@@ -1,6 +1,6 @@
-###############################################################################
+################################################################################
 #
-# Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
+# Copyright 1993-2009 NVIDIA Corporation.  All rights reserved.
 #
 # NOTICE TO USER:   
 #
@@ -27,50 +27,24 @@
 # 227.7202-4 (JUNE 1995), all U.S. Government End Users acquire the 
 # source code with only those rights set forth herein.
 #
-###############################################################################
+################################################################################
 #
-# GPU Computing SDK (OpenCL Samples)
+# Build script for project
 #
-###############################################################################
+################################################################################
+
+# Add source files here
+EXECUTABLE	:= oclParallelSum
+# C/C++ source files (compiled with gcc / c++)
+CCFILES		:= oclParallelSum.cpp
+
+################################################################################
+# Rules and targets
+
+# NOTE: Assuming P4 based install until OpenCL becomes public
+# Adjust P4_Root, default is ${HOME}/perforce/
+# P4_ROOT=${HOME}/myperforce/
+
+include ../../common/common_opencl.mk
 
 
-PROJECTS := $(shell find src -name Makefile)
-
-ifeq ($(dbg),1)
-	BINDIR := bin/linux/debug/
-else 
-    BINDIR := bin/linux/release/
-endif
-
-
-#%.ph_build : common/liboclUtil.so shared/libshrutil.so 
-%.ph_build : common/liboclUtil.so
-	+@$(MAKE) -C $(dir $*) $(MAKECMDGOALS)
-
-%.ph_clean : 
-	+@$(MAKE) -C $(dir $*) clean $(USE_DEVICE)
-
-%.ph_clobber :
-	+@$(MAKE) -C $(dir $*) clobber $(USE_DEVICE)
-
-all:  $(addsuffix .ph_build,$(PROJECTS))
-	@echo "Finished building all"
-
-common/liboclUtil.so:
-	+@$(MAKE) -C common
-
-shared/libshrutil.so:
-	+@$(MAKE) -C ../shared/ 
-
-tidy:
-	@find * | egrep "#" | xargs rm -f
-	@find * | egrep "\~" | xargs rm -f
-
-clean: tidy $(addsuffix .ph_clean,$(PROJECTS))
-	+@$(MAKE) -C common clean
-
-clobber: clean $(addsuffix .ph_clobber,$(PROJECTS))
-	+@$(MAKE) -C common clobber
-
-runall: 
-	$(SHELL) common/runall.sh $(BINDIR)

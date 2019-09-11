@@ -1,0 +1,10 @@
+OpenCL SW Info:
+
+ CL_PLATFORM_NAME: 	NVIDIA CUDA
+ CL_PLATFORM_VERSION: 	OpenCL 1.2 CUDA 10.1.236
+ OpenCL SDK Revision: 	7027912
+
+
+OpenCL Device Info:
+
+Creating context on device 0
