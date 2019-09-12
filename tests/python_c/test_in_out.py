@@ -7,6 +7,7 @@ import sys
 sys.path.append('../..')
 import globalConstants
 import random
+import ctypes
 
 STOPS_NUM = 30
 STOP_MAX_PASS = 1000
@@ -14,8 +15,8 @@ SIM_TIME = 600
 PRINT_LIST = False
 
 USE_PYOPENCL =0
-USE_PYTHON = 1
-USE_PYTHON_C = 0
+USE_PYTHON = 0
+USE_PYTHON_C = 1
 
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (STOP_MAX_PASS)))
@@ -156,3 +157,41 @@ if USE_PYTHON:
   print("\nPython process time: %s ms" % ((endTime - startTime)*1000))
 
 
+
+if USE_PYTHON_C:
+
+  # load the shared object file
+  move_pass = ctypes.CDLL('./move_pass.so')
+  move_pass.sum.argtypes = (ctypes.c_int, np.ctypeslib.ndpointer(dtype=np.int32))
+
+  numbers = np.arange(0, 10, 1, np.int32)
+  print(numbers)
+
+  num_numbers = len(numbers)
+
+  result = move_pass.sum(len(numbers), numbers)
+
+  print("resutl %d" % result)
+  print(numbers)
+
+
+  startTime = time.time()
+
+  for sim_time in range(0, SIM_TIME):
+
+    if (sim_time % 10) == 0:
+      sys.stdout.write("\rtime: %d  " % sim_time)
+      sys.stdout.flush()
+
+    for i in range(STOPS_NUM):
+      pass
+
+  endTime = time.time()
+
+  if PRINT_LIST:
+    print("\npass_arrival_list:")
+    print(pass_arrival_list)
+    print("\npass_list:")
+    print(pass_list)
+
+  print("\nPythonC process time: %s ms" % ((endTime - startTime)*1000))

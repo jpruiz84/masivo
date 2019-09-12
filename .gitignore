@@ -25,3 +25,8 @@ __pycache__/
 # Result tables
 *.csv
 
+# For ctypes 
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
