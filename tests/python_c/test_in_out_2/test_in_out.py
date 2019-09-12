@@ -9,14 +9,14 @@ import globalConstants
 import random
 import ctypes
 
-STOPS_NUM = 300
+STOPS_NUM = 3
 STOP_MAX_PASS = 10000
 MAX_SIM_TIME = 600
 PRINT_LIST = False
 
 USE_PYTHON = 0
-USE_PYOPENCL = 1
-USE_PYTHON_C = 0
+USE_PYOPENCL = 0
+USE_PYTHON_C = 1
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (STOP_MAX_PASS)))
 SPSL_TYPE = np.dtype([('stop_num', 'u2'), ('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', SPL_TYPE)])
@@ -51,53 +51,6 @@ if PRINT_LIST:
   print(pass_arrival_list)
   print("\n Original pass_list")
   print(pass_list)
-
-
-if USE_PYOPENCL:
-  print('load program from cl source file')
-  f = open('kernels_struct.c', 'r', encoding='utf-8')
-  kernels = ''.join(f.readlines())
-  f.close()
-
-  ocl_platforms = (platform.name
-                   for platform in cl.get_platforms())
-  print("\n".join(ocl_platforms))
-
-  nvidia_platform = [platform
-                     for platform in cl.get_platforms()
-                     if platform.name == "NVIDIA CUDA"][0]
-
-  nvidia_devices = nvidia_platform.get_devices()
-
-  ctx = cl.Context(devices=nvidia_devices)
-  queue = cl.CommandQueue(ctx)
-  mf = cl.mem_flags
-  prg = cl.Program(ctx, kernels).build()
-
-  pass_list_g = cl_array.to_device(queue, pass_list)
-  pass_arrival_list_g = cl_array.to_device(queue, pass_arrival_list)
-
-  total_start_time = time.time()
-
-  np_stops_num = np.uint32(STOPS_NUM)
-  np_max_sim_time = np.uint32(MAX_SIM_TIME)
-  evt = prg.move_pass(queue, (np_stops_num, 1), None, pass_list_g.data,
-                      pass_arrival_list_g.data, np_stops_num, np_max_sim_time)
-  evt.wait()
-
-  total_end_time = time.time()
-
-  if PRINT_LIST:
-    print("\npass_arrival_list_g:")
-    print(pass_arrival_list_g)
-    print("\npass_list_g:")
-    print(pass_list_g)
-
-  print('\n\nFinal pass list')
-  for i in range(STOPS_NUM):
-    print("Total pass list(%d): %d" % (i, np.array(pass_list_g[i].get(), dtype=SPSL_TYPE)['total']))
-
-  print("\nPyopencl process time: %s ms\n\n" % ((total_end_time - total_start_time)*1000))
 
 
 if USE_PYTHON:
@@ -147,7 +100,6 @@ if USE_PYTHON:
 
   print("\nPython process time: %s ms" % ((endTime - startTime)*1000))
 
-
 if USE_PYTHON_C:
 
   # Compile the C code with: gcc -shared -Wl,-soname,move_pass -o move_pass.so -fPIC move_pass.c
@@ -171,3 +123,52 @@ if USE_PYTHON_C:
     print("Total pass list(%d): %d" % (i, pass_list[i]['total']))
 
   print("\nPythonC process time: %s ms" % ((endTime - startTime)*1000))
+
+if USE_PYOPENCL:
+  print('load program from cl source file')
+  f = open('kernels_struct.c', 'r', encoding='utf-8')
+  kernels = ''.join(f.readlines())
+  f.close()
+
+  ocl_platforms = (platform.name
+                   for platform in cl.get_platforms())
+  print("\n".join(ocl_platforms))
+
+  nvidia_platform = [platform
+                     for platform in cl.get_platforms()
+                     if platform.name == "NVIDIA CUDA"][0]
+
+  nvidia_devices = nvidia_platform.get_devices()
+
+  ctx = cl.Context(devices=nvidia_devices)
+  queue = cl.CommandQueue(ctx)
+  mf = cl.mem_flags
+  prg = cl.Program(ctx, kernels).build()
+
+  pass_list_g = cl_array.to_device(queue, pass_list)
+  pass_arrival_list_g = cl_array.to_device(queue, pass_arrival_list)
+
+
+  np_stops_num = np.uint32(STOPS_NUM)
+  np_max_sim_time = np.uint32(MAX_SIM_TIME)
+
+  total_start_time = time.time()
+  evt = prg.move_pass(queue, (np_stops_num, 1), None, pass_list_g.data,
+                      pass_arrival_list_g.data, np_stops_num, np_max_sim_time)
+
+  evt.wait()
+  total_end_time = time.time()
+
+
+
+  if PRINT_LIST:
+    print("\npass_arrival_list_g:")
+    print(pass_arrival_list_g)
+    print("\npass_list_g:")
+    print(pass_list_g)
+
+  print('\n\nFinal pass list')
+  for i in range(STOPS_NUM):
+    print("Total pass list(%d): %d" % (i, np.array(pass_list_g[i].get(), dtype=SPSL_TYPE)['total']))
+
+  print("\nPyopencl process time: %s ms\n\n" % ((total_end_time - total_start_time)*1000))
