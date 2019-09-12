@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#define STOPS_NUM         30
 #define STOP_MAX_PASS     10000
 #define PRINT_LIST        0
 

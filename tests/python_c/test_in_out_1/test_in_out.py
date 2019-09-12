@@ -4,19 +4,19 @@ import pyopencl as cl
 import time
 import pyopencl.array as cl_array
 import sys
-sys.path.append('../..')
+sys.path.append('../../..')
 import globalConstants
 import random
 import ctypes
 
-STOPS_NUM = 30
+STOPS_NUM = 3
 STOP_MAX_PASS = 10000
 SIM_TIME = 600
 PRINT_LIST = False
 
 USE_PYTHON = 0
-USE_PYOPENCL = 0
-USE_PYTHON_C = 1
+USE_PYOPENCL = 1
+USE_PYTHON_C = 0
 
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (STOP_MAX_PASS)))
