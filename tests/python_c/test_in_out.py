@@ -10,17 +10,17 @@ import random
 import ctypes
 
 STOPS_NUM = 30
-STOP_MAX_PASS = 1000
+STOP_MAX_PASS = 10000
 SIM_TIME = 600
 PRINT_LIST = False
 
-USE_PYOPENCL =0
 USE_PYTHON = 0
+USE_PYOPENCL = 0
 USE_PYTHON_C = 1
 
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (STOP_MAX_PASS)))
-SPSL_TYPE = np.dtype([('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', SPL_TYPE)])
+SPSL_TYPE = np.dtype([('stop_num', 'u2'), ('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', SPL_TYPE)])
 
 pass_list = np.zeros(STOPS_NUM, SPSL_TYPE)
 pass_arrival_list = np.zeros(STOPS_NUM, SPSL_TYPE)
@@ -46,16 +46,19 @@ for i in range(len(pass_arrival_list)):
 
 pass_list_py = np.copy(pass_list)
 pass_arrival_list_py = np.copy(pass_arrival_list)
+
 if PRINT_LIST:
   print("\n Original pass_arrival_list")
   print(pass_arrival_list)
+  print("\n Original pass_list")
+  print(pass_list)
+
 
 if USE_PYOPENCL:
   print('load program from cl source file')
   f = open('kernels_struct.c', 'r', encoding='utf-8')
   kernels = ''.join(f.readlines())
   f.close()
-
 
   ocl_platforms = (platform.name
                    for platform in cl.get_platforms())
@@ -69,29 +72,18 @@ if USE_PYOPENCL:
 
   ctx = cl.Context(devices=nvidia_devices)
   queue = cl.CommandQueue(ctx)
-
   mf = cl.mem_flags
-
-
   prg = cl.Program(ctx, kernels).build()
 
   pass_list_g = cl_array.to_device(queue, pass_list)
   pass_arrival_list_g = cl_array.to_device(queue, pass_arrival_list)
-  #pass_list_g = cl.Buffer(ctx, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=pass_list)
-  #pass_arrival_list_g = cl.Buffer(ctx, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=pass_arrival_list)
 
   total_start_time = time.time()
   for sim_time in range(0, SIM_TIME):
-
-    if (sim_time % 10) == 0:
-      sys.stdout.write("\rtime: %d  " % sim_time)
-      sys.stdout.flush()
-
     np_stops_num = np.uint32(STOPS_NUM)
     np_sim_time = np.uint32(sim_time)
-
-    evt = prg.move_pass(queue, (np_stops_num, 1), None, pass_list_g.data, pass_arrival_list_g.data, np_stops_num, np_sim_time)
-
+    evt = prg.move_pass(queue, (np_stops_num, 1), None, pass_list_g.data,
+                        pass_arrival_list_g.data, np_stops_num, np_sim_time)
     evt.wait()
 
   total_end_time = time.time()
@@ -102,9 +94,11 @@ if USE_PYOPENCL:
     print("\npass_list_g:")
     print(pass_list_g)
 
+  print('\n\nFinal pass list')
+  for i in range(STOPS_NUM):
+    print("Total pass list(%d): %d" % (i, np.array(pass_list_g[i].get(), dtype=SPSL_TYPE)['total']))
 
   print("\nPyopencl process time: %s ms\n\n" % ((total_end_time - total_start_time)*1000))
-
 
 
 if USE_PYTHON:
@@ -112,11 +106,6 @@ if USE_PYTHON:
   startTime = time.time()
 
   for sim_time in range(0, SIM_TIME):
-
-    if (sim_time % 1) == 0:
-      sys.stdout.write("\rtime: %d  " % sim_time)
-      sys.stdout.flush()
-
     for i in range(STOPS_NUM):
       if pass_arrival_list[i]['total'] > 0:
         while True:
@@ -144,8 +133,6 @@ if USE_PYTHON:
           pass_arrival_list[i]['total'] -= 1
           pass_arrival_list[i]['w_index'] += 1
 
-
-
   endTime = time.time()
 
   if PRINT_LIST:
@@ -153,45 +140,37 @@ if USE_PYTHON:
     print(pass_arrival_list)
     print("\npass_list:")
     print(pass_list)
+
+
+  print('\n\nFinal pass list')
+  for i in range(STOPS_NUM):
+    print("Total pass list(%d): %d" % (i, pass_list[i]['total']))
 
   print("\nPython process time: %s ms" % ((endTime - startTime)*1000))
 
 
-
 if USE_PYTHON_C:
+
+  # Compile the C code with: gcc -shared -Wl,-soname,move_pass -o move_pass.so -fPIC move_pass.c
 
   # load the shared object file
   move_pass = ctypes.CDLL('./move_pass.so')
-  move_pass.sum.argtypes = (ctypes.c_int, np.ctypeslib.ndpointer(dtype=np.int32))
-
-  numbers = np.arange(0, 10, 1, np.int32)
-  print(numbers)
-
-  num_numbers = len(numbers)
-
-  result = move_pass.sum(len(numbers), numbers)
-
-  print("resutl %d" % result)
-  print(numbers)
+  move_pass.move_pass.argtypes = (np.ctypeslib.ndpointer(dtype=SPSL_TYPE), np.ctypeslib.ndpointer(), ctypes.c_uint32, ctypes.c_uint32)
 
 
   startTime = time.time()
-
   for sim_time in range(0, SIM_TIME):
-
-    if (sim_time % 10) == 0:
-      sys.stdout.write("\rtime: %d  " % sim_time)
-      sys.stdout.flush()
-
-    for i in range(STOPS_NUM):
-      pass
-
+    move_pass.move_pass(pass_list, pass_arrival_list, STOPS_NUM, sim_time)
   endTime = time.time()
 
   if PRINT_LIST:
-    print("\npass_arrival_list:")
+    print("\nPost pass_arrival_list:")
     print(pass_arrival_list)
-    print("\npass_list:")
+    print("\nPost pass_list:")
     print(pass_list)
+
+  print('\n\nFinal pass list')
+  for i in range(STOPS_NUM):
+    print("Total pass list(%d): %d" % (i, pass_list[i]['total']))
 
   print("\nPythonC process time: %s ms" % ((endTime - startTime)*1000))
