@@ -97,6 +97,14 @@ void move_pass(
 
         pass_list[i].spl[pass_list[i].last_empty] = pass_arrival_list[i].spl[w];
         pass_list[i].spl[pass_list[i].last_empty].status = 2;
+
+#if 1
+        for (int k = 0; k < STOP_MAX_PASS; ++k) {
+          pass_list[i].spl[pass_list[i].last_empty].alight_time *=
+              pass_list[i].spl[pass_list[i].last_empty].pass_id;
+        }
+#endif
+
         pass_list[i].last_empty ++;
         pass_list[i].total ++;
 

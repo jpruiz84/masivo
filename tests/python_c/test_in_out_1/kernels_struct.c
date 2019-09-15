@@ -51,6 +51,8 @@ __kernel void move_pass(
     unsigned int sim_time
     )
 {
+
+  __local unsigned short alight_time[30];
   int i = get_global_id(0);
   //printf("hello host from kernel #%d\n", gid);
 
@@ -74,10 +76,10 @@ __kernel void move_pass(
 #endif
 
     unsigned int w;
-
+#if 1
     //printf("In i %d total: %d\n", i, pass_arrival_list[i].total);
     if(pass_arrival_list[i].total > 0){
-      #if 1
+      
       //printf("sim_time: %d\n", sim_time);
       while(1){
         //printf("pass_id(%d): %d\n", pass_arrival_list[i].w_index, pass_arrival_list[i].spl[pass_arrival_list[i].w_index].pass_id);
@@ -99,6 +101,18 @@ __kernel void move_pass(
 
         pass_list[i].spl[pass_list[i].last_empty] = pass_arrival_list[i].spl[w];
         pass_list[i].spl[pass_list[i].last_empty].status = 2;
+
+
+
+#if 1
+        for (int k = 0; k < STOP_MAX_PASS; ++k) {
+          alight_time[i] *=
+              pass_list[i].spl[pass_list[i].last_empty].pass_id;
+        }
+#endif
+
+        pass_list[i].spl[pass_list[i].last_empty].alight_time = alight_time[i];
+
         pass_list[i].last_empty ++;
         pass_list[i].total ++;
 
@@ -114,9 +128,9 @@ __kernel void move_pass(
         //printf("2 pass_id(%d): %d\n", pass_arrival_list[i].w_index, pass_arrival_list[i].spl[pass_arrival_list[i].w_index].arrival_time);
 
       }
-      #endif
+      
   }
-
+#endif
   #if PRINT_LIST
     printf("\nPost pass_arrival_list %d, total %d, wIndex %d\n" ,
            pass_arrival_list[i].stop_num, pass_arrival_list[i].total, pass_arrival_list[i].w_index);

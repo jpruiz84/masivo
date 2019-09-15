@@ -9,7 +9,7 @@ import globalConstants
 import random
 import ctypes
 
-STOPS_NUM = 3
+STOPS_NUM = 30
 STOP_MAX_PASS = 10000
 SIM_TIME = 600
 PRINT_LIST = False
@@ -77,12 +77,12 @@ if USE_PYOPENCL:
 
   pass_list_g = cl_array.to_device(queue, pass_list)
   pass_arrival_list_g = cl_array.to_device(queue, pass_arrival_list)
+  np_stops_num = np.uint32(STOPS_NUM)
 
   total_start_time = time.time()
   for sim_time in range(0, SIM_TIME):
-    np_stops_num = np.uint32(STOPS_NUM)
     np_sim_time = np.uint32(sim_time)
-    evt = prg.move_pass(queue, (np_stops_num, 1), None, pass_list_g.data,
+    evt = prg.move_pass(queue, (np_stops_num, ), (np_stops_num, ), pass_list_g.data,
                         pass_arrival_list_g.data, np_stops_num, np_sim_time)
     evt.wait()
 
