@@ -27,8 +27,8 @@ def pass_alight(pass_list):
 					'arrival_time': str(pass_data['arrival_time']),
 					'alight_time': str(pass_data['alight_time']),
 					'status': str(pass_data['status'])})
-
-				commute_time.append(pass_data['alight_time'] - pass_data['arrival_time'])
+				
+				commute_time.append(int(pass_data['alight_time']) - int(pass_data['arrival_time']))
 
 	if len(commute_time):
 		avg_commute_time = float(sum(commute_time))/float(len(commute_time))

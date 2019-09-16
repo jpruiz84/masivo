@@ -7,6 +7,7 @@ import numpy as np
 import random
 import pyopencl as cl
 import pyopencl.array as cl_array
+import ctypes
 
 
 class StopsHandler:
@@ -153,6 +154,20 @@ class StopsHandler:
                                  np_total_stops, np_total_buses, np_sim_time)
 
     evt.wait()
+
+  def runner_c(self, sim_time):
+    masivo_c = ctypes.CDLL('./masivo_c.so')
+    masivo_c.masivo_runner.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type), 
+                                       np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
+                                       np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
+                                       np.ctypeslib.ndpointer(dtype=globalConstants.bpsl_type),
+                                       ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32)
+  
+    
+
+    masivo_c.masivo_runner(self.pass_list, self.pass_arrival_list, self.pass_alight_list, self.buses_pass_list,
+                           len(self.pass_list_g), len(self.buses_pass_list), sim_time)
+
 
   def runner(self, sim_time):
 

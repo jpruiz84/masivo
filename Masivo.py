@@ -57,9 +57,11 @@ class Masivo:
         sys.stdout.write("\rtime: %d  " % sim_time)
         sys.stdout.flush()
 
-      if globalConstants.cl_enabled:
+      if globalConstants.USE_PYOPENCL:
         self.stops_handler.runner_cl(sim_time)
-      else:
+      if globalConstants.USE_PYTHON_C:
+        self.stops_handler.runner_c(sim_time)
+      if globalConstants.USE_PYTHON:
         self.stops_handler.runner(sim_time)
 
       self.buses_handler.runner(sim_time)
@@ -100,10 +102,13 @@ class Masivo:
 
     results.pass_alight(self.stops_pass_alight_list)
 
-    if globalConstants.cl_enabled:
+    if globalConstants.USE_PYTHON:
+      print("Python Total time: %f s" % (total_end_time - total_start_time))
+    if globalConstants.USE_PYOPENCL:
       print("PyCL Total time: %f s" % (total_end_time - total_start_time))
-    else:
-      print("Py Total time: %f s" % (total_end_time - total_start_time))
+    if globalConstants.USE_PYTHON_C:
+      print("PyC Total time: %f s" % (total_end_time - total_start_time))
+
 
   def get_masivo_data(self):
     return self.masivo_data

@@ -1,3 +1,9 @@
+#ifndef __OPENCL_VERSION__
+#define __kernel
+#define __global
+#define __local
+#endif
+
 #define STOP_MAX_PASS     10000
 #define PRINT_LIST        0
 
