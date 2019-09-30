@@ -12,14 +12,14 @@ import globalConstants
 import random
 import ctypes
 
-STOPS_NUM = 1000
+STOPS_NUM = 300
 STOP_MAX_PASS = 10000
 SIM_TIME = 1
 PRINT_LIST = False
 
 USE_PYTHON = 0
-USE_PYOPENCL = 0
-USE_PYTHON_C = 1
+USE_PYOPENCL = 1
+USE_PYTHON_C = 0
 
 
 SPL_TYPE = np.dtype((globalConstants.PASS_TYPE, (STOP_MAX_PASS)))
@@ -67,7 +67,7 @@ if USE_PYOPENCL:
                    for platform in cl.get_platforms())
   print("\n".join(ocl_platforms))
 
-  nvidia_platform = cl.get_platforms()[1]
+  nvidia_platform = cl.get_platforms()[0]
 
   nvidia_devices = nvidia_platform.get_devices()
 
