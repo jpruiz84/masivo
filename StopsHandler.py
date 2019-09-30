@@ -21,15 +21,18 @@ class StopsHandler:
 
     ocl_platforms = (platform.name
                      for platform in cl.get_platforms())
-    print("\n".join(ocl_platforms))
+    #print("\n".join(ocl_platforms))
 
-    nvidia_platform = [platform
-                       for platform in cl.get_platforms()
-                       if platform.name == "NVIDIA CUDA"][0]
+    cl_platform = cl.get_platforms()[1]
+    cl_devices = cl_platform.get_devices()
 
-    nvidia_devices = nvidia_platform.get_devices()
+    if globalConstants.USE_PYOPENCL:
+      for i, dev in enumerate(cl_devices):
+        print('Device[%d]: %s, %s' % (i, dev.name, dev.vendor))
+      print()
 
-    self.ctx = cl.Context(devices=nvidia_devices)
+
+    self.ctx = cl.Context(devices=cl_devices)
     self.queue = cl.CommandQueue(self.ctx)
     self.mf = cl.mem_flags
     self.prg = cl.Program(self.ctx, kernels).build()

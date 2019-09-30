@@ -104,10 +104,12 @@ class Masivo:
 
     if globalConstants.USE_PYTHON:
       print("Python Total time: %f s" % (total_end_time - total_start_time))
-    if globalConstants.USE_PYOPENCL:
+    elif globalConstants.USE_PYOPENCL:
       print("PyCL Total time: %f s" % (total_end_time - total_start_time))
-    if globalConstants.USE_PYTHON_C:
+    elif globalConstants.USE_PYTHON_C:
       print("PyC Total time: %f s" % (total_end_time - total_start_time))
+    else:
+      print("Total time: %f s" % (total_end_time - total_start_time))
 
 
   def get_masivo_data(self):
