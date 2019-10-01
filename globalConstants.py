@@ -13,6 +13,7 @@ PASS_TOTAL_ARRIVAL_TIME = 3600     # In secs
 LOGGING_LEVEL = logging.ERROR
 STOP_MAX_PASS = 10000
 BUS_MAX_PASS = 250
+BUS_STOPPING_TIME = 10
 TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
@@ -23,8 +24,8 @@ sim_accel_rate = 0
 end_sim_time = 6000
 
 
-USE_PYTHON = 0
-USE_PYOPENCL = 1
+USE_PYTHON = 1
+USE_PYOPENCL = 0
 USE_PYTHON_C = 0
 
 if USE_PYOPENCL:
@@ -61,7 +62,9 @@ spsl_type = np.dtype([('stop_num', 'u2'), ('total', 'u4'), ('last_empty', 'u4'),
 # Bus Passengers List (BPL)
 bpl_type = np.dtype((PASS_TYPE, BUS_MAX_PASS))
 # Bus Passengers Struct List (BPSL)
-bpsl_type = np.dtype([('curr_stop', 'u2'), ('last_stop_i', 'u2'), ('total_stops', 'u2'), ('stops_num', 'u2', MAX_STOPS),
+bpsl_type = np.dtype([('number', 'u2'), ('start_pos', 'i4'), ('last_stop_table_i', 'u2'), ('last_stop_pos', 'i4'), ('start_time', 'u4'), ('stops_num_i', 'u2'),
+                      ('stop_inc', 'i1'), ('in_the_stop_counter', 'u2'), ('in_the_stop', 'u2'), ('curr_pos', 'i4'),
+                      ('curr_stop', 'u2'), ('last_stop_i', 'u2'), ('total_stops', 'u2'), ('stops_num', 'u2', MAX_STOPS),
                       ('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('bpl', bpl_type)])
 
 

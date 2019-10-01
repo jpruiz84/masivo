@@ -266,7 +266,7 @@ class StopsHandler:
               # Check if the bus route has the pass destination stop
               bus_for_dest = False
               # print("Bus %d in stop %d, last stop i %d" % (j, i, self.buses_pass_list[j]['last_stop_i']))
-              for l in (range(self.buses_pass_list[j]['last_stop_i'] + 1, self.buses_pass_list[j]['total_stops'])):
+              for l in (range(self.buses_pass_list[j]['last_stop_table_i'], self.buses_pass_list[j]['total_stops'])):
                 if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_pass_list[j]['stops_num'][l]:
                   bus_for_dest = True
                   break

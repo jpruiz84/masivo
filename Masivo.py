@@ -87,8 +87,8 @@ class Masivo:
 
     print('\nBuses list:')
     for i in range(len(self.buses_pass_list)):
-      print("Bus %s have %d pass, final poss %d" %
-            (self.buses_list[i].number, self.buses_pass_list[i]['total'], self.buses_list[i].current_position))
+      print("Bus %s have %d pass, final pos %d" %
+            (self.buses_list[i].number, self.buses_pass_list[i]['total'], self.buses_pass_list[i]['curr_pos']))
 
     print('\nStops list:')
     for stop in self.masivo_data["stops_list"]:

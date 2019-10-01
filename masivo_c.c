@@ -19,6 +19,9 @@
 #define PASS_STATUS_IN_BUS        3
 #define PASS_STATUS_ALIGHTED      4
 
+#define BUS_TRAVEL_SPEED_M_S         54*1000/3600
+#define BUS_STOPPING_TIME            10
+
 #define FALSE  0
 #define TRUE   1
 
