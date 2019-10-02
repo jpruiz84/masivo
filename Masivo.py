@@ -37,12 +37,12 @@ class Masivo:
     # Init buses
     self.buses_handler = BusesHandler(self.stops_list, self.cl_queue)
     self.buses_list = self.buses_handler.get_buses_list()
-    self.buses_pass_list = self.buses_handler.get_bus_pass_list()
-    self.buses_pass_list_g = self.buses_handler.get_bus_pass_list_g()
+    self.buses_struc_list = self.buses_handler.get_bus_struc_list()
+    self.buses_struc_list_g = self.buses_handler.get_bus_struc_list_g()
 
-    # Set the buses_pass_list in the stops handler
-    self.stops_handler.set_buses_pass_list(self.buses_pass_list)
-    self.stops_handler.set_buses_pass_list_g(self.buses_pass_list_g)
+    # Set the buses_struc_list in the stops handler
+    self.stops_handler.set_buses_struc_list(self.buses_struc_list)
+    self.stops_handler.set_buses_struc_list_g(self.buses_struc_list_g)
     self.stops_handler.set_buses_handler(self.buses_handler)
 
     self.masivo_data["stops_list"] = self.stops_list
@@ -64,7 +64,7 @@ class Masivo:
       if globalConstants.USE_PYTHON:
         self.stops_handler.runner(sim_time)
 
-      self.buses_handler.runner(sim_time)
+      #self.buses_handler.runner(sim_time)
 
       if globalConstants.sim_accel_rate > 0:
         while (time.time() - start_time) < (1 / globalConstants.sim_accel_rate):
@@ -86,9 +86,9 @@ class Masivo:
     print("\n")
 
     print('\nBuses list:')
-    for i in range(len(self.buses_pass_list)):
+    for i in range(len(self.buses_struc_list)):
       print("Bus %s have %d pass, final pos %d" %
-            (self.buses_list[i].number, self.buses_pass_list[i]['total'], self.buses_pass_list[i]['curr_pos']))
+            (self.buses_list[i].number, self.buses_struc_list[i]['total'], self.buses_struc_list[i]['curr_pos']))
 
     print('\nStops list:')
     for stop in self.masivo_data["stops_list"]:

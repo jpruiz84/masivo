@@ -41,20 +41,20 @@ class BusesHandler:
         self.bus_struc_lists[i]['stops_num'][j] = self.buses_list[i].route.stops_num_table[j]
       self.bus_struc_lists[i]['total_stops'] = len(self.buses_list[i].route.stops_num_table)
 
-    self.bus_pass_lists_g = cl_array.to_device(self.cl_queue, self.bus_struc_lists)
+    self.bus_struc_lists_g = cl_array.to_device(self.cl_queue, self.bus_struc_lists)
 
     # Set the CL buses list
     for i in range(len(self.buses_list)):
-      self.buses_list[i].set_cl_list(self.bus_pass_lists_g[i])
+      self.buses_list[i].set_cl_list(self.bus_struc_lists_g[i])
 
   def get_buses_list(self):
     return self.buses_list
 
-  def get_bus_pass_list(self):
+  def get_bus_struc_list(self):
     return self.bus_struc_lists
 
-  def get_bus_pass_list_g(self):
-    return self.bus_pass_lists_g
+  def get_bus_struc_list_g(self):
+    return self.bus_struc_lists_g
 
   def open_routes_file(self, file_name):
     logging.info("Opening routes file: %s" % file_name)

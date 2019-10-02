@@ -75,11 +75,11 @@ class StopsHandler:
   def get_pass_alight_list(self):
     return self.pass_alight_list
 
-  def set_buses_pass_list(self, buses_pass_list):
-    self.buses_pass_list = buses_pass_list
+  def set_buses_struc_list(self, buses_struc_list):
+    self.buses_struc_list = buses_struc_list
 
-  def set_buses_pass_list_g(self, buses_pass_list_g):
-    self.buses_pass_list_g = buses_pass_list_g
+  def set_buses_struc_list_g(self, buses_struc_list_g):
+    self.buses_struc_list_g = buses_struc_list_g
 
   def set_buses_handler(self, buses_handler):
     self.buses_handler = buses_handler
@@ -146,14 +146,14 @@ class StopsHandler:
 
   def runner_cl(self, sim_time):
     np_total_stops = np.uint32(len(self.pass_list_g))
-    np_total_buses = np.uint32(len(self.buses_pass_list_g))
+    np_total_buses = np.uint32(len(self.buses_struc_list_g))
     np_sim_time = np.uint32(sim_time)
 
     evt = self.prg.masivo_runner(self.queue, (np_total_stops,), None,
                                  self.pass_list_g.data,
                                  self.pass_arrival_list_g.data,
                                  self.pass_alight_list_g.data,
-                                 self.buses_pass_list_g.data,
+                                 self.buses_struc_list_g.data,
                                  np_total_stops, np_total_buses, np_sim_time)
 
     evt.wait()
@@ -168,8 +168,8 @@ class StopsHandler:
   
     
 
-    masivo_c.masivo_runner(self.pass_list, self.pass_arrival_list, self.pass_alight_list, self.buses_pass_list,
-                           len(self.pass_list_g), len(self.buses_pass_list), sim_time)
+    masivo_c.masivo_runner(self.pass_list, self.pass_arrival_list, self.pass_alight_list, self.buses_struc_list,
+                           len(self.pass_list_g), len(self.buses_struc_list), sim_time)
 
 
   def runner(self, sim_time):
@@ -210,29 +210,29 @@ class StopsHandler:
 
       # Handle the buses
       # For each bus
-      for j in range(len(self.buses_pass_list)):
+      for j in range(len(self.buses_struc_list)):
         # If the bus is in the stop
-        if self.pass_list[i]['stop_num'] == self.buses_pass_list[j]['curr_stop']:
+        if self.pass_list[i]['stop_num'] == self.buses_struc_list[j]['curr_stop']:
 
           if 1:
             # ALIGHTING
             # Only if there are passengers in the bus
-            if self.buses_pass_list[j]['total'] > 0:
+            if self.buses_struc_list[j]['total'] > 0:
               # For each pass in the bus
-              for k in range(len(self.buses_pass_list[j]['bpl'])):
-                #print("pass to check(%d): %s " %(k, str(self.buses_pass_list[j]['bpl'][k])))
-                if self.buses_pass_list[j]['bpl'][k]['status'] == globalConstants.PASS_STATUS_IN_BUS:
-                  if self.buses_pass_list[j]['bpl'][k]['dest_stop'] == self.pass_list[i]['stop_num']:
+              for k in range(len(self.buses_struc_list[j]['bpl'])):
+                #print("pass to check(%d): %s " %(k, str(self.buses_struc_list[j]['bpl'][k])))
+                if self.buses_struc_list[j]['bpl'][k]['status'] == globalConstants.PASS_STATUS_IN_BUS:
+                  if self.buses_struc_list[j]['bpl'][k]['dest_stop'] == self.pass_list[i]['stop_num']:
                     logging.info("ALIGHTING pass %s from bus %d to stop %d" %
-                                 (str(self.buses_pass_list[j]['bpl'][k]), j, self.pass_list[i]['stop_num']))
+                                 (str(self.buses_struc_list[j]['bpl'][k]), j, self.pass_list[i]['stop_num']))
 
-                    self.buses_pass_list[j]['bpl'][k]['status'] = globalConstants.PASS_STATUS_ALIGHTED
-                    self.buses_pass_list[j]['bpl'][k]['alight_time'] = sim_time
-                    self.buses_pass_list[j]['total'] -= 1
-                    self.buses_pass_list[j]['last_empty'] -= 1
+                    self.buses_struc_list[j]['bpl'][k]['status'] = globalConstants.PASS_STATUS_ALIGHTED
+                    self.buses_struc_list[j]['bpl'][k]['alight_time'] = sim_time
+                    self.buses_struc_list[j]['total'] -= 1
+                    self.buses_struc_list[j]['last_empty'] -= 1
 
                     m = self.pass_alight_list[i]['last_empty']
-                    self.pass_alight_list[i]['spl'][m] = np.copy(self.buses_pass_list[j]['bpl'][k])
+                    self.pass_alight_list[i]['spl'][m] = np.copy(self.buses_struc_list[j]['bpl'][k])
                     self.pass_alight_list[i]['total'] += 1
                     self.pass_alight_list[i]['last_empty'] += 1
 
@@ -242,18 +242,18 @@ class StopsHandler:
             break
 
           # If the bus is full, continue with the next bus
-          if self.buses_pass_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
+          if self.buses_struc_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
             continue
 
           # For this bus, begin the free space search from the beginning
-          self.buses_pass_list[j]['last_empty'] = 0
+          self.buses_struc_list[j]['last_empty'] = 0
 
           # For each pass in the stop
           for k in range(len(self.pass_list[i]['spl'])):
 
             # print("Check for board: %s" % (self.pass_list[i]['spl'][k]))
             # If the bus is full, continue with the next bus
-            if self.buses_pass_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
+            if self.buses_struc_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
               break
 
             # If we are at the end of the pass list
@@ -265,19 +265,19 @@ class StopsHandler:
 
               # Check if the bus route has the pass destination stop
               bus_for_dest = False
-              # print("Bus %d in stop %d, last stop i %d" % (j, i, self.buses_pass_list[j]['last_stop_i']))
-              for l in (range(self.buses_pass_list[j]['last_stop_table_i'], self.buses_pass_list[j]['total_stops'])):
-                if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_pass_list[j]['stops_num'][l]:
+              # print("Bus %d in stop %d, last stop i %d" % (j, i, self.buses_struc_list[j]['last_stop_i']))
+              for l in (range(self.buses_struc_list[j]['last_stop_table_i'], self.buses_struc_list[j]['total_stops'])):
+                if self.pass_list[i]['spl'][k]['dest_stop'] == self.buses_struc_list[j]['stops_num'][l]:
                   bus_for_dest = True
                   break
 
               # If the bus has the destination stop, pass boards
               if bus_for_dest:
                 # Look for a free space in the bus
-                for n in range(self.buses_pass_list[j]['last_empty'], len(self.buses_pass_list[j]['bpl'])):
-                  # print("bus seat: %d, %s" % (n, str(self.buses_pass_list[j]['bpl'][n])))
+                for n in range(self.buses_struc_list[j]['last_empty'], len(self.buses_struc_list[j]['bpl'])):
+                  # print("bus seat: %d, %s" % (n, str(self.buses_struc_list[j]['bpl'][n])))
 
-                  if self.buses_pass_list[j]['bpl'][n]['status'] == globalConstants.PASS_STATUS_IN_BUS:
+                  if self.buses_struc_list[j]['bpl'][n]['status'] == globalConstants.PASS_STATUS_IN_BUS:
                     # print("busy")
                     continue
 
@@ -287,15 +287,102 @@ class StopsHandler:
                   self.pass_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_IN_BUS
                   self.pass_list[i]['total'] -= 1
 
-                  self.buses_pass_list[j]['bpl'][n] = np.copy(self.pass_list[i]['spl'][k])
-                  self.buses_pass_list[j]['total'] += 1
-                  self.buses_pass_list[j]['last_empty'] = n
+                  self.buses_struc_list[j]['bpl'][n] = np.copy(self.pass_list[i]['spl'][k])
+                  self.buses_struc_list[j]['total'] += 1
+                  self.buses_struc_list[j]['last_empty'] = n
                   break
 
               # If bus is full break to go to the next bus in the stop
-              if self.buses_pass_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
+              if self.buses_struc_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
                 break
 
+
+    # Update buses
+
+    if 1:
+      # For each bus
+      for i in range(len(self.buses_struc_list)):
+        # Do not process finished buses
+        if self.buses_struc_list[i]['curr_stop'] == globalConstants.BUS_FINISHED:
+          continue
+
+        # Check if start the bus
+        if self.buses_struc_list[i]['curr_stop'] == globalConstants.BUS_NOT_STARTED_STOP:
+          if sim_time >= self.buses_struc_list[i]['start_time']:
+            self.buses_struc_list[i]['in_the_stop'] = True
+            self.buses_struc_list[i]['curr_stop'] = self.buses_struc_list[i]['stops_num'][0]
+            self.buses_struc_list[i]["last_stop_i"] = self.buses_struc_list[i]['stops_num'][0]
+            self.buses_struc_list[i]["curr_pos"] = self.buses_struc_list[i]["start_pos"]
+            self.buses_struc_list[i]['last_stop_pos'] = self.buses_struc_list[i]["curr_pos"]
+
+            logging.info("Starting bus %d in stop %d start time %d",
+                         self.buses_struc_list[i]["number"],
+                         self.buses_struc_list[i]['curr_stop'],
+                         self.buses_struc_list[i]['start_time'])
+            #self.bl_head += 1
+          continue
+
+        #self.buses_struc_list[i].update_pos(self.stops_list)
+
+        # Update bus possition
+
+        # If waiting in the stop
+        #print("Bus: %d, in_the_stop_flag: %d, curr_stop %d, pos: %d" %
+        #      (self.buses_struc_list[i]['number'],
+        #       self.buses_struc_list[i]["in_the_stop"],
+        #       self.buses_struc_list[i]['curr_stop'],
+        #       self.buses_struc_list[i]['curr_pos']))
+
+        # Check if we have to depart from the stop
+        if self.buses_struc_list[i]["in_the_stop"]:
+          self.buses_struc_list[i]["in_the_stop_counter"] -= 1
+          if self.buses_struc_list[i]["in_the_stop_counter"] == 0:
+            self.buses_struc_list[i]["last_stop_table_i"] += 1
+            self.buses_struc_list[i]["in_the_stop"] = False
+            self.buses_struc_list[i]["curr_stop"] = globalConstants.BUS_TRAVELING
+
+        # If I am not waiting in a stop, go ahead
+        if self.buses_struc_list[i]["curr_stop"] == globalConstants.BUS_TRAVELING:
+          self.buses_struc_list[i]["curr_pos"] += self.buses_struc_list[i]["travel_speed_m_s"]
+
+        # Check if the bus has to leave the current stop, if not, do not check for other stop
+        if abs(self.buses_struc_list[i]['last_stop_pos'] - self.buses_struc_list[i]["curr_pos"]) < \
+            globalConstants.STOP_BUS_WINDOW_DISTANCE:
+          return
+
+        # Check if the bus is at the next stop
+        next_stop_i = self.buses_struc_list[i]["last_stop_i"] + self.buses_struc_list[i]['stop_inc']
+        #print("next_stop_i: %d/%d" % (next_stop_i, self.buses_struc_list[i]['total_stops']))
+
+        # Check if the next stop is the last one
+        if next_stop_i >= self.buses_struc_list[i]['total_stops'] or next_stop_i < 0:
+          # Finish the bus and put in the rest position
+          self.buses_struc_list[i]["curr_stop"] = globalConstants.BUS_FINISHED
+          self.buses_struc_list[i]["curr_pos"] = 0
+          return
+
+        # Look if the bus is inside the stop window of the next stop
+        if abs(self.stops_list[next_stop_i].position - self.buses_struc_list[i]["curr_pos"]) \
+            < globalConstants.STOP_BUS_WINDOW_DISTANCE:
+
+          # Passing the stop, update last stop index
+          self.buses_struc_list[i]["last_stop_i"] = self.stops_list[next_stop_i].number
+
+          # Check if the stop is in the routes table to stop de bus
+          in_the_route = False
+          for j in range(self.buses_struc_list[i]["stops_num_i"], self.buses_struc_list[i]["total_stops"]):
+            if self.stops_list[next_stop_i].number == self.buses_struc_list[i]["stops_num"][j]:
+              self.buses_struc_list[i]["stops_num_i"] = j
+              in_the_route = True
+
+          # If this stop is in the stops table
+          if in_the_route:
+            logging.info("i: %d, Bus %s, in the stop: %s, pos %d" % (i,
+              self.buses_struc_list[i]['number'], self.stops_list[next_stop_i].name, self.buses_struc_list[i]['curr_pos']))
+            self.buses_struc_list[i]['curr_stop'] = self.stops_list[next_stop_i].number
+            self.buses_struc_list[i]['last_stop_pos'] = self.stops_list[next_stop_i].position
+            self.buses_struc_list[i]['in_the_stop'] = True
+            self.buses_struc_list[i]['in_the_stop_counter'] = globalConstants.BUS_STOPPING_TIME
 
 
 

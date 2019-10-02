@@ -36,6 +36,7 @@ class Bus:
     self.bus_struc['start_time'] = self.start_time
     self.bus_struc['stop_inc'] = self.stop_inc
     self.bus_struc['number'] = self.number
+    self.bus_struc['travel_speed_m_s'] = self.travel_speed_m_s
     self.bus_struc['curr_stop'] = self.bus_struc['stops_num'][0]
     self.bus_struc['in_the_stop_counter'] = globalConstants.BUS_STOPPING_TIME
     self.bus_struc["start_pos"] = self.route.start_stop.x_pos
