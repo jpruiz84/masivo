@@ -30,8 +30,8 @@ class Masivo:
     # Init stops
     self.stops_handler = StopsHandler()
     self.stops_list = self.stops_handler.get_stops_list()
-    self.stops_pass_list = self.stops_handler.get_pass_list()
-    self.stops_pass_alight_list = self.stops_handler.get_pass_alight_list()
+    self.stops_pass_list = self.stops_handler.get_stops_list()
+    self.stops_pass_alight_list = self.stops_handler.get_stops_alight_list()
     self.cl_queue = self.stops_handler.get_cl_queue()
 
     # Init buses

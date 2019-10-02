@@ -34,6 +34,7 @@ class Stop:
     self.pass_list = pass_list
     self.pass_arrival_list = pass_arrival_list
     self.pass_alight_list = pass_alight_list
+    self.pass_list['stop_pos'] = self.x_pos
 
   def set_cl_lists(self, pass_list, pass_arrival_list, pass_alight_list):
     self.pass_list_g = pass_list

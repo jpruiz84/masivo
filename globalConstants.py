@@ -57,7 +57,8 @@ PASS_TYPE = np.dtype([('pass_id', 'u4'), ('orig_stop', 'u2'), ('dest_stop', 'u2'
 # Stop Passengers List (SPL)
 spl_type = np.dtype((PASS_TYPE, STOP_MAX_PASS))
 # Stop Passengers Struct List (SPSL)
-spsl_type = np.dtype([('stop_num', 'u2'), ('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', spl_type)])
+spsl_type = np.dtype([('stop_num', 'u2'), ('stop_pos', 'i4'),
+                      ('total', 'u4'), ('last_empty', 'u4'), ('w_index', 'u4'), ('spl', spl_type)])
 
 # Bus Passengers List (BPL)
 bpl_type = np.dtype((PASS_TYPE, BUS_MAX_PASS))
