@@ -30,3 +30,6 @@ __pycache__/
 *.so
 *.dylib
 *.dll
+
+# For pycharm
+venv/

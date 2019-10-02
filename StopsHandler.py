@@ -207,7 +207,6 @@ class StopsHandler:
           self.stops_arrival_list[i]['total'] -= 1
           self.stops_arrival_list[i]['w_index'] += 1
 
-
       # Handle the buses
       # For each bus
       for j in range(len(self.buses_struc_list)):
@@ -296,9 +295,7 @@ class StopsHandler:
               if self.buses_struc_list[j]['total'] >= globalConstants.BUS_MAX_PASS:
                 break
 
-
     # Update buses
-
     if 1:
       # For each bus
       for i in range(len(self.buses_struc_list)):
@@ -348,18 +345,18 @@ class StopsHandler:
         # Check if the bus has to leave the current stop, if not, do not check for other stop
         if abs(self.buses_struc_list[i]['last_stop_pos'] - self.buses_struc_list[i]["curr_pos"]) < \
             globalConstants.STOP_BUS_WINDOW_DISTANCE:
-          return
+          continue
 
         # Check if the bus is at the next stop
         next_stop_i = self.buses_struc_list[i]["last_stop_i"] + self.buses_struc_list[i]['stop_inc']
-        #print("next_stop_i: %d/%d" % (next_stop_i, self.buses_struc_list[i]['total_stops']))
+        # print("next_stop_i: %d/%d" % (next_stop_i, self.buses_struc_list[i]['total_stops']))
 
         # Check if the next stop is the last one
         if next_stop_i >= self.buses_struc_list[i]['total_stops'] or next_stop_i < 0:
           # Finish the bus and put in the rest position
           self.buses_struc_list[i]["curr_stop"] = globalConstants.BUS_FINISHED
           self.buses_struc_list[i]["curr_pos"] = 0
-          return
+          continue
 
         # Look if the bus is inside the stop window of the next stop
         if abs(self.stops_queue_list[next_stop_i]['stop_pos'] - self.buses_struc_list[i]["curr_pos"]) \
@@ -377,7 +374,7 @@ class StopsHandler:
 
           # If this stop is in the stops table
           if in_the_route:
-            logging.info("i: %d, Bus %s, in the stop: %s, pos %d" % (i,
+            logging.info("i: %d, Bus %d, in the stop: %d, pos %d" % (i,
               self.buses_struc_list[i]['number'], self.stops_queue_list[next_stop_i]['stop_num'],
                                                                      self.buses_struc_list[i]['curr_pos']))
             self.buses_struc_list[i]['curr_stop'] = self.stops_queue_list[next_stop_i]['stop_num']
