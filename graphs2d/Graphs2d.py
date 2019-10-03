@@ -14,6 +14,10 @@ class Graphs2d:
     return y
 
   def speed_up(self, speed_up_data):
+
+    if len(speed_up_data) <= 2:
+      return
+
     fig, ax = plt.subplots()
     ax.plot(speed_up_data["time"], speed_up_data["speed_up"])
     ax.plot(speed_up_data["time"], self.filter_low_pass(speed_up_data["speed_up"]))
@@ -27,6 +31,10 @@ class Graphs2d:
     #plt.show()
 
   def save_speed_up_csv(self, speed_up_data):
+
+    if len(speed_up_data) <= 2:
+      return
+
 
     filtered_data = self.filter_low_pass(speed_up_data["speed_up"])
 

@@ -99,7 +99,7 @@ __kernel void masivo_runner(
   //printf("In gid %d total: %d\n", gid, pass_arrival_list[gid].total);
   if(stops_arrival_list[gid].total > 0){
     #if 1
-    //printf("sim_time: %d\n", sim_time);
+    //printf("gid: %d, sim_time: %d\n", gid, sim_time);
     while(1){
       //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
 

@@ -144,19 +144,25 @@ class StopsHandler:
     end_time = time.time()
     print("generate_pass_input_queue stops time %d ms" % ((end_time - start_time)*1000))
 
-  def runner_cl(self, sim_time):
+  def runner_cl(self, sim_time2):
     np_total_stops = np.uint32(len(self.stops_queue_list_g))
     np_total_buses = np.uint32(len(self.buses_struc_list_g))
-    np_sim_time = np.uint32(sim_time)
+    knl = self.prg.masivo_runner
+    knl.set_arg(0, self.stops_queue_list_g.data)
+    knl.set_arg(1, self.stops_arrival_list_g.data) 
+    knl.set_arg(2, self.stops_alight_list_g.data) 
+    knl.set_arg(3, self.buses_struc_list_g.data) 
+    knl.set_arg(4, np_total_stops) 
+    knl.set_arg(5, np_total_buses) 
 
-    evt = self.prg.masivo_runner(self.queue, (np_total_stops,), (np_total_stops,),
-                                 self.stops_queue_list_g.data,
-                                 self.stops_arrival_list_g.data,
-                                 self.stops_alight_list_g.data,
-                                 self.buses_struc_list_g.data,
-                                 np_total_stops, np_total_buses, np_sim_time)
 
-    evt.wait()
+    for sim_time in range(6000):
+      np_sim_time = np.uint32(sim_time)
+      knl.set_arg(6,np_sim_time)
+      evt = cl.enqueue_nd_range_kernel(self.queue, knl, (np_total_stops,), None)
+
+
+      evt.wait()
 
   def runner_c(self, sim_time):
     masivo_c = ctypes.CDLL('./masivo_c.so')
