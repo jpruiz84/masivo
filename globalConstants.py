@@ -18,7 +18,7 @@ TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
-test_scenario = 3
+test_scenario = 30
 panda3d_enabled = False
 sim_accel_rate = 0
 end_sim_time = 6000

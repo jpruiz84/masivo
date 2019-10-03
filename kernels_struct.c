@@ -266,8 +266,10 @@ __kernel void masivo_runner(
 
 #endif
 
+  barrier(CLK_GLOBAL_MEM_FENCE);
+#if 1
 
-
+  if(gid == 0){
   // Update buses
   // For each bus
   for(int i = 0; i < total_buses; ++i){
@@ -369,4 +371,8 @@ __kernel void masivo_runner(
       }
     }
   }
+
+  }
+
+#endif
 }
