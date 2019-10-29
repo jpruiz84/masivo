@@ -23,7 +23,7 @@ class StopsHandler:
                          for platform in cl.get_platforms())
         # print("\n".join(ocl_platforms))
 
-        cl_platform = cl.get_platforms()[1]
+        cl_platform = cl.get_platforms()[-1]
         cl_devices = cl_platform.get_devices()
 
         if globalConstants.USE_PYOPENCL:

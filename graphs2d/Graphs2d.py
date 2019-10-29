@@ -27,13 +27,13 @@ class Graphs2d:
 
         if globalConstants.USE_PYOPENCL:
             ax.set(title='RTF using PythonCL')
-            fig.savefig("pyopencl_rtf.eps")
+            fig.savefig("results/pyopencl_rtf_tc_%d.eps" % globalConstants.test_scenario)
         elif globalConstants.USE_PYTHON_C:
             ax.set(title='RTF using PythonC')
-            fig.savefig("pythonc_rtf.eps")
+            fig.savefig("results/pythonc_rtf_tc_%d.eps" % globalConstants.test_scenario.eps)
         elif globalConstants.USE_PYTHON:
             ax.set(title='RTF using pure python')
-            fig.savefig("pure_python_rtf.eps")
+            fig.savefig("results/pure_python_rtf_tc_%d.eps" % globalConstants.test_scenario)
 
 
         # plt.show()
@@ -45,7 +45,14 @@ class Graphs2d:
 
         filtered_data = self.filter_low_pass(rtf_data["factor"])
 
-        file = open('rtf.csv', 'w', encoding='utf-8')
+        if globalConstants.USE_PYOPENCL:
+            filename = ("results/pyopencl_rtf_table_tc_%d.csv" % globalConstants.test_scenario)
+        elif globalConstants.USE_PYTHON_C:
+            filename = ("results/pyopenc_rtf_table_tc_%d.csv" % globalConstants.test_scenario)
+        elif globalConstants.USE_PYTHON:
+            filename = ("results/pure_python_rtf_table_tc_%d.csv" % globalConstants.test_scenario)
+
+        file = open(filename, 'w', encoding='utf-8')
         field_names = ["time (s)", "RTF", "RTF filtered"]
         csv_writer = csv.DictWriter(file, fieldnames=field_names, dialect=csv.excel, lineterminator='\n')
         csv_writer.writeheader()
