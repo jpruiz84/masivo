@@ -54,6 +54,10 @@ class Masivo:
     # Main run
     def run(self):
         total_start_time = time.time()
+
+        if globalConstants.USE_PYOPENCL:
+            self.stops_handler.prepare_cl()
+
         for sim_time in range(0, globalConstants.END_SIM_TIME):
             start_time = time.time()
 
