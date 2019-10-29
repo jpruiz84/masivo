@@ -6,18 +6,18 @@ import globalConstants
 
 
 class MasivoRunner(threading.Thread):
-  def run(self):
-    time.sleep(2)
-    masivo.run()
+    def run(self):
+        time.sleep(2)
+        masivo.run()
 
 
 if globalConstants.panda3d_enabled:
-  masivo = Masivo()
-  masivo_data = masivo.get_masivo_data()
-  MasivoRunner().start()
+    masivo = Masivo()
+    masivo_data = masivo.get_masivo_data()
+    MasivoRunner().start()
 
-  panda3d_run(masivo_data)
+    panda3d_run(masivo_data)
 
 else:
-  masivo = Masivo()
-  masivo.run()
+    masivo = Masivo()
+    masivo.run()
