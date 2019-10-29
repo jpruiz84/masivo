@@ -33,7 +33,7 @@ class Masivo:
         self.stops_handler = StopsHandler()
         self.stops_list = self.stops_handler.get_stops_list()
         self.stops_pass_list = self.stops_handler.get_stops_list()
-        self.stops_pass_alight_list = self.stops_handler.get_stops_alight_list()
+        self.stops_handler.get_stops_alight_list()
         self.cl_queue = self.stops_handler.get_cl_queue()
 
         # Init buses
@@ -103,11 +103,10 @@ class Masivo:
                   (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
                    stop.expected_alight_pass))
 
-
         self.graphs2d.speed_up(self.real_time_factor)
         self.graphs2d.save_speed_up_csv(self.real_time_factor)
 
-        results.pass_alight(self.stops_pass_alight_list)
+        results.pass_alight(self.stops_handler.get_stops_alight_list())
 
         if globalConstants.USE_PYTHON:
             print("Python Total time: %f s" % (total_end_time - total_start_time))

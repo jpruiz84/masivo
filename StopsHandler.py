@@ -76,7 +76,10 @@ class StopsHandler:
         return self.stops_queue_list
 
     def get_stops_alight_list(self):
-        return self.stops_alight_list
+        if globalConstants.cl_enabled:
+            return np.array(self.stops_alight_list_g.get(), dtype=globalConstants.spsl_type)
+        else:
+            return self.stops_alight_list
 
     def set_buses_struc_list(self, buses_struc_list):
         self.buses_struc_list = buses_struc_list
