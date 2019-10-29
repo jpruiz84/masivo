@@ -89,6 +89,9 @@ bpsl_type = np.dtype([('number', 'u2'),
                       ('w_index', 'u4'),
                       ('bpl', bpl_type)])
 
+dest_vec_type = np.dtype([('dest_total', 'u4')])
+
+
 PASS_STATUS_EMPTY_255 = 255
 PASS_STATUS_EMPTY = 0
 PASS_STATUS_TO_ARRIVE = 1

@@ -106,11 +106,13 @@ class StopsHandler:
         # Get stop destination vector
         with open(file_name, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-            # Rows have the destinations of the stop users
+            # Rows have the destinations of the users' stops
             for row in reader:
                 i = int(row['stop_number'])
+                self.stops_object_list[i].destination_vector = np.zeros(len(self.stops_object_list),
+                                                                        globalConstants.dest_vec_type)
                 for stop in self.stops_object_list:
-                    self.stops_object_list[i].destination_vector[stop.number] = int(row[stop.name])
+                    self.stops_object_list[i].destination_vector[stop.number]['dest_total'] = int(row[stop.name])
                     self.stops_object_list[stop.number].expected_alight_pass += int(row[stop.name])
 
         # Calculate total pass in and input queue
@@ -120,31 +122,45 @@ class StopsHandler:
     def generate_pass_input(self):
         start_time = time.time()
 
-        # For each destination
-        for i in range(len(self.stops_queue_list)):
-            for j in range(len(self.stops_queue_list[i]['spl'])):
-                self.stops_queue_list[i]['spl'][j]['status'] = globalConstants.PASS_STATUS_EMPTY_255
-                self.stops_arrival_list[i]['spl'][j]['status'] = globalConstants.PASS_STATUS_EMPTY_255
-
-        # Calculate total pass in and input queue
-        for i in range(len(self.stops_object_list)):
-            print("Generating pass input queue for stop name %s" % self.stops_object_list[i].name)
+        if 0:
             # For each destination
-            for key, val in self.stops_object_list[i].destination_vector.items():
-                for j in range(val):
-                    k = self.stops_arrival_list[i]['last_empty']
-                    self.stops_arrival_list[i]['spl'][k]['pass_id'] = globalConstants.pass_num
-                    self.stops_arrival_list[i]['spl'][k]['orig_stop'] = int(self.stops_object_list[i].number)
-                    self.stops_arrival_list[i]['spl'][k]['dest_stop'] = int(key)
-                    self.stops_arrival_list[i]['spl'][k]['arrival_time'] = \
-                        random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
-                    self.stops_arrival_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_TO_ARRIVE
-                    self.stops_arrival_list[i]['total'] += 1
-                    self.stops_arrival_list[i]['last_empty'] += 1
-                    globalConstants.pass_num += 1
+            print("Setting empty pass lists")
+            for i in range(len(self.stops_queue_list)):
+                for j in range(len(self.stops_queue_list[i]['spl'])):
+                    self.stops_queue_list[i]['spl'][j]['status'] = globalConstants.PASS_STATUS_EMPTY_255
+                    self.stops_arrival_list[i]['spl'][j]['status'] = globalConstants.PASS_STATUS_EMPTY_255
 
-            # Sort items by arrival time ascending
-            self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
+            # Calculate total pass in and input queue
+            for i in range(len(self.stops_object_list)):
+                print("Generating pass input queue for stop name %s" % self.stops_object_list[i].name)
+                # For each destination
+                for key, val in enumerate(self.stops_object_list[i].destination_vector):
+                    for j in range(val["dest_total"]):
+                        k = self.stops_arrival_list[i]['last_empty']
+                        self.stops_arrival_list[i]['spl'][k]['pass_id'] = globalConstants.pass_num
+                        self.stops_arrival_list[i]['spl'][k]['orig_stop'] = int(self.stops_object_list[i].number)
+                        self.stops_arrival_list[i]['spl'][k]['dest_stop'] = int(key)
+                        self.stops_arrival_list[i]['spl'][k]['arrival_time'] = \
+                            random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
+                        self.stops_arrival_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_TO_ARRIVE
+                        self.stops_arrival_list[i]['total'] += 1
+                        self.stops_arrival_list[i]['last_empty'] += 1
+                        globalConstants.pass_num += 1
+
+                # Sort items by arrival time ascending
+                self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
+        else:
+            masivo_c = ctypes.CDLL('./c_code/masivo_c.so')
+            masivo_c.generate_pass.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
+                                               np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
+                                               ctypes.c_uint32)
+
+            masivo_c.generate_pass(self.stops_queue_list,
+                                   self.stops_arrival_list,
+                                   len(self.stops_object_list))
+
+
+
         end_time = time.time()
         print("generate_pass_input_queue stops time %d ms" % ((end_time - start_time) * 1000))
 

@@ -375,3 +375,19 @@ __kernel void masivo_runner(
   }
 
 }
+
+
+void generate_pass(
+    SpslType *stops_queue_list,
+    SpslType *stops_arrival_list,
+    unsigned int total_stops                     // Total stops
+    )
+    {
+        printf("Setting empty pass lists\n");
+        for (int i = 0; i < total_stops; ++i) {
+            for (int j = 0; j < STOP_MAX_PASS; ++j) {
+                stops_queue_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
+                stops_arrival_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
+            }
+        }
+    }

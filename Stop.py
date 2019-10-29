@@ -26,7 +26,7 @@ class Stop:
         self.pass_arrival_list_g = 0
         self.pass_alight_list_g = 0
 
-        self.destination_vector = {}
+        self.destination_vector = 0
         self.expected_alight_pass = 0
         self.last_arrived_index = 0
         self.sap_index = 0
@@ -56,8 +56,8 @@ class Stop:
 
     def calculate_total_pass_in(self):
         self.total_pass_in = 0
-        for key, value in self.destination_vector.items():
-            self.total_pass_in += value
+        for d in self.destination_vector:
+            self.total_pass_in += d['dest_total']
 
     @staticmethod
     def get_pass_arrival_time(pass_pack):
