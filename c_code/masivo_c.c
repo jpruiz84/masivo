@@ -162,6 +162,7 @@ __kernel void masivo_runner(
                 //printf("ALIGHTING pass id %d from bus %d to stop %d\n", buses_pass_list[j].bpl[k].pass_id, j, pass_list[gid].stop_num);
 
                 buses_struc_list[j].bpl[k].status = PASS_STATUS_ALIGHTED;
+                buses_struc_list[j].bpl[k].alight_time = sim_time;
                 buses_struc_list[j].total -= 1;
                 buses_struc_list[j].last_empty -= 1;
 

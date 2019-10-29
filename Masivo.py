@@ -27,7 +27,7 @@ class Masivo:
         self.stops_list = []
         self.buses_list = []
         self.finished_buses_list = []
-        self.speed_up = {"time": [], "speed_up": []}
+        self.real_time_factor = {"time": [], "factor": []}
 
         # Init stops
         self.stops_handler = StopsHandler()
@@ -68,18 +68,16 @@ class Masivo:
             if globalConstants.USE_PYTHON:
                 self.stops_handler.runner(sim_time)
 
-            # self.buses_handler.runner(sim_time)
-
             if globalConstants.SIM_ACCEL_RATE > 0:
                 while (time.time() - start_time) < (1 / globalConstants.SIM_ACCEL_RATE):
                     pass
 
-            self.speed_up["time"].append(sim_time)
-            self.speed_up["speed_up"].append(1 / (time.time() - start_time))
+            self.real_time_factor["time"].append(sim_time)
+            self.real_time_factor["factor"].append(1 / (time.time() - start_time))
 
         total_end_time = time.time()
 
-        print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
+        print("\nAverage real time factor: %d" % np.mean(self.real_time_factor["factor"]))
         print("Total time: %f s" % (total_end_time - total_start_time))
 
         # END SIMULATION, log results
@@ -101,10 +99,9 @@ class Masivo:
                   (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
                    stop.expected_alight_pass))
 
-        print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
 
-        self.graphs2d.speed_up(self.speed_up)
-        self.graphs2d.save_speed_up_csv(self.speed_up)
+        self.graphs2d.speed_up(self.real_time_factor)
+        self.graphs2d.save_speed_up_csv(self.real_time_factor)
 
         results.pass_alight(self.stops_pass_alight_list)
 
