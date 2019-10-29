@@ -54,7 +54,7 @@ class Masivo:
     # Main run
     def run(self):
         total_start_time = time.time()
-        for sim_time in range(0, globalConstants.end_sim_time):
+        for sim_time in range(0, globalConstants.END_SIM_TIME):
             start_time = time.time()
 
             if (sim_time % 10) == 0:
@@ -70,8 +70,8 @@ class Masivo:
 
             # self.buses_handler.runner(sim_time)
 
-            if globalConstants.sim_accel_rate > 0:
-                while (time.time() - start_time) < (1 / globalConstants.sim_accel_rate):
+            if globalConstants.SIM_ACCEL_RATE > 0:
+                while (time.time() - start_time) < (1 / globalConstants.SIM_ACCEL_RATE):
                     pass
 
             self.speed_up["time"].append(sim_time)
@@ -89,10 +89,11 @@ class Masivo:
         print("Total stops: %d" % len(self.masivo_data["stops_list"]))
         print("\n")
 
-        print('\nBuses list:')
-        for i in range(len(self.buses_struc_list)):
-            print("Bus %s have %d pass, final pos %d" %
-                  (self.buses_list[i].number, self.buses_struc_list[i]['total'], self.buses_struc_list[i]['curr_pos']))
+        if 0:
+            print('\nBuses list:')
+            for i in range(len(self.buses_struc_list)):
+                print("Bus %s have %d pass, final pos %d" %
+                      (self.buses_list[i].number, self.buses_struc_list[i]['total'], self.buses_struc_list[i]['curr_pos']))
 
         print('\nStops list:')
         for stop in self.masivo_data["stops_list"]:

@@ -50,7 +50,7 @@ class Masivo:
 
   def run(self):
     total_start_time = time.time()
-    for sim_time in range(0, globalConstants.end_sim_time):
+    for sim_time in range(0, globalConstants.END_SIM_TIME):
       start_time = time.time()
 
       if (sim_time % 10) == 0:
@@ -66,8 +66,8 @@ class Masivo:
 
       #self.buses_handler.runner(sim_time)
 
-      if globalConstants.sim_accel_rate > 0:
-        while (time.time() - start_time) < (1 / globalConstants.sim_accel_rate):
+      if globalConstants.SIM_ACCEL_RATE > 0:
+        while (time.time() - start_time) < (1 / globalConstants.SIM_ACCEL_RATE):
           pass
 
       self.speed_up["time"].append(sim_time)

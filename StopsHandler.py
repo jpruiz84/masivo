@@ -15,7 +15,7 @@ class StopsHandler:
     def __init__(self):
 
         print('load program from cl source file')
-        f = open('kernels_struct.c', 'r', encoding='utf-8')
+        f = open('c_code/kernels_struct.c', 'r', encoding='utf-8')
         kernels = ''.join(f.readlines())
         f.close()
 
@@ -162,16 +162,20 @@ class StopsHandler:
             evt.wait()
 
     def runner_c(self, sim_time):
-        masivo_c = ctypes.CDLL('./masivo_c.so')
+        masivo_c = ctypes.CDLL('./c_code/masivo_c.so')
         masivo_c.masivo_runner.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
                                            np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
                                            np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
                                            np.ctypeslib.ndpointer(dtype=globalConstants.bpsl_type),
                                            ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32)
 
-        masivo_c.masivo_runner(self.stops_queue_list, self.stops_arrival_list, self.stops_alight_list,
+        masivo_c.masivo_runner(self.stops_queue_list,
+                               self.stops_arrival_list,
+                               self.stops_alight_list,
                                self.buses_struc_list,
-                               len(self.stops_queue_list_g), len(self.buses_struc_list), sim_time)
+                               len(self.stops_queue_list_g),
+                               len(self.buses_struc_list),
+                               sim_time)
 
     def runner(self, sim_time):
 
@@ -224,8 +228,8 @@ class StopsHandler:
                             for k in range(len(self.buses_struc_list[j]['bpl'])):
                                 # print("pass to check(%d): %s " %(k, str(self.buses_struc_list[j]['bpl'][k])))
                                 if self.buses_struc_list[j]['bpl'][k]['status'] == globalConstants.PASS_STATUS_IN_BUS:
-                                    if self.buses_struc_list[j]['bpl'][k]['dest_stop'] == self.stops_queue_list[i][
-                                        'stop_num']:
+                                    if self.buses_struc_list[j]['bpl'][k]['dest_stop'] == \
+                                            self.stops_queue_list[i]['stop_num']:
                                         logging.info("ALIGHTING pass %s from bus %d to stop %d" %
                                                      (str(self.buses_struc_list[j]['bpl'][k]), j,
                                                       self.stops_queue_list[i]['stop_num']))
@@ -271,7 +275,8 @@ class StopsHandler:
 
                             # Check if the bus route has the pass destination stop
                             bus_for_dest = False
-                            # print("Bus %d in stop %d, last stop i %d" % (j, i, self.buses_struc_list[j]['last_stop_i']))
+                            # print("Bus %d in stop %d, last stop i %d" %
+                            # (j, i, self.buses_struc_list[j]['last_stop_i']))
                             for l in (range(self.buses_struc_list[j]['last_stop_table_i'],
                                             self.buses_struc_list[j]['total_stops'])):
                                 if self.stops_queue_list[i]['spl'][k]['dest_stop'] == \
@@ -286,8 +291,8 @@ class StopsHandler:
                                                len(self.buses_struc_list[j]['bpl'])):
                                     # print("bus seat: %d, %s" % (n, str(self.buses_struc_list[j]['bpl'][n])))
 
-                                    if self.buses_struc_list[j]['bpl'][n][
-                                        'status'] == globalConstants.PASS_STATUS_IN_BUS:
+                                    if self.buses_struc_list[j]['bpl'][n]['status'] == \
+                                            globalConstants.PASS_STATUS_IN_BUS:
                                         # print("busy")
                                         continue
 

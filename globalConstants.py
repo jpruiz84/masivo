@@ -18,14 +18,15 @@ TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
-test_scenario = 30
-panda3d_enabled = False
-sim_accel_rate = 0
-end_sim_time = 1
+test_scenario = 3
+
+PANDA_3D_ENABLED = False
+SIM_ACCEL_RATE = 0
+END_SIM_TIME = 6000
 
 USE_PYTHON = 0
-USE_PYOPENCL = 1
-USE_PYTHON_C = 0
+USE_PYOPENCL = 0
+USE_PYTHON_C = 1
 
 if USE_PYOPENCL:
     cl_enabled = True

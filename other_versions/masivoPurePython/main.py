@@ -11,7 +11,7 @@ class MasivoRunner(threading.Thread):
     masivo.run()
 
 
-if globalConstants.panda3d_enabled:
+if globalConstants.PANDA_3D_ENABLED:
   masivo = Masivo()
   masivo_data = masivo.get_masivo_data()
   MasivoRunner().start()
