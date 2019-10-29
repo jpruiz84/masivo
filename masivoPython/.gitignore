@@ -1,0 +1,35 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Blender
+*.blend*
+
+# Libre office
+.~*
+
+# Pycharm
+.idea/
+
+# Result graphs
+*.eps
+*.svg
+*.pdf
+*.png
+
+# Result tables
+*.csv
+
+# For ctypes 
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# For pycharm
+venv/
