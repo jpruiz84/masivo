@@ -36,3 +36,11 @@ OpenCL/bin
 
 # Visual Studio Code folders
 .idea
+
+# For pycharm
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
