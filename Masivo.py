@@ -103,7 +103,7 @@ class Masivo:
                   (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
                    stop.expected_alight_pass))
 
-        self.graphs2d.speed_up(self.real_time_factor)
+        self.graphs2d.real_time_factor_graph(self.real_time_factor)
         self.graphs2d.save_speed_up_csv(self.real_time_factor)
 
         results.pass_alight(self.stops_handler.get_stops_alight_list())

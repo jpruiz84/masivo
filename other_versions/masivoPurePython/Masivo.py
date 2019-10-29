@@ -97,7 +97,7 @@ class Masivo:
 
     print("\nAverage speed up: %d" % np.mean(self.speed_up["speed_up"]))
 
-    self.graphs2d.speed_up(self.speed_up)
+    self.graphs2d.real_time_factor_graph(self.speed_up)
     self.graphs2d.save_speed_up_csv(self.speed_up)
 
     results.pass_alight(self.stops_pass_alight_list)

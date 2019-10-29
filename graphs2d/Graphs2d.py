@@ -1,7 +1,7 @@
 from scipy.signal import butter, filtfilt
 import matplotlib.pyplot as plt
 import csv
-
+import globalConstants
 
 class Graphs2d:
 
@@ -13,38 +13,46 @@ class Graphs2d:
 
         return y
 
-    def speed_up(self, speed_up_data):
-
-        if len(speed_up_data) <= 2:
+    def real_time_factor_graph(self, rtf_data):
+        if len(rtf_data["time"]) <= 2:
             return
 
         fig, ax = plt.subplots()
-        ax.plot(speed_up_data["time"], speed_up_data["speed_up"])
-        ax.plot(speed_up_data["time"], self.filter_low_pass(speed_up_data["speed_up"]))
+        ax.plot(rtf_data["time"], rtf_data["factor"])
+        ax.plot(rtf_data["time"], self.filter_low_pass(rtf_data["factor"]))
 
-        ax.set(xlabel='time (s)', ylabel='Speed up',
-               title='Simulation speed up')
+        ax.set(xlabel='time (s)', ylabel='Real time factor')
         ax.grid()
         # ax.set_yscale('log')
 
-        fig.savefig("speed_up.eps")
+        if globalConstants.USE_PYOPENCL:
+            ax.set(title='RTF using PythonCL')
+            fig.savefig("pyopencl_rtf.eps")
+        elif globalConstants.USE_PYTHON_C:
+            ax.set(title='RTF using PythonC')
+            fig.savefig("pythonc_rtf.eps")
+        elif globalConstants.USE_PYTHON:
+            ax.set(title='RTF using pure python')
+            fig.savefig("pure_python_rtf.eps")
+
+
         # plt.show()
 
-    def save_speed_up_csv(self, speed_up_data):
+    def save_speed_up_csv(self, rtf_data):
 
-        if len(speed_up_data) <= 2:
+        if len(rtf_data["time"]) <= 2:
             return
 
-        filtered_data = self.filter_low_pass(speed_up_data["speed_up"])
+        filtered_data = self.filter_low_pass(rtf_data["factor"])
 
-        file = open('speed_up.csv', 'w', encoding='utf-8')
-        field_names = ["time (s)", "Speed up", "Speed up filtered"]
+        file = open('rtf.csv', 'w', encoding='utf-8')
+        field_names = ["time (s)", "RTF", "RTF filtered"]
         csv_writer = csv.DictWriter(file, fieldnames=field_names, dialect=csv.excel, lineterminator='\n')
         csv_writer.writeheader()
 
-        for i in range(0, len(speed_up_data['time'])):
-            csv_writer.writerow({'time (s)': str(speed_up_data['time'][i]),
-                                 'Speed up': str(speed_up_data['speed_up'][i]),
-                                 'Speed up filtered': str(filtered_data[i])})
+        for i in range(0, len(rtf_data['time'])):
+            csv_writer.writerow({'time (s)': str(rtf_data['time'][i]),
+                                 'RTF': str(rtf_data['factor'][i]),
+                                 'RTF filtered': str(filtered_data[i])})
 
         file.close()
