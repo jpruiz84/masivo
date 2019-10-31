@@ -150,14 +150,21 @@ class StopsHandler:
                 # Sort items by arrival time ascending
                 self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
         else:
-            masivo_c = ctypes.CDLL('./c_code/masivo_c.so')
-            masivo_c.generate_pass.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
-                                               np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
-                                               ctypes.c_uint32)
+            # For each destination
+            print("Setting empty pass lists")
+            for i in range(len(self.stops_queue_list)):
+                masivo_c = ctypes.CDLL('./c_code/masivo_c.so')
+                masivo_c.generate_pass.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
+                                                   np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
+                                                   np.ctypeslib.ndpointer(dtype=globalConstants.dest_vec_type),
+                                                   ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32)
 
-            masivo_c.generate_pass(self.stops_queue_list,
-                                   self.stops_arrival_list,
-                                   len(self.stops_object_list))
+                masivo_c.generate_pass(self.stops_queue_list,
+                                       self.stops_arrival_list,
+                                       self.stops_object_list[i].destination_vector,
+                                       i,
+                                       len(self.stops_object_list),
+                                       len(self.stops_object_list[i].destination_vector))
 
 
 

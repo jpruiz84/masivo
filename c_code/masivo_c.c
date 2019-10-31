@@ -24,6 +24,8 @@
 #define BUS_TRAVEL_SPEED_M_S         54*1000/3600
 #define BUS_STOPPING_TIME            10
 
+#define PASS_TOTAL_ARRIVAL_TIME   3600
+
 #define BUS_NOT_STARTED_STOP  20000
 #define EMPTY_STOP_NUMBER     20000
 #define BUS_TRAVELING         20001
@@ -380,14 +382,51 @@ __kernel void masivo_runner(
 void generate_pass(
     SpslType *stops_queue_list,
     SpslType *stops_arrival_list,
-    unsigned int total_stops                     // Total stops
+    unsigned int *destination_vector,
+    unsigned int i,
+    unsigned int total_stops,
+    unsigned int len_dest_vector
     )
-    {
-        printf("Setting empty pass lists\n");
-        for (int i = 0; i < total_stops; ++i) {
-            for (int j = 0; j < STOP_MAX_PASS; ++j) {
-                stops_queue_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
-                stops_arrival_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
-            }
+{
+
+    unsigned int k = 0;
+    unsigned int pass_count = 0;
+    unsigned int total_pass = 0;
+
+    printf("Generating pass input queue for stop: %d\n", i);
+
+    for (int j = 0; j < STOP_MAX_PASS; ++j) {
+        stops_queue_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
+        stops_arrival_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
+    }
+
+    for (int j = 0; j < len_dest_vector; ++j) {
+        //printf("destination_vector(%d): %d\n", j, destination_vector[j]);
+        total_pass += destination_vector[j];
+    }
+
+#if 1
+
+    // For each destination
+    //for key, val in enumerate(self.stops_object_list[i].destination_vector):
+    for (int key = 0; key < len_dest_vector; ++key) {
+        //for j in range(val["dest_total"]):
+        for (int j = 0; j < destination_vector[key]; ++j){
+            k = stops_arrival_list[i].last_empty;
+            stops_arrival_list[i].spl[k].pass_id = i*1000000 + pass_count;
+            stops_arrival_list[i].spl[k].orig_stop = i;
+            stops_arrival_list[i].spl[k].dest_stop = key;
+            stops_arrival_list[i].spl[k].arrival_time = pass_count*PASS_TOTAL_ARRIVAL_TIME / total_pass ;
+            stops_arrival_list[i].spl[k].status = PASS_STATUS_TO_ARRIVE;
+            stops_arrival_list[i].total += 1;
+            stops_arrival_list[i].last_empty += 1;
+            pass_count +=1;
         }
     }
+
+
+    //Sort items by arrival time ascending
+    //self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
+#endif
+
+}
