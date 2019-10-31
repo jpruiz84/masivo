@@ -39,3 +39,22 @@ def pass_alight(pass_list):
     print("Average commute time %f s" % avg_commute_time)
 
     file.close()
+
+
+def pass_alight2(pass_list):
+    # Create output folders if not exist
+
+    stop_ct_array = []
+    for stops in pass_list:
+        commute_time = []
+        for pass_data in stops['spl']:
+            if pass_data['status'] == globalConstants.PASS_STATUS_ALIGHTED:
+                commute_time.append(int(pass_data['alight_time']) - int(pass_data['arrival_time']))
+
+        if len(commute_time):
+            avg_commute_time = float(sum(commute_time)) / float(len(commute_time))
+        else:
+            avg_commute_time = 0
+        stop_ct_array.append(avg_commute_time)
+
+    print(stop_ct_array)

@@ -16,7 +16,7 @@ class Masivo:
         # Configuring logging format
         # logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
         logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
-        logging.info("Starting Masivo public transport simulator")
+        print("\n\nStarting Masivo public transport simulator\n")
 
         # Init objects
         self.graphs2d = Graphs2d()
@@ -94,12 +94,12 @@ class Masivo:
         if 0:
             print('\nBuses list:')
             for i in range(len(self.buses_struc_list)):
-                print("Bus %s have %d pass, final pos %d" %
+                print("Bus %s has %d pass, final pos %d" %
                       (self.buses_list[i].number, self.buses_struc_list[i]['total'], self.buses_struc_list[i]['curr_pos']))
 
         print('\nStops list:')
         for stop in self.masivo_data["stops_list"]:
-            print("Stop %s have %d/%d pass, and alighted %d/%d out" %
+            print("Stop %s has %d/%d pass, and alighted %d/%d out" %
                   (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
                    stop.expected_alight_pass))
 
@@ -107,6 +107,8 @@ class Masivo:
         self.graphs2d.save_speed_up_csv(self.real_time_factor)
 
         results.pass_alight(self.stops_handler.get_stops_alight_list())
+        #results.pass_alight2(self.stops_handler.get_stops_alight_list())
+        self.graphs2d.statics1(self.stops_handler.get_stops_alight_list())
 
         if globalConstants.USE_PYTHON:
             print("Python Total time: %f s" % (total_end_time - total_start_time))

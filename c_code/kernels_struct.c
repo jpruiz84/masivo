@@ -320,7 +320,14 @@ __kernel void masivo_runner(
 
     // if I am not waiting in a stop, go ahead
     if(buses_struc_list[i].curr_stop == BUS_TRAVELING){
-      buses_struc_list[i].curr_pos += buses_struc_list[i].travel_speed_m_s;
+
+      if(buses_struc_list[i].curr_pos > 1000 && buses_struc_list[i].curr_pos < 3000){
+        buses_struc_list[i].curr_pos += buses_struc_list[i].travel_speed_m_s;
+      }else{
+        buses_struc_list[i].curr_pos += buses_struc_list[i].travel_speed_m_s;
+      }
+
+
     }
 
     // Check if the bus has to leave the current stop, if not, do not check for other stop
