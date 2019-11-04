@@ -58,12 +58,9 @@ class Masivo:
         if globalConstants.USE_PYOPENCL:
             self.stops_handler.prepare_cl()
 
+        start_perf_time = time.time()
         for sim_time in range(0, globalConstants.END_SIM_TIME):
-            start_time = time.time()
-
-            if (sim_time % 10) == 0:
-                sys.stdout.write("\rtime: %d  " % sim_time)
-                sys.stdout.flush()
+            start_op_time = time.time()
 
             if globalConstants.USE_PYOPENCL:
                 self.stops_handler.runner_cl(sim_time)
@@ -73,11 +70,17 @@ class Masivo:
                 self.stops_handler.runner(sim_time)
 
             if globalConstants.SIM_ACCEL_RATE > 0:
-                while (time.time() - start_time) < (1 / globalConstants.SIM_ACCEL_RATE):
+                while (time.time() - start_op_time) < (1 / globalConstants.SIM_ACCEL_RATE):
                     pass
 
-            self.real_time_factor["time"].append(sim_time)
-            self.real_time_factor["factor"].append(1 / (time.time() - start_time))
+            if (sim_time % globalConstants.PERFORMANCE_ODR) == 0:
+                if(sim_time / globalConstants.PERFORMANCE_ODR) > 2:
+                    self.real_time_factor["time"].append(sim_time)
+                    self.real_time_factor["factor"].append(globalConstants.PERFORMANCE_ODR / (time.time() - start_perf_time))
+                start_perf_time = time.time()
+                sys.stdout.write("\rtime: %d  " % sim_time)
+                sys.stdout.flush()
+
 
         total_end_time = time.time()
 

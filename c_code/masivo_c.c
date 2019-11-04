@@ -383,7 +383,7 @@ void generate_pass(
     SpslType *stops_queue_list,
     SpslType *stops_arrival_list,
     unsigned int *destination_vector,
-    unsigned int i,
+    unsigned int i,                     // Stop index
     unsigned int total_stops,
     unsigned int len_dest_vector
     )
@@ -395,11 +395,14 @@ void generate_pass(
 
     printf("Generating pass input queue for stop: %d\n", i);
 
+
+    // Set empty lists
     for (int j = 0; j < STOP_MAX_PASS; ++j) {
         stops_queue_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
         stops_arrival_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
     }
 
+    // Calculate total passengers
     for (int j = 0; j < len_dest_vector; ++j) {
         //printf("destination_vector(%d): %d\n", j, destination_vector[j]);
         total_pass += destination_vector[j];

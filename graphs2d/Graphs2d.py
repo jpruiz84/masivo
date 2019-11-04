@@ -8,7 +8,7 @@ class Graphs2d:
 
     def filter_low_pass(self, x):
         fOrder = 5
-        normal_cutoff = 0.005
+        normal_cutoff = 0.05
         b, a = butter(fOrder, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, x)
 
@@ -25,6 +25,8 @@ class Graphs2d:
         ax.set(xlabel='time (s)', ylabel='Real time factor')
         ax.grid()
         # ax.set_yscale('log')
+        [ymin, ymax] = ax.get_ylim()
+        ax.set_ylim(0, ymax)
 
         if globalConstants.USE_PYOPENCL:
             ax.set(title='RTF using PythonCL')
@@ -36,8 +38,9 @@ class Graphs2d:
             ax.set(title='RTF using pure python')
             fig.savefig("results/pure_python_rtf_tc_%d.eps" % globalConstants.test_scenario)
 
+        plt.show()
         plt.close()
-        # plt.show()
+
 
     def save_speed_up_csv(self, rtf_data):
 

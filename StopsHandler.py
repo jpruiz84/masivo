@@ -165,6 +165,8 @@ class StopsHandler:
                                        i,
                                        len(self.stops_object_list),
                                        len(self.stops_object_list[i].destination_vector))
+                #for p in self.stops_arrival_list[i]['spl']:
+                #    print(p)
 
 
 
