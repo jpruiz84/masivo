@@ -18,7 +18,7 @@ TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 
-test_scenario = 30
+test_scenario = 3
 
 PANDA_3D_ENABLED = False
 SIM_ACCEL_RATE = 0
@@ -28,20 +28,20 @@ USE_PYTHON = 0
 USE_PYOPENCL = 1
 USE_PYTHON_C = 0
 
-if USE_PYOPENCL:
-    cl_enabled = True
-else:
-    cl_enabled = False
 
 if test_scenario == 3:
-    ODM_FILE = 'utils/odm3small.csv'
-    ROUTES_FILE = 'utils/routes3small.csv'
+    if 1:
+        ODM_FILE = 'inputs/odm3.csv'
+        ROUTES_FILE = 'inputs/routes3.csv'
+    else:
+        ODM_FILE = 'inputs/odm3small.csv'
+        ROUTES_FILE = 'inputs/routes3small.csv'
 if test_scenario == 30:
-    ODM_FILE = 'utils/odm30.csv'
-    ROUTES_FILE = 'utils/routes30.csv'
+    ODM_FILE = 'inputs/odm30.csv'
+    ROUTES_FILE = 'inputs/routes30.csv'
 if test_scenario == 300:
-    ODM_FILE = 'utils/odm300.csv'
-    ROUTES_FILE = 'utils/routes300.csv'
+    ODM_FILE = 'inputs/odm300.csv'
+    ROUTES_FILE = 'inputs/routes300.csv'
 
 BUS_NOT_STARTED_STOP = 20000
 BUS_TRAVELING = 20001
@@ -100,3 +100,8 @@ PASS_STATUS_IN_BUS = 3
 PASS_STATUS_ALIGHTED = 4
 
 RESULTS_FOLDER = 'results'
+
+if USE_PYOPENCL:
+    cl_enabled = True
+else:
+    cl_enabled = False

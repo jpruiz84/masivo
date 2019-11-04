@@ -1,6 +1,0 @@
-route_number,route_name,route_frequency,route_offset,route_dir,route_notes,route_stops_table
-0,Route_00,300,100,W-E,all stops,"Stop_00,Stop_01,Stop_02"
-1,Route_01,300,200,W-E,,"Stop_00,Stop_01"
-2,Route_02,300,300,W-E,,"Stop_01,Stop_02"
-3,Route_03,300,400,W-E,,"Stop_00,Stop_02"
-4,Route_04,100,0,E-W,all stops,"Stop_02,Stop_01,Stop_00"

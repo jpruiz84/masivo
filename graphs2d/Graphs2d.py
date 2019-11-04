@@ -101,7 +101,7 @@ class Graphs2d:
         ax.bar(x - width / 2, stop_ct_we_array, width, label='W-E')
         ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W')
 
-        ax.set(xlabel='Stops number', ylabel='Average commute time (min)')
+        ax.set(xlabel='Stop number', ylabel='Average commute time (min)')
         ax.legend(title="Passenger direction")
 
         plt.show()

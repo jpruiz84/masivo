@@ -1,0 +1,5 @@
+route_number,route_name,route_frequency,route_offset,route_buses,route_dir,route_notes,route_stops_table
+0,Route_00,300,100,50,W-E,all stops,"Stop_00,Stop_01,Stop_02"
+1,Route_01,300,100,50,E-W,all stops,"Stop_02,Stop_01,Stop_00"
+2,Route_02,900,100,50,W-E,express,"Stop_00,Stop_02"
+3,Route_03,900,100,50,E-W,express,"Stop_02,Stop_00"

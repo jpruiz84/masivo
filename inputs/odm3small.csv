@@ -1,0 +1,4 @@
+stop_number,stop_name,x_pos,y_pos,max_capacity,Stop_00,Stop_01,Stop_02
+0,Stop_00,400,1000,30,0,10,20
+1,Stop_01,800,1000,20,10,0,10
+2,Stop_02,1200,1000,30,20,10,0
