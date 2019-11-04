@@ -16,7 +16,7 @@
 #define PASS_STATUS_ALIGHTED      4
 
 #define BUS_TRAVEL_SPEED_M_S         54*1000/3600
-#define BUS_STOPPING_TIME            10
+#define BUS_STOPPING_TIME            20
 
 #define BUS_NOT_STARTED_STOP  20000
 #define EMPTY_STOP_NUMBER     20000

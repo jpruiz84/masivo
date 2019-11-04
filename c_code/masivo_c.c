@@ -22,7 +22,7 @@
 #define PASS_STATUS_ALIGHTED      4
 
 #define BUS_TRAVEL_SPEED_M_S         54*1000/3600
-#define BUS_STOPPING_TIME            10
+#define BUS_STOPPING_TIME            20
 
 #define PASS_TOTAL_ARRIVAL_TIME   3600
 
