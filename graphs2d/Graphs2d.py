@@ -7,7 +7,7 @@ import numpy as np
 class Graphs2d:
 
     def filter_low_pass(self, x):
-        fOrder = 5
+        fOrder = 3
         normal_cutoff = 0.05
         b, a = butter(fOrder, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, x)
@@ -15,7 +15,10 @@ class Graphs2d:
         return y
 
     def real_time_factor_graph(self, rtf_data):
-        if len(rtf_data["time"]) <= 2:
+
+        print("\nAverage real time factor: %d" % np.mean(rtf_data["factor"]))
+
+        if len(rtf_data["time"]) <= 10:
             return
 
         fig, ax = plt.subplots()
@@ -38,13 +41,13 @@ class Graphs2d:
             ax.set(title='RTF using pure python')
             fig.savefig("results/pure_python_rtf_tc_%d.eps" % globalConstants.test_scenario)
 
-        plt.show()
+        #plt.show()
         plt.close()
 
 
     def save_speed_up_csv(self, rtf_data):
 
-        if len(rtf_data["time"]) <= 2:
+        if len(rtf_data["time"]) <= 10:
             return
 
         filtered_data = self.filter_low_pass(rtf_data["factor"])
@@ -68,7 +71,7 @@ class Graphs2d:
 
         file.close()
 
-    def statics1(self, pass_list):
+    def commute_time(self, pass_list):
         # Create output folders if not exist
 
         stop_ct_we_array = []
@@ -107,4 +110,59 @@ class Graphs2d:
         ax.set(xlabel='Stop number', ylabel='Average commute time (min)')
         ax.legend(title="Passenger direction")
 
+        #plt.show()
+        plt.close()
+
+    def served_passengers(self, stops_list):
+        # Create output folders if not exist
+
+        print('\nStops list:')
+        for stop in stops_list:
+            print("Stop %s has %d/%d pass, and alighted %d/%d out" %
+                  (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
+                   stop.expected_alight_pass))
+
+        # This data comes from stop.pass_count(), stop.total_pass_in
+        pass_waiting = []
+        pass_boarded = []
+
+        # This data comes from stop.pass_alight_count(), stop.expected_alight_pass
+        pass_alighted = []
+        pass_not_alighted = []
+
+        total_alighted_pass = 0
+        total_expected_alighted_pass = 0
+
+        for stop in stops_list:
+            pass_waiting.append(int(stop.pass_count()))
+            pass_boarded.append(stop.total_pass_in - stop.pass_count())
+
+            pass_alighted.append(int(stop.pass_alight_count()))
+            pass_not_alighted.append(stop.expected_alight_pass - stop.pass_alight_count())
+
+            total_alighted_pass += int(stop.pass_alight_count())
+            total_expected_alighted_pass += stop.expected_alight_pass
+
+        print("Total alighted: %d/%d,  %f%%" % (total_alighted_pass,
+                                                total_expected_alighted_pass,
+                                                100.0 * total_alighted_pass / total_expected_alighted_pass))
+
+        width = 0.5  # the width of the bars
+
+        x = np.arange(len(pass_waiting))
+        fig, ax = plt.subplots()
+        # ax.grid()
+
+        #p1 = ax.bar(x, pass_boarded, width, label='Departed')
+        #p2 = ax.bar(x, pass_waiting, width, bottom=pass_boarded, label='Still waiting')
+        #ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Origin stop passengers')
+        #ax.legend()
+
+        p1 = ax.bar(x, pass_alighted, width, label='Alighted')
+        p2 = ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted')
+        ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers')
+        ax.legend()
+
         plt.show()
+
+        print('')

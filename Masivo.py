@@ -84,15 +84,14 @@ class Masivo:
 
         total_end_time = time.time()
 
-        print("\nAverage real time factor: %d" % np.mean(self.real_time_factor["factor"]))
-        print("Total time: %f s" % (total_end_time - total_start_time))
+        print("\nTotal execution time: %f s" % (total_end_time - total_start_time))
 
         # END SIMULATION, log results
-        print("\n\nEND SIMULATION !!!!!")
+        print("\nEND SIMULATION !!!!!")
         print("Total present buses: %d" % len(self.buses_list))
         print("Total finished buses: %d" % len(self.finished_buses_list))
         print("Total stops: %d" % len(self.masivo_data["stops_list"]))
-        print("\n")
+        print("")
 
         if 0:
             print('\nBuses list:')
@@ -100,18 +99,17 @@ class Masivo:
                 print("Bus %s has %d pass, final pos %d" %
                       (self.buses_list[i].number, self.buses_struc_list[i]['total'], self.buses_struc_list[i]['curr_pos']))
 
-        print('\nStops list:')
-        for stop in self.masivo_data["stops_list"]:
-            print("Stop %s has %d/%d pass, and alighted %d/%d out" %
-                  (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
-                   stop.expected_alight_pass))
+
+        self.graphs2d.served_passengers(self.masivo_data["stops_list"])
 
         self.graphs2d.real_time_factor_graph(self.real_time_factor)
         self.graphs2d.save_speed_up_csv(self.real_time_factor)
 
         results.pass_alight(self.stops_handler.get_stops_alight_list())
         #results.pass_alight2(self.stops_handler.get_stops_alight_list())
-        self.graphs2d.statics1(self.stops_handler.get_stops_alight_list())
+        self.graphs2d.commute_time(self.stops_handler.get_stops_alight_list())
+
+
 
         if globalConstants.USE_PYTHON:
             print("Python Total time: %f s" % (total_end_time - total_start_time))

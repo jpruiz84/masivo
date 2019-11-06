@@ -19,11 +19,12 @@ STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
 PERFORMANCE_ODR = 30
 
-test_scenario = 3
+test_scenario = 30
 
 PANDA_3D_ENABLED = False
 SIM_ACCEL_RATE = 0
 END_SIM_TIME = 3600*2
+#END_SIM_TIME = 2000
 
 USE_PYTHON = 0
 USE_PYOPENCL = 1
@@ -106,3 +107,8 @@ if USE_PYOPENCL:
     cl_enabled = True
 else:
     cl_enabled = False
+
+
+# Default colors and markers for the graphs
+COLORS_TAB10 = [
+"#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
