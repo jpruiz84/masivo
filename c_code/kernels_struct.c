@@ -71,10 +71,10 @@ typedef struct {
 
 
 __kernel void masivo_runner(
-  __global SpslType *stops_queue_list,
-  __global SpslType *stops_arrival_list,
-  __global SpslType *stops_alight_list,
-  __global BpslType *buses_struc_list,
+  __global SpslType *pwq,		// Passengers Waiting Queue
+  __global SpslType *paq,		// Passengers Arrival Queue
+  __global SpslType *plq,		// Passengers aLight Queue
+  __global BpslType *bpa,		// Bus Passengers Array
   unsigned int total_stops,                     // Total stops
   unsigned int total_buses,                     // Total stops
   unsigned int sim_time
@@ -102,26 +102,26 @@ __kernel void masivo_runner(
     //pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
 
     // Check if the arrival queue is empty 
-    if(stops_arrival_list[gid].total == 0){
+    if(paq[gid].total == 0){
       break;
     }
 
-    w = stops_arrival_list[gid].w_index;
+    w = paq[gid].w_index;
 
     // Check arrival time
-    if(stops_arrival_list[gid].spl[w].arrival_time > sim_time){
+    if(paq[gid].spl[w].arrival_time > sim_time){
       break;
     }
 
     //printf("In gid %d moving pass_id(%d): %d\n", gid, w, pass_arrival_list[gid].spl[w].pass_id);
-    stops_queue_list[gid].spl[stops_queue_list[gid].last_empty] = stops_arrival_list[gid].spl[w];
-    stops_queue_list[gid].spl[stops_queue_list[gid].last_empty].status = PASS_STATUS_ARRIVED;
-    stops_queue_list[gid].last_empty ++;
-    stops_queue_list[gid].total ++;
+    pwq[gid].spl[pwq[gid].last_empty] = paq[gid].spl[w];
+    pwq[gid].spl[pwq[gid].last_empty].status = PASS_STATUS_ARRIVED;
+    pwq[gid].last_empty ++;
+    pwq[gid].total ++;
 
-    stops_arrival_list[gid].spl[w].status = 0;
-    stops_arrival_list[gid].w_index ++;
-    stops_arrival_list[gid].total --;
+    paq[gid].spl[w].status = 0;
+    paq[gid].w_index ++;
+    paq[gid].total --;
 
     //printf("2 pass_id(%d): %d\n", pass_arrival_list[gid].w_index,
     //pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].arrival_time);
@@ -133,48 +133,48 @@ __kernel void masivo_runner(
   for(j = 0; j < total_buses; j++){
     
     // If the bus is in the stop
-    if(stops_queue_list[gid].stop_num == buses_struc_list[j].curr_stop){
+    if(pwq[gid].stop_num == bpa[j].curr_stop){
     
       // **************** PASSENGERS ALIGHTING ********************************
     
       // Only if there are passengers in the bus
-      if(buses_struc_list[j].total > 0){
+      if(bpa[j].total > 0){
         
         // For each passenger in the bus
         for(k = 0; k < BUS_MAX_PASS; k++){
-          //printf("pass id to check(%d): %d\n" k, buses_pass_list[j].bpl[k].pass_id)
+          //printf("pass id to check(%d): %d\n" k, buses_pass_list[j].bpa[k].pass_id)
           
           // If the passenger status indicate that is the bus
-          if(buses_struc_list[j].bpl[k].status == PASS_STATUS_IN_BUS){
+          if(bpa[j].bpl[k].status == PASS_STATUS_IN_BUS){
             
             // If the stop is the passsenger destination stop
-            if(buses_struc_list[j].bpl[k].dest_stop == stops_queue_list[gid].stop_num){
+            if(bpa[j].bpl[k].dest_stop == pwq[gid].stop_num){
               //printf("ALIGHTING pass id %d from bus %d to stop %d\n", 
-              //buses_struc_list[j].bpl[k].pass_id, j, stops_alight_list[gid].stop_num);
+              //buses_struc_list[j].bpa[k].pass_id, j, stops_alight_list[gid].stop_num);
 
               // Move the passenger from the bus to the stop alight queue
-              n = stops_alight_list[gid].total;
-              stops_alight_list[gid].spl[n] = buses_struc_list[j].bpl[k];
-              stops_alight_list[gid].spl[n].status = PASS_STATUS_ALIGHTED;
-              stops_alight_list[gid].spl[n].alight_time = sim_time;
-              stops_alight_list[gid].total += 1;
+              n = plq[gid].total;
+              plq[gid].spl[n] = bpa[j].bpl[k];
+              plq[gid].spl[n].status = PASS_STATUS_ALIGHTED;
+              plq[gid].spl[n].alight_time = sim_time;
+              plq[gid].total += 1;
 
-              buses_struc_list[j].bpl[k].status = PASS_STATUS_EMPTY;
-              buses_struc_list[j].total -= 1;
+              bpa[j].bpl[k].status = PASS_STATUS_EMPTY;
+              bpa[j].total -= 1;
             }
-          } // End if passger in the bus, if(buses_struc_list[j].bpl[k].status == PASS_STATUS_IN_BUS)
+          } // End if passger in the bus, if(buses_struc_list[j].bpa[k].status == PASS_STATUS_IN_BUS)
         }// End For each pass in the bus, for(k = 0; k < BUS_MAX_PASS; k++)
 
       } // End Only if there are passengers in the bus, if(buses_pass_list[j].total > 0)
 
       // **************** PASSENGERS BOARDING ********************************
       // If there are not passengers in the stop, do not look for more buses to boarding
-      if(stops_queue_list[gid].total == 0){
+      if(pwq[gid].total == 0){
         break;
       }
 
       // If the bus is full, continue with the next bus
-      if(buses_struc_list[j].total >= BUS_MAX_PASS){
+      if(bpa[j].total >= BUS_MAX_PASS){
         continue;
       }
 
@@ -185,23 +185,23 @@ __kernel void masivo_runner(
         //printf("Check for board pass_id %d\n", (stops_queue_list[gid].spl[k].pass_id));
 
         // If the bus is full, continue with the next bus
-        if(buses_struc_list[j].total >= BUS_MAX_PASS){
+        if(bpa[j].total >= BUS_MAX_PASS){
           break;
         }
 
         // If we are at the end of the passenger waiting queue, finish
-        if(stops_queue_list[gid].spl[k].status == PASS_STATUS_EMPTY_255){
+        if(pwq[gid].spl[k].status == PASS_STATUS_EMPTY_255){
           break;
         }
 
         // If the passenger has arrived to the stop
-        if(stops_queue_list[gid].spl[k].status == PASS_STATUS_ARRIVED){
+        if(pwq[gid].spl[k].status == PASS_STATUS_ARRIVED){
 
           // Check if the bus route has the passenger destination stop
           bus_for_dest = FALSE;
           // For each remaining stops in bus's stop table
-          for(l = buses_struc_list[j].last_stop_table_i; l < buses_struc_list[j].total_stops; l++){
-            if(stops_queue_list[gid].spl[k].dest_stop == buses_struc_list[j].stops_num[l]){
+          for(l = bpa[j].last_stop_table_i; l < bpa[j].total_stops; l++){
+            if(pwq[gid].spl[k].dest_stop == bpa[j].stops_num[l]){
               bus_for_dest = TRUE;
               break;
             }
@@ -211,21 +211,21 @@ __kernel void masivo_runner(
           if(bus_for_dest){
             // Look for a free space in the bus
             for(n = last_empty_seat_in_bus; n < BUS_MAX_PASS; n++){
-              //printf("bus seat: %d, status: %d\n",n, buses_struc_list[j].bpl[n].status);
+              //printf("bus seat: %d, status: %d\n",n, buses_struc_list[j].bpa[n].status);
 
               // If the seat in the bus is empty
-              if(buses_struc_list[j].bpl[n].status == PASS_STATUS_EMPTY){
+              if(bpa[j].bpl[n].status == PASS_STATUS_EMPTY){
 
                 //printf("BOARDING pass_id %d to the bus %d, in seat %d\n",
                 //stops_queue_list[gid].spl[k].pass_id, j, n);
 
                 // Move passenger from stop wating queue to the bus
-                buses_struc_list[j].bpl[n] = stops_queue_list[gid].spl[k];
-                buses_struc_list[j].bpl[n].status = PASS_STATUS_IN_BUS;
-                buses_struc_list[j].total += 1;
+                bpa[j].bpl[n] = pwq[gid].spl[k];
+                bpa[j].bpl[n].status = PASS_STATUS_IN_BUS;
+                bpa[j].total += 1;
 
-                stops_queue_list[gid].spl[k].status = PASS_STATUS_EMPTY;
-                stops_queue_list[gid].total -= 1;
+                pwq[gid].spl[k].status = PASS_STATUS_EMPTY;
+                pwq[gid].total -= 1;
 
                 last_empty_seat_in_bus = n;
                 break;
@@ -237,7 +237,7 @@ __kernel void masivo_runner(
           } // End If the bus has the destination stop, pass boards  if(bus_for_dest)
 
           // If bus is full break to go to the next bus in the stop
-          if(buses_struc_list[j].total >= BUS_MAX_PASS){
+          if(bpa[j].total >= BUS_MAX_PASS){
             break;
           }
 
@@ -251,121 +251,121 @@ __kernel void masivo_runner(
 
 #endif
 
-  barrier(CLK_GLOBAL_MEM_FENCE);
 
   // **************** UPDATE BUSES POSITION ********************************
 #if 1
   if(gid == 0){
-  // Update buses
-  // For each bus
-  for(int i = 0; i < total_buses; ++i){
-    // Do not process finished buses
-    if(buses_struc_list[i].curr_stop == BUS_FINISHED){
-      continue;
-    }
-
-    // Check if start the bus
-    if(buses_struc_list[i].curr_stop == BUS_NOT_STARTED_STOP){
-      if(sim_time >= buses_struc_list[i].start_time){
-        buses_struc_list[i].in_the_stop = TRUE;
-        buses_struc_list[i].curr_stop = buses_struc_list[i].stops_num[0];
-        buses_struc_list[i].last_stop_i = buses_struc_list[i].stops_num[0];
-        buses_struc_list[i].curr_pos = buses_struc_list[i].start_pos;
-        buses_struc_list[i].last_stop_pos = buses_struc_list[i].curr_pos;
-
-        //printf("Starting bus %d in stop %d start time %d\n",
-        //             buses_struc_list[i].number,
-        //             buses_struc_list[i].curr_stop,
-        //             buses_struc_list[i].start_time);
+    // Update buses
+    // For each bus
+    for(int i = 0; i < total_buses; ++i){
+      // Do not process finished buses
+      if(bpa[i].curr_stop == BUS_FINISHED){
+        continue;
       }
-      continue;
-    }
 
+      // Check if start the bus
+      if(bpa[i].curr_stop == BUS_NOT_STARTED_STOP){
+        if(sim_time >= bpa[i].start_time){
+          bpa[i].in_the_stop = TRUE;
+          bpa[i].curr_stop = bpa[i].stops_num[0];
+          bpa[i].last_stop_i = bpa[i].stops_num[0];
+          bpa[i].curr_pos = bpa[i].start_pos;
+          bpa[i].last_stop_pos = bpa[i].curr_pos;
 
-    // Update bus position
-
-    // if waiting in the stop
-    //printf("Bus: %d, in_the_stop_flag: %d, curr_stop %d, pos: %d\n",
-    //       buses_struc_list[i].number,
-    //       buses_struc_list[i].in_the_stop,
-    //       buses_struc_list[i].curr_stop,
-    //       buses_struc_list[i].curr_pos);
-
-    // Check if we have to depart from the stop
-    if(buses_struc_list[i].in_the_stop){
-      buses_struc_list[i].in_the_stop_counter -= 1;
-      if(buses_struc_list[i].in_the_stop_counter == 0){
-        buses_struc_list[i].last_stop_table_i += 1;
-        buses_struc_list[i].in_the_stop = FALSE;
-        buses_struc_list[i].curr_stop = BUS_TRAVELING;
-      }
-    }
-
-    // if I am not waiting in a stop, go ahead
-    if(buses_struc_list[i].curr_stop == BUS_TRAVELING){
-
-      if(buses_struc_list[i].curr_pos > 1000 && buses_struc_list[i].curr_pos < 3000){
-        buses_struc_list[i].curr_pos += buses_struc_list[i].travel_speed_m_s;
-      }else{
-        buses_struc_list[i].curr_pos += buses_struc_list[i].travel_speed_m_s;
+          //printf("Starting bus %d in stop %d start time %d\n",
+          //             buses_struc_list[i].number,
+          //             buses_struc_list[i].curr_stop,
+          //             buses_struc_list[i].start_time);
+        }
+        continue;
       }
 
 
-    }
+      // Update bus position
 
-    // Check if the bus has to leave the current stop, if not, do not check for other stop
-    if(abs(buses_struc_list[i].last_stop_pos - buses_struc_list[i].curr_pos)
-        < STOP_BUS_WINDOW_DISTANCE){
-      continue;
-    }
+      // if waiting in the stop
+      //printf("Bus: %d, in_the_stop_flag: %d, curr_stop %d, pos: %d\n",
+      //       buses_struc_list[i].number,
+      //       buses_struc_list[i].in_the_stop,
+      //       buses_struc_list[i].curr_stop,
+      //       buses_struc_list[i].curr_pos);
 
-
-    // Check if the bus is at the next stop
-    next_stop_i = (short)buses_struc_list[i].last_stop_i + buses_struc_list[i].stop_inc;
-
-    // printf("next_stop_i: %d/%d" % (next_stop_i, buses_struc_list[i].total_stops))
-    // Check if the next stop is the last one
-    if((next_stop_i >= buses_struc_list[i].total_stops) ||
-       (next_stop_i < 0))
-    {
-      // Finish the bus and put in the rest position
-      buses_struc_list[i].curr_stop = BUS_FINISHED;
-      buses_struc_list[i].curr_pos = 0;
-      continue;
-    }
-
-    // Look if the bus is inside the stop window of the next stop
-    if(abs(stops_queue_list[next_stop_i].stop_pos - buses_struc_list[i].curr_pos)
-        < STOP_BUS_WINDOW_DISTANCE){
-
-      // Passing the stop, update last stop index
-      buses_struc_list[i].last_stop_i = stops_queue_list[next_stop_i].stop_num;
-
-      // Check if the stop is in the routes table to stop thee bus
-      in_the_route = FALSE;
-      for (int j = buses_struc_list[i].stops_num_i; j < buses_struc_list[i].total_stops; ++j) {
-        if(stops_queue_list[next_stop_i].stop_num == buses_struc_list[i].stops_num[j]){
-          buses_struc_list[i].stops_num_i = j;
-          in_the_route = TRUE;
+      // Check if we have to depart from the stop
+      if(bpa[i].in_the_stop){
+        bpa[i].in_the_stop_counter -= 1;
+        if(bpa[i].in_the_stop_counter == 0){
+          bpa[i].last_stop_table_i += 1;
+          bpa[i].in_the_stop = FALSE;
+          bpa[i].curr_stop = BUS_TRAVELING;
         }
       }
 
-      // if this stop is in the stops table
-      if(in_the_route){
-        //printf("i: %d, Bus %d, in the stop: %d, pos %d\n", i,
-        //  buses_struc_list[i].number,
-        //  stops_queue_list[next_stop_i].stop_num,
-        //  buses_struc_list[i].curr_pos);
+      // if I am not waiting in a stop, go ahead
+      if(bpa[i].curr_stop == BUS_TRAVELING){
 
-        buses_struc_list[i].curr_stop = stops_queue_list[next_stop_i].stop_num;
-        buses_struc_list[i].last_stop_pos = stops_queue_list[next_stop_i].stop_pos;
-        buses_struc_list[i].in_the_stop = TRUE;
-        buses_struc_list[i].in_the_stop_counter = BUS_STOPPING_TIME;
+        if(bpa[i].curr_pos > 1000 && bpa[i].curr_pos < 3000){
+          bpa[i].curr_pos += bpa[i].travel_speed_m_s;
+        }else{
+          bpa[i].curr_pos += bpa[i].travel_speed_m_s;
+        }
+
+
       }
-    }
-  }
 
-  }
+      // Check if the bus has to leave the current stop, if not, do not check for other stop
+      if(abs(bpa[i].last_stop_pos - bpa[i].curr_pos)
+          < STOP_BUS_WINDOW_DISTANCE){
+        continue;
+      }
+
+
+      // Check if the bus is at the next stop
+      next_stop_i = (short)bpa[i].last_stop_i + bpa[i].stop_inc;
+
+      // printf("next_stop_i: %d/%d" % (next_stop_i, buses_struc_list[i].total_stops))
+      // Check if the next stop is the last one
+      if((next_stop_i >= bpa[i].total_stops) ||
+        (next_stop_i < 0))
+      {
+        // Finish the bus and put in the rest position
+        bpa[i].curr_stop = BUS_FINISHED;
+        bpa[i].curr_pos = 0;
+        continue;
+      }
+
+      // Look if the bus is inside the stop window of the next stop
+      if(abs(pwq[next_stop_i].stop_pos - bpa[i].curr_pos)
+          < STOP_BUS_WINDOW_DISTANCE){
+
+        // Passing the stop, update last stop index
+        bpa[i].last_stop_i = pwq[next_stop_i].stop_num;
+
+        // Check if the stop is in the routes table to stop thee bus
+        in_the_route = FALSE;
+        for (int j = bpa[i].stops_num_i; j < bpa[i].total_stops; ++j) {
+          if(pwq[next_stop_i].stop_num == bpa[i].stops_num[j]){
+            bpa[i].stops_num_i = j;
+            in_the_route = TRUE;
+          }
+        }
+
+        // if this stop is in the stops table
+        if(in_the_route){
+          //printf("i: %d, Bus %d, in the stop: %d, pos %d\n", i,
+          //  buses_struc_list[i].number,
+          //  stops_queue_list[next_stop_i].stop_num,
+          //  buses_struc_list[i].curr_pos);
+
+          bpa[i].curr_stop = pwq[next_stop_i].stop_num;
+          bpa[i].last_stop_pos = pwq[next_stop_i].stop_pos;
+          bpa[i].in_the_stop = TRUE;
+          bpa[i].in_the_stop_counter = BUS_STOPPING_TIME;
+        }
+      }
+
+    } // End for each bus for(int i = 0; i < total_buses; ++i){
+
+  } // End if(gid == 0){
 
 #endif
 }
