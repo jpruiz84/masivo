@@ -66,8 +66,6 @@ typedef struct {
   unsigned short  total_stops;
   unsigned short  stops_num[MAX_STOPS];
   unsigned int    total;
-  unsigned int    last_empty;
-  unsigned int    w_index;
   PassType        bpl[BUS_MAX_PASS];
 } __attribute__ ((packed)) BpslType;
 
@@ -88,6 +86,7 @@ __kernel void masivo_runner(
   unsigned int i,j,k,l,n;
   char in_the_route;
   short next_stop_i;
+  unsigned int last_empty_seat_in_bus;
 
   // bound check (equivalent to the limit on a 'for' loop for standard/serial C code
   if (gid >= total_stops){   
@@ -132,39 +131,44 @@ __kernel void masivo_runner(
 #if 1
   // For each bus
   for(j = 0; j < total_buses; j++){
+    
     // If the bus is in the stop
     if(stops_queue_list[gid].stop_num == buses_struc_list[j].curr_stop){
+    
       // **************** PASSENGERS ALIGHTING ********************************
+    
       // Only if there are passengers in the bus
       if(buses_struc_list[j].total > 0){
-        // For each pass in the bus
+        
+        // For each passenger in the bus
         for(k = 0; k < BUS_MAX_PASS; k++){
           //printf("pass id to check(%d): %d\n" k, buses_pass_list[j].bpl[k].pass_id)
-          // If the pass is in the bus
+          
+          // If the passenger status indicate that is the bus
           if(buses_struc_list[j].bpl[k].status == PASS_STATUS_IN_BUS){
-            // If the stop is the pass dest stop
+            
+            // If the stop is the passsenger destination stop
             if(buses_struc_list[j].bpl[k].dest_stop == stops_queue_list[gid].stop_num){
-              //printf("ALIGHTING pass id %d from bus %d to stop %d\n", buses_struc_list[j].bpl[k].pass_id, j, stops_alight_list[gid].stop_num);
+              //printf("ALIGHTING pass id %d from bus %d to stop %d\n", 
+              //buses_struc_list[j].bpl[k].pass_id, j, stops_alight_list[gid].stop_num);
 
-              buses_struc_list[j].bpl[k].status = PASS_STATUS_ALIGHTED;
-              buses_struc_list[j].bpl[k].alight_time = sim_time;
-              buses_struc_list[j].total -= 1;
-              buses_struc_list[j].last_empty -= 1;
-
-              //printf("buses_struc_list[j].bpl[k].alight_time: %d\n", buses_struc_list[j].bpl[k].alight_time);
-
-              n = stops_alight_list[gid].last_empty;
+              // Move the passenger from the bus to the stop alight queue
+              n = stops_alight_list[gid].total;
               stops_alight_list[gid].spl[n] = buses_struc_list[j].bpl[k];
+              stops_alight_list[gid].spl[n].status = PASS_STATUS_ALIGHTED;
+              stops_alight_list[gid].spl[n].alight_time = sim_time;
               stops_alight_list[gid].total += 1;
-              stops_alight_list[gid].last_empty += 1;
+
+              buses_struc_list[j].bpl[k].status = PASS_STATUS_EMPTY;
+              buses_struc_list[j].total -= 1;
             }
-          }
+          } // End if passger in the bus, if(buses_struc_list[j].bpl[k].status == PASS_STATUS_IN_BUS)
         }// End For each pass in the bus, for(k = 0; k < BUS_MAX_PASS; k++)
 
       } // End Only if there are passengers in the bus, if(buses_pass_list[j].total > 0)
 
-      // BOARDING
-      // If there are not passengers in the stop, do not look for more buses
+      // **************** PASSENGERS BOARDING ********************************
+      // If there are not passengers in the stop, do not look for more buses to boarding
       if(stops_queue_list[gid].total == 0){
         break;
       }
@@ -175,10 +179,8 @@ __kernel void masivo_runner(
       }
 
       // For this bus, begin the free space search from the beginning
-      buses_struc_list[j].last_empty = 0;
-      //printf("Bus %d in the stop %d\n", j, pass_list[gid].stop_num);
-
-      // For each pass in the stop
+      last_empty_seat_in_bus = 0;
+      // For each passenger in the stop
       for(k = 0; k < STOP_MAX_PASS; k++){
         //printf("Check for board pass_id %d\n", (stops_queue_list[gid].spl[k].pass_id));
 
@@ -187,17 +189,17 @@ __kernel void masivo_runner(
           break;
         }
 
-        // If we are at the end of the pass list
+        // If we are at the end of the passenger waiting queue, finish
         if(stops_queue_list[gid].spl[k].status == PASS_STATUS_EMPTY_255){
           break;
         }
 
-        // If the pass has arrived to the stop
+        // If the passenger has arrived to the stop
         if(stops_queue_list[gid].spl[k].status == PASS_STATUS_ARRIVED){
 
-          // Check if the bus route has the pass destination stop
+          // Check if the bus route has the passenger destination stop
           bus_for_dest = FALSE;
-          // For each remaining stops
+          // For each remaining stops in bus's stop table
           for(l = buses_struc_list[j].last_stop_table_i; l < buses_struc_list[j].total_stops; l++){
             if(stops_queue_list[gid].spl[k].dest_stop == buses_struc_list[j].stops_num[l]){
               bus_for_dest = TRUE;
@@ -205,34 +207,32 @@ __kernel void masivo_runner(
             }
           }
 
-          // If the bus has the destination stop, pass boards
+          // If the bus has the destination stop, passenger tryies to board this bus
           if(bus_for_dest){
             // Look for a free space in the bus
-            for(n = buses_struc_list[j].last_empty; n < BUS_MAX_PASS; n++){
+            for(n = last_empty_seat_in_bus; n < BUS_MAX_PASS; n++){
               //printf("bus seat: %d, status: %d\n",n, buses_struc_list[j].bpl[n].status);
 
-              if(buses_struc_list[j].bpl[n].status == PASS_STATUS_IN_BUS){
-                //printf("busy\n");
-                continue;
+              // If the seat in the bus is empty
+              if(buses_struc_list[j].bpl[n].status == PASS_STATUS_EMPTY){
+
+                //printf("BOARDING pass_id %d to the bus %d, in seat %d\n",
+                //stops_queue_list[gid].spl[k].pass_id, j, n);
+
+                // Move passenger from stop wating queue to the bus
+                buses_struc_list[j].bpl[n] = stops_queue_list[gid].spl[k];
+                buses_struc_list[j].bpl[n].status = PASS_STATUS_IN_BUS;
+                buses_struc_list[j].total += 1;
+
+                stops_queue_list[gid].spl[k].status = PASS_STATUS_EMPTY;
+                stops_queue_list[gid].total -= 1;
+
+                last_empty_seat_in_bus = n;
+                break;
+
               }
 
-              //printf("BOARDING pass_id %d to the bus %d, in seat %d\n",
-              //  stops_queue_list[gid].spl[k].pass_id, j, n);
-
-              stops_queue_list[gid].spl[k].status = PASS_STATUS_IN_BUS;
-              stops_queue_list[gid].total -= 1;
-
-              buses_struc_list[j].bpl[n] = stops_queue_list[gid].spl[k];
-              buses_struc_list[j].total += 1;
-              buses_struc_list[j].last_empty = n;
-
-              break;
-
             } // End // Look for a free space in the bus
-
-
-
-
 
           } // End If the bus has the destination stop, pass boards  if(bus_for_dest)
 
@@ -241,17 +241,11 @@ __kernel void masivo_runner(
             break;
           }
 
-
         } // End If the pass have arrived to the stop if(pass_list[gid].spl[k].status == PASS_STATUS_ARRIVED)
-
-
-
 
       } // End For each pass in the stop for(int k = 0; k < STOP_MAX_PASS; k++)
 
-
     } // End If the bus is in the stop
-
 
   }// End For each bus for(int j = 0; j < total_buses; j++)
 

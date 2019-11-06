@@ -77,8 +77,6 @@ typedef struct {
   unsigned short  total_stops;
   unsigned short  stops_num[MAX_STOPS];
   unsigned int    total;
-  unsigned int    last_empty;
-  unsigned int    w_index;
   PassType        bpl[BUS_MAX_PASS];
 } __attribute__ ((packed)) BpslType;
 

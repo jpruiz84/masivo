@@ -87,8 +87,6 @@ bpsl_type = np.dtype([('number', 'u2'),
                       ('total_stops', 'u2'),
                       ('stops_num', 'u2', MAX_STOPS),
                       ('total', 'u4'),
-                      ('last_empty', 'u4'),
-                      ('w_index', 'u4'),
                       ('bpl', bpl_type)])
 
 dest_vec_type = np.dtype([('dest_total', 'u4')])
