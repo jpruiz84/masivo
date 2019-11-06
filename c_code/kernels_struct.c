@@ -94,59 +94,47 @@ __kernel void masivo_runner(
       return; 
   }
 
-
-  // STOPS ARRIVAL:
+  // **************** PASSENGERS ARRIVING ********************************
   //printf("In gid %d total: %d\n", gid, pass_arrival_list[gid].total);
-  if(stops_arrival_list[gid].total > 0){
-    #if 1
-    //printf("gid: %d, sim_time: %d\n", gid, sim_time);
-    while(1){
-      //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
-
-
-      w = stops_arrival_list[gid].w_index;
-      // Check if the list is finished
-      if(w >= STOP_MAX_PASS){
-        break;
-      }
-
-      // Check pass status
-      if(stops_arrival_list[gid].spl[w].status != PASS_STATUS_TO_ARRIVE){
-        break;
-      }
-
-      // Check arrival time
-      if(sim_time < stops_arrival_list[gid].spl[w].arrival_time){
-        break;
-      }
-
-      //printf("In gid %d moving pass_id(%d): %d\n", gid, w, pass_arrival_list[gid].spl[w].pass_id);
-
-      stops_queue_list[gid].spl[stops_queue_list[gid].last_empty] = stops_arrival_list[gid].spl[w];
-      stops_queue_list[gid].spl[stops_queue_list[gid].last_empty].status = PASS_STATUS_ARRIVED;
-      stops_queue_list[gid].last_empty ++;
-      stops_queue_list[gid].total ++;
-
-      stops_arrival_list[gid].spl[w].status = 0;
-      stops_arrival_list[gid].w_index ++;
-      stops_arrival_list[gid].total --;
-      stops_arrival_list[gid].last_empty --;
-
-      if(stops_arrival_list[gid].total == 0){
-        break;
-      }
-
-      //printf("2 pass_id(%d): %d\n", pass_arrival_list[gid].w_index, pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].arrival_time);
-    }
-    #endif
-  } // END Stops arrival
 #if 1
+  //printf("gid: %d, sim_time: %d\n", gid, sim_time);
+  while(TRUE){
+    //printf("pass_id(%d): %d\n", pass_arrival_list[gid].w_index, 
+    //pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].pass_id);
 
+    // Check if the arrival queue is empty 
+    if(stops_arrival_list[gid].total == 0){
+      break;
+    }
+
+    w = stops_arrival_list[gid].w_index;
+
+    // Check arrival time
+    if(stops_arrival_list[gid].spl[w].arrival_time > sim_time){
+      break;
+    }
+
+    //printf("In gid %d moving pass_id(%d): %d\n", gid, w, pass_arrival_list[gid].spl[w].pass_id);
+    stops_queue_list[gid].spl[stops_queue_list[gid].last_empty] = stops_arrival_list[gid].spl[w];
+    stops_queue_list[gid].spl[stops_queue_list[gid].last_empty].status = PASS_STATUS_ARRIVED;
+    stops_queue_list[gid].last_empty ++;
+    stops_queue_list[gid].total ++;
+
+    stops_arrival_list[gid].spl[w].status = 0;
+    stops_arrival_list[gid].w_index ++;
+    stops_arrival_list[gid].total --;
+
+    //printf("2 pass_id(%d): %d\n", pass_arrival_list[gid].w_index,
+    //pass_arrival_list[gid].spl[pass_arrival_list[gid].w_index].arrival_time);
+  }
+#endif
+   
+#if 1
   // For each bus
   for(j = 0; j < total_buses; j++){
     // If the bus is in the stop
     if(stops_queue_list[gid].stop_num == buses_struc_list[j].curr_stop){
-      // ALIGHTING
+      // **************** PASSENGERS ALIGHTING ********************************
       // Only if there are passengers in the bus
       if(buses_struc_list[j].total > 0){
         // For each pass in the bus
@@ -270,8 +258,9 @@ __kernel void masivo_runner(
 #endif
 
   barrier(CLK_GLOBAL_MEM_FENCE);
-#if 1
 
+  // **************** UPDATE BUSES POSITION ********************************
+#if 1
   if(gid == 0){
   // Update buses
   // For each bus
