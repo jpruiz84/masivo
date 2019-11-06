@@ -16,7 +16,7 @@ class Masivo:
         # Configuring logging format
         # logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
         logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
-        print("\n\nStarting Masivo public transport simulator\n")
+        print("\n\n|||||||||| Starting Masivo public transport simulator ||||||||||\n")
 
         # Init objects
         self.graphs2d = Graphs2d()

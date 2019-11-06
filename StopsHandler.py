@@ -151,7 +151,7 @@ class StopsHandler:
                 self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
         else:
             # For each destination
-            print("Setting empty pass lists")
+            print("\nGenerating pass input queue all stops: %d" % len(self.stops_queue_list))
             for i in range(len(self.stops_queue_list)):
                 masivo_c = ctypes.CDLL('./c_code/masivo_c.so')
                 masivo_c.generate_pass.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),

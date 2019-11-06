@@ -118,9 +118,12 @@ class Graphs2d:
 
         print('\nStops list:')
         for stop in stops_list:
-            print("Stop %s has %d/%d pass, and alighted %d/%d out" %
-                  (stop.name, stop.pass_count(), stop.total_pass_in, stop.pass_alight_count(),
-                   stop.expected_alight_pass))
+            print("Stop %s has %d/%d pass,\t  alighted %d/%d, \t %.2f%%" %
+                  (stop.name, stop.pass_count(),
+                   stop.total_pass_in,
+                   stop.pass_alight_count(),
+                   stop.expected_alight_pass,
+                   100 * stop.pass_alight_count() / stop.expected_alight_pass))
 
         # This data comes from stop.pass_count(), stop.total_pass_in
         pass_waiting = []
@@ -143,7 +146,7 @@ class Graphs2d:
             total_alighted_pass += int(stop.pass_alight_count())
             total_expected_alighted_pass += stop.expected_alight_pass
 
-        print("Total alighted: %d/%d,  %f%%" % (total_alighted_pass,
+        print("Total alighted: %d/%d,  %.2f%%" % (total_alighted_pass,
                                                 total_expected_alighted_pass,
                                                 100.0 * total_alighted_pass / total_expected_alighted_pass))
 
@@ -163,6 +166,6 @@ class Graphs2d:
         ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers')
         ax.legend()
 
-        plt.show()
+        #plt.show()
 
         print('')

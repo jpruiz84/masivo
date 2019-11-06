@@ -37,6 +37,9 @@
 #define FALSE  0
 #define TRUE   1
 
+#define UINT16_MAX             65535
+
+
 typedef struct {
   unsigned int    pass_id;
   unsigned short  orig_stop;
@@ -393,13 +396,11 @@ void generate_pass(
     unsigned int pass_count = 0;
     unsigned int total_pass = 0;
 
-    printf("Generating pass input queue for stop: %d\n", i);
-
-
     // Set empty lists
     for (int j = 0; j < STOP_MAX_PASS; ++j) {
         stops_queue_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
         stops_arrival_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
+        stops_arrival_list[i].spl[j].arrival_time = UINT16_MAX;
     }
 
     // Calculate total passengers
