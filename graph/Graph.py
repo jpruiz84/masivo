@@ -53,14 +53,14 @@ class Graph(ShowBase):
         self.model.reparentTo(render)
 
         # Init lists for stops and buses
-        self.bus_stop_list = []
+        self.stops_list = []
         self.buses_list = []
 
         if "stops_list" in masivo:
             for stop in masivo["stops_list"]:
                 bus_stop = GraphStop(stop)
                 bus_stop.set_pass(stop.pass_count())
-                self.bus_stop_list.append(bus_stop)
+                self.stops_list.append(bus_stop)
 
         if "buses_list" in masivo:
             for bus in masivo["buses_list"]:
@@ -84,10 +84,10 @@ class Graph(ShowBase):
 
     def update_simulation(self, task):
         # Update stops graphs
-        for i in range(0, len(self.bus_stop_list)):
-            self.bus_stop_list[i].set_pass(self.masivo["stops_list"][i].pass_count())
-            self.bus_stop_list[i].set_alight(self.masivo["stops_list"][i].pass_alight_count(),
-                                             self.masivo["stops_list"][i].expected_alight_pass)
+        for i in range(0, len(self.stops_list)):
+            self.stops_list[i].set_pass(self.masivo["stops_list"][i].pass_count())
+            self.stops_list[i].set_alight(self.masivo["stops_list"][i].pass_alight_count(),
+                                          self.masivo["stops_list"][i].expected_alight_pass)
 
         # Update buses
         for i in range(0, len(self.masivo["buses_list"])):
@@ -102,7 +102,7 @@ class Graph(ShowBase):
             if i >= len(self.masivo["buses_list"]):
                 break
             # Update bus position and count
-            self.buses_list[i].set_pos(self.masivo["buses_list"][i].bus_struc["curr_pos"],
+            self.buses_list[i].set_pos(self.masivo["buses_list"][i].get_x_pos(),
                                        self.masivo["buses_list"][i].y_pos)
             self.buses_list[i].set_pass(self.masivo["buses_list"][i].pass_count())
 

@@ -69,10 +69,6 @@ class Masivo:
             if globalConstants.USE_PYTHON:
                 self.stops_handler.runner(sim_time)
 
-            if globalConstants.SIM_ACCEL_RATE > 0:
-                while (time.time() - start_op_time) < (1 / globalConstants.SIM_ACCEL_RATE):
-                    pass
-
             if (sim_time % globalConstants.PERFORMANCE_ODR) == 0:
                 if(sim_time / globalConstants.PERFORMANCE_ODR) > 2:
                     self.real_time_factor["time"].append(sim_time)
@@ -81,6 +77,9 @@ class Masivo:
                 sys.stdout.write("\rtime: %d  " % sim_time)
                 sys.stdout.flush()
 
+            if globalConstants.SIM_ACCEL_RATE > 0:
+                rem_time = (1 / globalConstants.SIM_ACCEL_RATE) - (time.time() - start_op_time)
+                time.sleep(rem_time)
 
         total_end_time = time.time()
 

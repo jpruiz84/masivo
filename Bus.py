@@ -15,7 +15,7 @@ class Bus:
         self.travel_speed_m_s = self.travel_speed_km_h * 1000.0 / 3600.0  # Km/s
         self.start_time = 0
         self.bus_struc = 0
-        self.pass_list_g = 0
+        self.bus_struc_g = 0
         self.stop_inc = 1
         self.total_stops = len(stops_list)
         self.stop_index = 0
@@ -44,8 +44,8 @@ class Bus:
         self.bus_struc['last_stop_pos'] = self.bus_struc["curr_pos"]
         self.bus_struc["last_stop_i"] = self.bus_struc['stops_num'][0]
 
-    def set_cl_list(self, pass_list_g):
-        self.pass_list_g = pass_list_g
+    def set_cl_list(self, bus_struc_g):
+        self.bus_struc_g = bus_struc_g
 
     def pass_in(self, pass_id):
         if len(self.pass_queue) < self.max_capacity:
@@ -62,9 +62,16 @@ class Bus:
 
     def pass_count(self):
         if globalConstants.cl_enabled:
-            return np.array(self.pass_list_g.get(), dtype=globalConstants.bpsl_type)['total']
+            return np.array(self.bus_struc_g.get(), dtype=globalConstants.bpsl_type)['total']
         else:
             return self.bus_struc['total']
+
+    def get_x_pos(self):
+        if globalConstants.cl_enabled:
+            return np.array(self.bus_struc_g.get(), dtype=globalConstants.bpsl_type)['curr_pos']
+        else:
+            return self.self.bus_struc["curr_pos"]
+
 
     def get_number(self):
         return self.number
