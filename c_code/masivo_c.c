@@ -14,7 +14,7 @@
 #define BUS_MAX_PASS      250
 #define MAX_STOPS         500
 
-#define PASS_STATUS_EMPTY_255   255
+#define PASS_STATUS_END_LIST    255
 #define PASS_STATUS_EMPTY         0
 #define PASS_STATUS_TO_ARRIVE     1
 #define PASS_STATUS_ARRIVED       2
@@ -197,7 +197,7 @@ __kernel void masivo_runner(
           }
 
           // If we are at the end of the passenger waiting queue, finish
-          if(pwq[gid].spl[k].status == PASS_STATUS_EMPTY_255){
+          if(pwq[gid].spl[k].status == PASS_STATUS_END_LIST){
             break;
           }
 
@@ -374,8 +374,8 @@ __kernel void masivo_runner(
 
 
 void generate_pass(
-    SpslType *stops_queue_list,
-    SpslType *stops_arrival_list,
+    SpslType *pwq,                      // Passengers Waiting Queue
+    SpslType *paq,                      // Passengers Arrival Queue
     unsigned int *destination_vector,
     unsigned int i,                     // Stop index
     unsigned int total_stops,
@@ -389,9 +389,9 @@ void generate_pass(
 
     // Set empty lists
     for (int j = 0; j < STOP_MAX_PASS; ++j) {
-        stops_queue_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
-        stops_arrival_list[i].spl[j].status = PASS_STATUS_EMPTY_255;
-        stops_arrival_list[i].spl[j].arrival_time = UINT16_MAX;
+        pwq[i].spl[j].status = PASS_STATUS_END_LIST;
+        paq[i].spl[j].status = PASS_STATUS_END_LIST;
+        paq[i].spl[j].arrival_time = UINT16_MAX;
     }
 
     // Calculate total passengers
@@ -407,14 +407,14 @@ void generate_pass(
     for (int key = 0; key < len_dest_vector; ++key) {
         //for j in range(val["dest_total"]):
         for (int j = 0; j < destination_vector[key]; ++j){
-            k = stops_arrival_list[i].last_empty;
-            stops_arrival_list[i].spl[k].pass_id = i*1000000 + pass_count;
-            stops_arrival_list[i].spl[k].orig_stop = i;
-            stops_arrival_list[i].spl[k].dest_stop = key;
-            stops_arrival_list[i].spl[k].arrival_time = pass_count*PASS_TOTAL_ARRIVAL_TIME / total_pass ;
-            stops_arrival_list[i].spl[k].status = PASS_STATUS_TO_ARRIVE;
-            stops_arrival_list[i].total += 1;
-            stops_arrival_list[i].last_empty += 1;
+            k = paq[i].last_empty;
+            paq[i].spl[k].pass_id = i*1000000 + pass_count;
+            paq[i].spl[k].orig_stop = i;
+            paq[i].spl[k].dest_stop = key;
+            paq[i].spl[k].arrival_time = pass_count*PASS_TOTAL_ARRIVAL_TIME / total_pass ;
+            paq[i].spl[k].status = PASS_STATUS_TO_ARRIVE;
+            paq[i].total += 1;
+            paq[i].last_empty += 1;
             pass_count +=1;
         }
     }
