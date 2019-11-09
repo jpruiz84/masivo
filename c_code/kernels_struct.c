@@ -166,28 +166,26 @@ __kernel void masivo_runner(
         bpa[i].curr_pos = 0;
         continue;
       }
-
       // Look if the bus is inside the stop window of the next stop
       if(abs(pwq[next_stop_i].stop_pos - bpa[i].curr_pos)
           < STOP_BUS_WINDOW_DISTANCE){
         // Passing the stop, update last stop index
-        bpa[i].last_stop_i = pwq[next_stop_i].stop_num;
+        bpa[i].last_stop_i = next_stop_i;
         // Check if the stop is in the routes table to stop thee bus
         in_the_route = FALSE;
         for (int j = bpa[i].stops_num_i; j < bpa[i].total_stops; ++j) {
-          if(pwq[next_stop_i].stop_num == bpa[i].stops_num[j]){
+          if(next_stop_i == bpa[i].stops_num[j]){
             bpa[i].stops_num_i = j;
             in_the_route = TRUE;
           }
         }
-
         // if this stop is in the stops table
         if(in_the_route){
           //printf("i: %d, Bus %d, in the stop: %d, pos %d\n", i,
           //  buses_struc_list[i].number,
           //  stops_queue_list[next_stop_i].stop_num,
           //  buses_struc_list[i].curr_pos);
-          bpa[i].curr_stop = pwq[next_stop_i].stop_num;
+          bpa[i].curr_stop = next_stop_i;
           bpa[i].last_stop_pos = pwq[next_stop_i].stop_pos;
           bpa[i].in_the_stop = TRUE;
           bpa[i].in_the_stop_counter = BUS_STOPPING_TIME;

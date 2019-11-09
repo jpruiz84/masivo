@@ -14,7 +14,7 @@ class StopsHandler:
 
     def __init__(self):
 
-        print('load program from cl source file')
+        print('Load program from cl source file')
         f = open('c_code/kernels_struct.c', 'r', encoding='utf-8')
         kernels = ''.join(f.readlines())
         f.close()
@@ -28,9 +28,17 @@ class StopsHandler:
 
         if globalConstants.USE_PYOPENCL:
             for i, dev in enumerate(cl_devices):
-                print('Device[%d]: %s, %s' % (i, dev.name, dev.vendor))
-            print()
+                print('OpenCL device[%d]: %s, %s, max_cu: %d ' % (i, dev.name, dev.vendor, dev.max_compute_units))
 
+        if globalConstants.LIMIT_MAX_CPUS > 0:
+        # emulate multiple devices
+            cl_devices = cl_devices[0].create_sub_devices(
+                [cl.device_partition_property.BY_COUNTS, globalConstants.LIMIT_MAX_CPUS])
+
+            for i, dev in enumerate(cl_devices):
+                print('Emulated OpenCL device[%d]: %s, %s, max_cu: %d ' % (i, dev.name, dev.vendor, dev.max_compute_units))
+
+        print()
         self.ctx = cl.Context(devices=cl_devices)
         self.queue = cl.CommandQueue(self.ctx)
         self.mf = cl.mem_flags
@@ -40,6 +48,8 @@ class StopsHandler:
 
         self.buses_struc_list = 0
         self.buses_handler = 0
+
+        self.grand_total_passengers = 0
 
         self.stops_object_list = []
         self.open_stops_file(globalConstants.ODM_FILE)
@@ -72,8 +82,17 @@ class StopsHandler:
     def get_stops_list(self):
         return self.stops_object_list
 
+    def get_stops_arrival_list(self):
+        if globalConstants.cl_enabled:
+            return np.array(self.stops_arrival_list_g.get(), dtype=globalConstants.spsl_type)
+        else:
+            return self.stops_arrival_list
+
     def get_stops_queue_list(self):
-        return self.stops_queue_list
+        if globalConstants.cl_enabled:
+            return np.array(self.stops_queue_list_g.get(), dtype=globalConstants.spsl_type)
+        else:
+            return self.stops_queue_list
 
     def get_stops_alight_list(self):
         if globalConstants.cl_enabled:
@@ -165,13 +184,14 @@ class StopsHandler:
                                        i,
                                        len(self.stops_object_list),
                                        len(self.stops_object_list[i].destination_vector))
+
+                self.grand_total_passengers += int(self.stops_arrival_list[i]['total'])
                 #for p in self.stops_arrival_list[i]['spl']:
                 #    print(p)
-
-
-
         end_time = time.time()
-        print("generate_pass_input_queue stops time %d ms" % ((end_time - start_time) * 1000))
+
+        print("generate_pass_input_queue stops time %d ms, grand total passengers: %d"
+              % ((end_time - start_time) * 1000, self.grand_total_passengers))
 
     def prepare_cl(self):
         self.np_total_stops = np.uint32(len(self.stops_queue_list_g))

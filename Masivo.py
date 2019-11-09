@@ -8,6 +8,7 @@ from StopsHandler import StopsHandler
 from graphs2d.Graphs2d import Graphs2d
 import numpy as np
 import results
+import psutil
 
 
 class Masivo:
@@ -27,7 +28,7 @@ class Masivo:
         self.stops_list = []
         self.buses_list = []
         self.finished_buses_list = []
-        self.real_time_factor = {"time": [], "factor": []}
+        self.performance = {"time": [], "rtf": [], "cpu_usage": []}
 
         # Init stops
         self.stops_handler = StopsHandler()
@@ -51,6 +52,7 @@ class Masivo:
         self.masivo_data["stops_list"] = self.stops_list
         self.masivo_data["buses_list"] = self.buses_list
 
+
     # Main run
     def run(self):
         total_start_time = time.time()
@@ -71,8 +73,11 @@ class Masivo:
 
             if (sim_time % globalConstants.PERFORMANCE_ODR) == 0:
                 if(sim_time / globalConstants.PERFORMANCE_ODR) > 2:
-                    self.real_time_factor["time"].append(sim_time)
-                    self.real_time_factor["factor"].append(globalConstants.PERFORMANCE_ODR / (time.time() - start_perf_time))
+                    self.performance["time"].append(sim_time)
+                    self.performance["rtf"].append(
+                        globalConstants.PERFORMANCE_ODR / (time.time() - start_perf_time))
+                    self.performance["cpu_usage"].append(psutil.cpu_percent())
+
                 start_perf_time = time.time()
                 sys.stdout.write("\rtime: %d  " % sim_time)
                 sys.stdout.flush()
@@ -94,18 +99,19 @@ class Masivo:
 
         if 0:
             print('\nBuses list:')
-            for i in range(len(self.buses_struc_list)):
-                print("Bus %s has %d pass, final pos %d" %
-                      (self.buses_list[i].number, self.buses_struc_list[i]['total'], self.buses_struc_list[i]['curr_pos']))
+            for i in range(len(self.buses_handler.get_final_bus_struc_list())):
+                print("Bus %s \t has %d pass, \t final pos %d" %
+                      (self.buses_list[i].number,
+                       self.buses_handler.get_final_bus_struc_list()[i]['total'],
+                       self.buses_handler.get_final_bus_struc_list()[i]['curr_pos']))
 
+        results.passengers_results(self.stops_handler, self.buses_handler)
 
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
+        self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
+        self.graphs2d.save_performance_csv(self.performance)
 
-        self.graphs2d.real_time_factor_graph(self.real_time_factor)
-        self.graphs2d.save_speed_up_csv(self.real_time_factor)
 
-        results.pass_alight(self.stops_handler.get_stops_alight_list())
-        #results.pass_alight2(self.stops_handler.get_stops_alight_list())
         self.graphs2d.commute_time(self.stops_handler.get_stops_alight_list())
 
 

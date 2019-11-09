@@ -55,6 +55,12 @@ class BusesHandler:
     def get_bus_struc_list_g(self):
         return self.bus_struc_lists_g
 
+    def get_final_bus_struc_list(self):
+        if globalConstants.cl_enabled:
+            return np.array(self.bus_struc_lists_g.get(), dtype=globalConstants.bpsl_type)
+        else:
+            return self.bus_struc_lists
+
     def open_routes_file(self, file_name):
         logging.info("Opening routes file: %s" % file_name)
 

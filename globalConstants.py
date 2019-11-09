@@ -21,10 +21,12 @@ PERFORMANCE_ODR = 30
 
 test_scenario = 30
 
+LIMIT_MAX_CPUS = 0              # 0 unlimited
+
 PANDA_3D_ENABLED = False
-SIM_ACCEL_RATE = 0
+SIM_ACCEL_RATE = 0              # 0 unlimited
 END_SIM_TIME = 3600*2
-#END_SIM_TIME = 2000
+
 
 USE_PYTHON = 0
 USE_PYOPENCL = 1
@@ -49,6 +51,20 @@ BUS_NOT_STARTED_STOP = 20000
 BUS_TRAVELING = 20001
 BUS_FINISHED = 20002
 EMPTY_STOP_NUMBER = 20000
+
+
+# Output file names
+RESULTS_FOLDER_NAME = 'results'
+
+# Passengers served information output files
+PASSENGERS_ALIGHTED_FILE_NAME = 'total_passengers_results.csv'
+PASSENGERS_ALIGHTED_PER_STOP_FILE_NAME = 'served_passengers_per_stop.csv'
+GRAPH_SERVED_PASSENGERS_FILE_NAME = 'served_passengers_per_stop.eps'
+GRAPH_COMMUTE_TIME_PER_STOP_FILE_NAME = 'commute_time_per_stop.eps'
+
+# Performance output files
+GRAPH_PERFORMANCE_TIMELINE_FILE_NAME = 'performance_timeline.eps'
+CSV_PERFORMANCE_TIMELINE_FILE_NAME = 'performance_timeline.csv'
 
 # Masivo fixed constants, DO NOT MODIFY !!!!
 PASS_TYPE = np.dtype([('pass_id', 'u4'),
@@ -99,7 +115,7 @@ PASS_STATUS_ARRIVED = 2
 PASS_STATUS_IN_BUS = 3
 PASS_STATUS_ALIGHTED = 4
 
-RESULTS_FOLDER = 'results'
+STATUS_TEXT_ARRAY = ['EMPTY', 'TO ARRIVE', 'ARRIVED', 'IN BUS', 'ALIGHTED']
 
 if USE_PYOPENCL:
     cl_enabled = True

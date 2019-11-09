@@ -3,71 +3,85 @@ import matplotlib.pyplot as plt
 import csv
 import globalConstants
 import numpy as np
+import os
+
 
 class Graphs2d:
 
     def filter_low_pass(self, x):
         fOrder = 3
-        normal_cutoff = 0.05
+        normal_cutoff = 0.1
         b, a = butter(fOrder, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, x)
 
         return y
 
-    def real_time_factor_graph(self, rtf_data):
+    def performance_graph(self, perf_data, stops_list):
 
-        print("\nAverage real time factor: %d" % np.mean(rtf_data["factor"]))
+        print("\nAverage real-time factor: %d, average CPU usage: %.2f%%" % (
+            np.mean(perf_data["rtf"]),
+            np.mean(perf_data["cpu_usage"])))
 
-        if len(rtf_data["time"]) <= 10:
+        if len(perf_data["time"]) <= 10:
             return
 
         fig, ax = plt.subplots()
-        ax.plot(rtf_data["time"], rtf_data["factor"])
-        ax.plot(rtf_data["time"], self.filter_low_pass(rtf_data["factor"]))
+        ax.plot(perf_data["time"], perf_data["rtf"], label='Not filtered')
+        ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='Low pass filtered')
 
-        ax.set(xlabel='time (s)', ylabel='Real time factor')
+        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor')
         ax.grid()
         # ax.set_yscale('log')
         [ymin, ymax] = ax.get_ylim()
         ax.set_ylim(0, ymax)
 
+
+
+        ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
+        ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
+                 color = 'tab:green')
+
+        ax2.set_ylim(0, 110)
+        ax2.set_ylabel('CPU usage (%)',)
+
+        ax.legend()
+        ax2.legend(loc='lower right')
+
         if globalConstants.USE_PYOPENCL:
-            ax.set(title='RTF using PythonCL')
-            fig.savefig("results/pyopencl_rtf_tc_%d.eps" % globalConstants.test_scenario)
+            ax.set(title='Performance using PythonCL, for %d stops' % len(stops_list))
         elif globalConstants.USE_PYTHON_C:
-            ax.set(title='RTF using PythonC')
-            fig.savefig("results/pythonc_rtf_tc_%d.eps" % globalConstants.test_scenario.eps)
+            ax.set(title='Performance using PythonC, for %d stops' % len(stops_list))
         elif globalConstants.USE_PYTHON:
-            ax.set(title='RTF using pure python')
-            fig.savefig("results/pure_python_rtf_tc_%d.eps" % globalConstants.test_scenario)
+            ax.set(title='Performance using pure python, for %d stops' % len(stops_list))
+
+        fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
+                                 globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
 
         #plt.show()
         plt.close()
 
 
-    def save_speed_up_csv(self, rtf_data):
+    def save_performance_csv(self, perf_data):
 
-        if len(rtf_data["time"]) <= 10:
+        if len(perf_data["time"]) <= 10:
             return
 
-        filtered_data = self.filter_low_pass(rtf_data["factor"])
+        filtered_data = self.filter_low_pass(perf_data["rtf"])
 
-        if globalConstants.USE_PYOPENCL:
-            filename = ("results/pyopencl_rtf_table_tc_%d.csv" % globalConstants.test_scenario)
-        elif globalConstants.USE_PYTHON_C:
-            filename = ("results/pyopenc_rtf_table_tc_%d.csv" % globalConstants.test_scenario)
-        elif globalConstants.USE_PYTHON:
-            filename = ("results/pure_python_rtf_table_tc_%d.csv" % globalConstants.test_scenario)
+        filename = (os.path.join(globalConstants.RESULTS_FOLDER_NAME,
+                             globalConstants.CSV_PERFORMANCE_TIMELINE_FILE_NAME))
 
         file = open(filename, 'w', encoding='utf-8')
-        field_names = ["time (s)", "RTF", "RTF filtered"]
+        field_names = ["time (s)", "RTF", "RTF filtered", "CPU usage (%)"]
         csv_writer = csv.DictWriter(file, fieldnames=field_names, dialect=csv.excel, lineterminator='\n')
         csv_writer.writeheader()
 
-        for i in range(0, len(rtf_data['time'])):
-            csv_writer.writerow({'time (s)': str(rtf_data['time'][i]),
-                                 'RTF': str(rtf_data['factor'][i]),
-                                 'RTF filtered': str(filtered_data[i])})
+        for i in range(0, len(perf_data['time'])):
+            csv_writer.writerow({'time (s)': str(perf_data['time'][i]),
+                                 'RTF': '{:0.2f}'.format(perf_data['rtf'][i]),
+                                 'RTF filtered': '{:0.2f}'.format(filtered_data[i]),
+                                 'CPU usage (%)': perf_data['cpu_usage'][i]
+                                 })
 
         file.close()
 
@@ -111,10 +125,23 @@ class Graphs2d:
         ax.legend(title="Passenger direction")
 
         #plt.show()
+
+        fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
+                                 globalConstants.GRAPH_COMMUTE_TIME_PER_STOP_FILE_NAME))
+
         plt.close()
 
     def served_passengers(self, stops_list):
         # Create output folders if not exist
+
+        file_name = os.path.join(globalConstants.RESULTS_FOLDER_NAME,
+                                 globalConstants.PASSENGERS_ALIGHTED_PER_STOP_FILE_NAME)
+
+        file = open(file_name, 'w', encoding='utf-8')
+        field_names = ['stop num', 'stop name', 'total waiting pass.', 'total expected input pass.',
+                       'total alight pass.', 'total expected alight pass.', 'alighted percentage (%)']
+        csv_writer = csv.DictWriter(file, fieldnames=field_names, dialect=csv.excel, lineterminator='\n')
+        csv_writer.writeheader()
 
         print('\nStops list:')
         for stop in stops_list:
@@ -124,6 +151,20 @@ class Graphs2d:
                    stop.pass_alight_count(),
                    stop.expected_alight_pass,
                    100 * stop.pass_alight_count() / stop.expected_alight_pass))
+
+
+            csv_writer.writerow({
+                'stop num': str(stop.number),
+                'stop name': str(stop.name),
+                'total waiting pass.': str(stop.pass_count()),
+                'total expected input pass.': str(stop.total_pass_in),
+                'total alight pass.': str(stop.pass_alight_count()),
+                'total expected alight pass.': str(stop.expected_alight_pass),
+                'alighted percentage (%)': '{:0.2f}'.format(100 * stop.pass_alight_count() / stop.expected_alight_pass)
+            })
+
+        file.close()
+
 
         # This data comes from stop.pass_count(), stop.total_pass_in
         pass_waiting = []
@@ -165,6 +206,9 @@ class Graphs2d:
         p2 = ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted')
         ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers')
         ax.legend()
+
+        fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
+                                 globalConstants.GRAPH_SERVED_PASSENGERS_FILE_NAME))
 
         #plt.show()
 
