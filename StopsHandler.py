@@ -175,6 +175,7 @@ class StopsHandler:
 
     def prepare_cl(self):
         self.np_total_stops = np.uint32(len(self.stops_queue_list_g))
+        self.total_work_items = self.np_total_stops + 10
         np_total_buses = np.uint32(len(self.buses_struc_list_g))
         self.knl.set_arg(0, self.stops_queue_list_g.data)
         self.knl.set_arg(1, self.stops_arrival_list_g.data)
@@ -186,7 +187,7 @@ class StopsHandler:
     def runner_cl(self, sim_time):
         np_sim_time = np.uint32(sim_time)
         self.knl.set_arg(6, np_sim_time)
-        evt = cl.enqueue_nd_range_kernel(self.queue, self.knl, (self.np_total_stops,), None)
+        evt = cl.enqueue_nd_range_kernel(self.queue, self.knl, (self.total_work_items,), None)
         evt.wait()
 
     def runner_c(self, sim_time):
