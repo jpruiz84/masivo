@@ -4,7 +4,7 @@
 #define BUS_MAX_PASS      250
 #define MAX_STOPS         500
 
-#define PASS_STATUS_EMPTY_255   255
+#define PASS_STATUS_END_LIST   255
 #define PASS_STATUS_EMPTY         0
 #define PASS_STATUS_TO_ARRIVE     1
 #define PASS_STATUS_ARRIVED       2

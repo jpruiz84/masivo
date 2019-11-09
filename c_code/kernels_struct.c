@@ -153,10 +153,10 @@ __kernel void masivo_runner(
               //buses_struc_list[j].bpa[k].pass_id, j, stops_alight_list[gid].stop_num);
 
               // Move the passenger from the bus to the stop alight queue
-              n = plq[gid].total;
-              plq[gid].spl[n] = bpa[j].bpl[k];
-              plq[gid].spl[n].status = PASS_STATUS_ALIGHTED;
-              plq[gid].spl[n].alight_time = sim_time;
+              l = plq[gid].total;
+              plq[gid].spl[l] = bpa[j].bpl[k];
+              plq[gid].spl[l].status = PASS_STATUS_ALIGHTED;
+              plq[gid].spl[l].alight_time = sim_time;
               plq[gid].total += 1;
 
               bpa[j].bpl[k].status = PASS_STATUS_EMPTY;
@@ -183,11 +183,6 @@ __kernel void masivo_runner(
       // For each passenger in the stop
       for(k = 0; k < STOP_MAX_PASS; k++){
         //printf("Check for board pass_id %d\n", (stops_queue_list[gid].spl[k].pass_id));
-
-        // If the bus is full, continue with the next bus
-        if(bpa[j].total >= BUS_MAX_PASS){
-          break;
-        }
 
         // If we are at the end of the passenger waiting queue, finish
         if(pwq[gid].spl[k].status == PASS_STATUS_END_LIST){
@@ -235,11 +230,6 @@ __kernel void masivo_runner(
             } // End // Look for a free space in the bus
 
           } // End If the bus has the destination stop, pass boards  if(bus_for_dest)
-
-          // If bus is full break to go to the next bus in the stop
-          if(bpa[j].total >= BUS_MAX_PASS){
-            break;
-          }
 
         } // End If the pass have arrived to the stop if(pass_list[gid].spl[k].status == PASS_STATUS_ARRIVED)
 
