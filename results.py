@@ -69,4 +69,10 @@ def simulation_brief(results):
     for key in sorted(results):
         file.write("%s,%s\r\n" % (key, str(results[key])))
 
+    file.write("Parallel execution time for cu %s,%s\r\n" %
+               (globalConstants.results['LIMIT_MAX_CPUS'],
+                globalConstants.results['Total_execution_time']))
+
+
+
     file.close()
