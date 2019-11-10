@@ -70,16 +70,15 @@ class Graphs2d:
         ax3.set_ylim(0, 5000)
 
 
-
-        lines = [p1, p2, p3, p4]
-        ax.legend(lines, [l.get_label() for l in lines])
-
         if globalConstants.USE_PYOPENCL:
             ax.set(title='Performance using PythonCL, for %d stops' % len(stops_list))
         elif globalConstants.USE_PYTHON_C:
             ax.set(title='Performance using PythonC, for %d stops' % len(stops_list))
         elif globalConstants.USE_PYTHON:
             ax.set(title='Performance using only python, for %d stops' % len(stops_list))
+
+        lines = [p1, p2, p3, p4]
+        ax3.legend(lines, [l.get_label() for l in lines], loc='lower right', fontsize=8)
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
@@ -163,7 +162,7 @@ class Graphs2d:
 
         ax.set(xlabel='Stop number', ylabel='Average commute time (min)',
                title='Commute time per dest. stop ')
-        ax.legend(title="Pass. direc.", loc='lower right')
+        ax.legend(title="Pass. direc.", loc='lower right', fontsize=8)
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
         footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time / 60.0))
@@ -261,7 +260,7 @@ class Graphs2d:
         plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
 
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.legend()
+        ax.legend(fontsize=8)
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_SERVED_PASSENGERS_FILE_NAME))
