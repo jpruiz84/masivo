@@ -108,9 +108,9 @@ class Masivo:
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
         self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
         self.graphs2d.save_performance_csv(self.performance)
-        self.graphs2d.commute_time(self.stops_handler.get_stops_alight_list())
+        #self.graphs2d.commute_time(self.stops_handler.get_stops_alight_list())
 
-        results.passengers_results(self.stops_handler, self.buses_handler)
+        #results.passengers_results(self.stops_handler, self.buses_handler)
         results.simulation_brief(globalConstants.results)
 
         if globalConstants.USE_PYTHON:
