@@ -53,7 +53,7 @@ class Graphs2d:
         elif globalConstants.USE_PYTHON_C:
             ax.set(title='Performance using PythonC, for %d stops' % len(stops_list))
         elif globalConstants.USE_PYTHON:
-            ax.set(title='Performance using pure python, for %d stops' % len(stops_list))
+            ax.set(title='Performance using only python, for %d stops' % len(stops_list))
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
@@ -134,7 +134,7 @@ class Graphs2d:
         ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W')
 
         ax.set(xlabel='Stop number', ylabel='Average commute time (min)',
-               title='Commute time per dest. stop (Pure Python)')
+               title='Commute time per dest. stop ')
         ax.legend(title="Pass. direc.", loc='lower right')
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
