@@ -81,7 +81,7 @@ class Stop:
       for i in range(0, val):
         orig_stop = int(self.number)
         dest_stop = int(key)
-        arrival_time = random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
+        arrival_time = int(globalConstants.PASS_TOTAL_ARRIVAL_TIME * i / val)
         alight_time = 0
         pass_id = globalConstants.pass_num
         globalConstants.pass_num += 1
