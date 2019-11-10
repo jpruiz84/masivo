@@ -48,6 +48,7 @@ class StopsHandler:
         self.mf = cl.mem_flags
         self.prg = cl.Program(self.ctx, kernels).build()
         self.knl = self.prg.masivo_runner
+        self.knl_gen_pass = self.prg.generate_pass
         self.np_total_stops = 0
 
         self.buses_struc_list = 0
@@ -177,7 +178,7 @@ class StopsHandler:
                     for p in self.stops_arrival_list[i]['spl']:
                         if p['status'] == globalConstants.PASS_STATUS_TO_ARRIVE:
                             print(p)
-        else:
+        if 1:
             # For each destination
             print("\nGenerating pass input queue all stops: %d" % len(self.stops_queue_list))
             for i in range(len(self.stops_queue_list)):
@@ -185,20 +186,22 @@ class StopsHandler:
                 masivo_c.generate_pass.argtypes = (np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
                                                    np.ctypeslib.ndpointer(dtype=globalConstants.spsl_type),
                                                    np.ctypeslib.ndpointer(dtype=globalConstants.dest_vec_type),
-                                                   ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32)
+                                                   ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32)
 
                 masivo_c.generate_pass(self.stops_queue_list,
                                        self.stops_arrival_list,
                                        self.stops_object_list[i].destination_vector,
                                        i,
                                        len(self.stops_object_list),
-                                       len(self.stops_object_list[i].destination_vector))
+                                       len(self.stops_object_list[i].destination_vector),
+                                       globalConstants.PASS_TOTAL_ARRIVAL_TIME)
 
                 self.grand_total_passengers += int(self.stops_arrival_list[i]['total'])
                 if 0:
                     for p in self.stops_arrival_list[i]['spl']:
                         if p['status'] == globalConstants.PASS_STATUS_TO_ARRIVE:
                             print(p)
+
         end_time = time.time()
 
         print("generate_pass_input_queue stops time %d ms, grand total passengers: %d"

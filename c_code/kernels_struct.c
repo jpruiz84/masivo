@@ -24,6 +24,7 @@
 
 #define STOP_BUS_WINDOW_DISTANCE     20
 
+#define UINT16_MAX             65535
 
 #define FALSE  0
 #define TRUE   1
@@ -343,7 +344,81 @@ __kernel void masivo_runner(
   }// End For each bus for(int j = 0; j < total_buses; j++)
 
 #endif
+}
 
 
+
+__kernel void generate_pass(
+    __global SpslType *pwq,                      // Passengers Waiting Queue
+    __global SpslType *paq,                      // Passengers Arrival Queue
+	__global unsigned int *destination_vector,
+    unsigned int len_dest_vector,
+	unsigned int total_stops,
+    unsigned int total_arrival_time
+
+    )
+{
+
+	int gid = get_global_id(0);
+    unsigned int k = 0;
+    unsigned int pass_count = 0;
+    unsigned int total_pass = 0;
+    unsigned int i, j;
+    PassType pass_temp;
+
+	// bound check (equivalent to the limit on a 'for' loop for standard/serial C code
+	if (gid >= total_stops){
+	  return;
+	}
+
+    // Set empty lists
+    for (j = 0; j < STOP_MAX_PASS; ++j) {
+        pwq[gid].spl[j].status = PASS_STATUS_END_LIST;
+        paq[gid].spl[j].status = PASS_STATUS_END_LIST;
+        paq[gid].spl[j].arrival_time = UINT16_MAX;
+    }
+
+    // Calculate total passengers
+    for (j = 0; j < len_dest_vector; ++j) {
+        //printf("destination_vector(%d): %d\n", j, destination_vector[j]);
+        total_pass += destination_vector[j];
+    }
+
+#if 1
+
+    // For each destination
+    //for key, val in enumerate(self.stops_object_list[i].destination_vector):
+    for (int key = 0; key < len_dest_vector; ++key) {
+        //for j in range(val["dest_total"]):
+        for (j = 0; j < destination_vector[key]; ++j){
+            k = paq[gid].last_empty;
+            paq[gid].spl[k].pass_id = gid*1000000 + pass_count;
+            paq[gid].spl[k].orig_stop = gid;
+            paq[gid].spl[k].dest_stop = key;
+            paq[gid].spl[k].arrival_time =
+            		j * total_arrival_time / destination_vector[key];
+            paq[gid].spl[k].status = PASS_STATUS_TO_ARRIVE;
+            paq[gid].total += 1;
+            paq[gid].last_empty += 1;
+            pass_count +=1;
+        }
+    }
+
+
+    //Sort items by arrival time ascending
+    //bubbleSort(paq[gid].spl, STOP_MAX_PASS);
+    // A function to implement bubble sort
+	for (i = 0; i < STOP_MAX_PASS - 1; i++){
+	   // Last i elements are already in place
+	   for (j = 0; j < STOP_MAX_PASS-i-1; j++){
+		   if (paq[gid].spl[j].arrival_time > paq[gid].spl[j+1].arrival_time){
+			  pass_temp = paq[gid].spl[j];
+			  paq[gid].spl[j] = paq[gid].spl[j+1];
+			  paq[gid].spl[j+1] = pass_temp;
+		   }
+	   }
+	}
+
+#endif
 
 }

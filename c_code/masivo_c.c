@@ -25,8 +25,6 @@
 #define BUS_TRAVEL_SPEED_M_S         54*1000/3600
 #define BUS_STOPPING_TIME            20
 
-#define PASS_TOTAL_ARRIVAL_TIME   3600
-
 #define BUS_NOT_STARTED_STOP  20000
 #define EMPTY_STOP_NUMBER     20000
 #define BUS_TRAVELING         20001
@@ -403,7 +401,9 @@ void generate_pass(
     unsigned int *destination_vector,
     unsigned int i,                     // Stop index
     unsigned int total_stops,
-    unsigned int len_dest_vector
+    unsigned int len_dest_vector,
+    unsigned int total_arrival_time
+
     )
 {
 
@@ -436,7 +436,7 @@ void generate_pass(
             paq[i].spl[k].orig_stop = i;
             paq[i].spl[k].dest_stop = key;
             paq[i].spl[k].arrival_time =
-            		j * PASS_TOTAL_ARRIVAL_TIME / destination_vector[key];
+            		j * total_arrival_time / destination_vector[key];
             paq[i].spl[k].status = PASS_STATUS_TO_ARRIVE;
             paq[i].total += 1;
             paq[i].last_empty += 1;
