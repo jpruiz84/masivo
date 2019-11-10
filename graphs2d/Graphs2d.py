@@ -1,9 +1,9 @@
 from scipy.signal import butter, filtfilt
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import csv
 import globalConstants
 import numpy as np
-from matplotlib.ticker import MaxNLocator
 import os
 
 
