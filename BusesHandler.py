@@ -83,6 +83,9 @@ class BusesHandler:
 
         logging.info("Total created buses %d" % len(self.buses_list))
 
+        globalConstants.results['Total_buses'] = len(self.buses_list)
+        globalConstants.results['Total_routes'] = len(self.routes_list)
+
     def runner(self, sim_time):
 
         # Update the bus position

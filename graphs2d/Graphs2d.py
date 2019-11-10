@@ -23,6 +23,9 @@ class Graphs2d:
             np.mean(perf_data["rtf"]),
             np.mean(perf_data["cpu_usage"])))
 
+        globalConstants.results['Average_real_time_factor'] = '{:0.2f}'.format(np.mean(perf_data["rtf"]))
+        globalConstants.results['Average_cpu_usage'] = '{:0.2f}'.format(np.mean(perf_data["cpu_usage"]))
+
         if len(perf_data["time"]) <= 10:
             return
 
@@ -36,11 +39,9 @@ class Graphs2d:
         [ymin, ymax] = ax.get_ylim()
         ax.set_ylim(0, ymax)
 
-
-
         ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
         ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
-                 color = 'tab:green')
+                 color='tab:green')
 
         ax2.set_ylim(0, 110)
         ax2.set_ylabel('CPU usage (%)')
@@ -58,9 +59,8 @@ class Graphs2d:
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
 
-        #plt.show()
+        # plt.show()
         plt.close()
-
 
     def save_performance_csv(self, perf_data):
 
@@ -70,7 +70,7 @@ class Graphs2d:
         filtered_data = self.filter_low_pass(perf_data["rtf"])
 
         filename = (os.path.join(globalConstants.RESULTS_FOLDER_NAME,
-                             globalConstants.CSV_PERFORMANCE_TIMELINE_FILE_NAME))
+                                 globalConstants.CSV_PERFORMANCE_TIMELINE_FILE_NAME))
 
         file = open(filename, 'w', encoding='utf-8')
         field_names = ["time (s)", "RTF", "RTF filtered", "CPU usage (%)"]
@@ -108,13 +108,13 @@ class Graphs2d:
                 avg_commute_time = float(sum(commute_time_we)) / float(len(commute_time_we))
             else:
                 avg_commute_time = 0
-            stop_ct_we_array.append(avg_commute_time/60)
+            stop_ct_we_array.append(avg_commute_time / 60)
 
             if len(commute_time_ew):
                 avg_commute_time = float(sum(commute_time_ew)) / float(len(commute_time_ew))
             else:
                 avg_commute_time = 0
-            stop_ct_ew_array.append(avg_commute_time/60)
+            stop_ct_ew_array.append(avg_commute_time / 60)
 
         if len(total_commute_time):
             avg_total_commute_time = float(sum(total_commute_time)) / float(len(total_commute_time))
@@ -122,13 +122,15 @@ class Graphs2d:
             avg_total_commute_time = 0
 
         print("Average total commute time %f s" % avg_total_commute_time)
+        globalConstants.results['Total_average_commute_time'] = \
+            '{:0.3f}'.format(avg_total_commute_time)
 
 
         width = 0.35  # the width of the bars
 
         x = np.arange(len(stop_ct_ew_array))  # the label location
         fig, ax = plt.subplots()
-        #ax.grid()
+        # ax.grid()
 
         ax.bar(x - width / 2, stop_ct_we_array, width, label='W-E')
         ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W')
@@ -138,11 +140,10 @@ class Graphs2d:
         ax.legend(title="Pass. direc.", loc='lower right')
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-        footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time/60.0))
+        footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time / 60.0))
         plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
 
-
-        #plt.show()
+        # plt.show()
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_COMMUTE_TIME_PER_STOP_FILE_NAME))
@@ -170,7 +171,6 @@ class Graphs2d:
                    stop.expected_alight_pass,
                    100 * stop.pass_alight_count() / stop.expected_alight_pass))
 
-
             csv_writer.writerow({
                 'stop num': str(stop.number),
                 'stop name': str(stop.name),
@@ -178,11 +178,11 @@ class Graphs2d:
                 'total expected input pass.': str(stop.total_pass_in),
                 'total alight pass.': str(stop.pass_alight_count()),
                 'total expected alight pass.': str(stop.expected_alight_pass),
-                'alighted percentage (%)': '{:0.2f}'.format(100 * stop.pass_alight_count() / stop.expected_alight_pass)
+                'alighted percentage (%)':
+                    '{:0.2f}'.format(100.0 * stop.pass_alight_count() / stop.expected_alight_pass)
             })
 
         file.close()
-
 
         # This data comes from stop.pass_count(), stop.total_pass_in
         pass_waiting = []
@@ -206,8 +206,13 @@ class Graphs2d:
             total_expected_alighted_pass += stop.expected_alight_pass
 
         print("Total alighted: %d/%d,  %.2f%%" % (total_alighted_pass,
-                                                total_expected_alighted_pass,
-                                                100.0 * total_alighted_pass / total_expected_alighted_pass))
+                                                  total_expected_alighted_pass,
+                                                  100.0 * total_alighted_pass / total_expected_alighted_pass))
+
+        globalConstants.results['Total_alighted_passengers'] = total_alighted_pass
+        globalConstants.results['Total_alighted_expected_passengers'] = total_expected_alighted_pass
+        globalConstants.results['Total_alighted_passengers_percentage'] = \
+            '{:0.2f}'.format(100.0 * total_alighted_pass / total_expected_alighted_pass)
 
         width = 0.5  # the width of the bars
 
@@ -215,20 +220,19 @@ class Graphs2d:
         fig, ax = plt.subplots()
         # ax.grid()
 
-        #p1 = ax.bar(x, pass_boarded, width, label='Departed')
-        #p2 = ax.bar(x, pass_waiting, width, bottom=pass_boarded, label='Still waiting')
-        #ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Origin stop passengers')
-        #ax.legend()
+        # p1 = ax.bar(x, pass_boarded, width, label='Departed')
+        # p2 = ax.bar(x, pass_waiting, width, bottom=pass_boarded, label='Still waiting')
+        # ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Origin stop passengers')
+        # ax.legend()
 
         ax.bar(x, pass_alighted, width, label='Alighted')
         ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted')
-        ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers')
+        ax.set(xlabel='Stop number', ylabel='Number of passengers', title='Destination stop passengers')
 
-        footnote =("Total alighted: %d/%d, %.2f%%" % (total_alighted_pass,
-                                                total_expected_alighted_pass,
-                                                100.0 * total_alighted_pass / total_expected_alighted_pass))
+        footnote = ("Total alighted: %d/%d, %.2f%%" % (total_alighted_pass,
+                                                       total_expected_alighted_pass,
+                                                       100.0 * total_alighted_pass / total_expected_alighted_pass))
         plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
-
 
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend()
@@ -236,6 +240,6 @@ class Graphs2d:
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_SERVED_PASSENGERS_FILE_NAME))
 
-        #plt.show()
+        # plt.show()
 
         print('')

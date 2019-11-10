@@ -1,3 +1,0 @@
-route_number,route_name,route_frequency,route_offset,route_buses,route_dir,route_notes,route_stops_table
-0,Route_00,60,0,600,W-E,all stops,"Stop_00,Stop_01,Stop_02,Stop_03,Stop_04,Stop_05,Stop_06,Stop_07,Stop_08,Stop_09,Stop_10,Stop_11,Stop_12,Stop_13,Stop_14,Stop_15,Stop_16,Stop_17,Stop_18,Stop_19,Stop_20,Stop_21,Stop_22,Stop_23,Stop_24,Stop_25,Stop_26,Stop_27,Stop_28,Stop_29"
-1,Route_01,60,0,600,E-W,all stops,"Stop_29,Stop_28,Stop_27,Stop_26,Stop_25,Stop_24,Stop_23,Stop_22,Stop_21,Stop_20,Stop_19,Stop_18,Stop_17,Stop_16,Stop_15,Stop_14,Stop_13,Stop_12,Stop_11,Stop_10,Stop_09,Stop_08,Stop_07,Stop_06,Stop_05,Stop_04,Stop_03,Stop_02,Stop_01,Stop_00"

@@ -88,16 +88,15 @@ class Masivo:
 
         total_end_time = time.time()
 
-        print("\nTotal execution time: %f s" % (total_end_time - total_start_time))
 
         # END SIMULATION, log results
         print("\nEND SIMULATION !!!!!")
-        print("Total present buses: %d" % len(self.buses_list))
-        print("Total finished buses: %d" % len(self.finished_buses_list))
-        print("Total stops: %d" % len(self.masivo_data["stops_list"]))
+        print("\nTotal execution time: %.3f s" % (total_end_time - total_start_time))
+        globalConstants.results['Total_execution_time'] = \
+            '{:0.3f}'.format(total_end_time - total_start_time)
         print("")
 
-        if 1:
+        if 0:
             print('\nBuses list:')
             for i in range(len(self.buses_handler.get_final_bus_struc_list())):
                 if self.buses_handler.get_final_bus_struc_list()[i]['total'] > 0:
@@ -106,16 +105,13 @@ class Masivo:
                            self.buses_handler.get_final_bus_struc_list()[i]['total'],
                            self.buses_handler.get_final_bus_struc_list()[i]['curr_pos']))
 
-        results.passengers_results(self.stops_handler, self.buses_handler)
-
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
         self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
         self.graphs2d.save_performance_csv(self.performance)
-
-
         self.graphs2d.commute_time(self.stops_handler.get_stops_alight_list())
 
-
+        results.passengers_results(self.stops_handler, self.buses_handler)
+        results.simulation_brief(globalConstants.results)
 
         if globalConstants.USE_PYTHON:
             print("Python Total time: %f s" % (total_end_time - total_start_time))

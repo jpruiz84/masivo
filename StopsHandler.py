@@ -29,6 +29,8 @@ class StopsHandler:
         if globalConstants.USE_PYOPENCL:
             for i, dev in enumerate(cl_devices):
                 print('OpenCL device[%d]: %s, %s, max_cu: %d ' % (i, dev.name, dev.vendor, dev.max_compute_units))
+                globalConstants.results['OpenCL_device_name'] = \
+                    '"OpenCL device[%d]: %s, %s, max_cu: %d"' % (i, dev.name, dev.vendor, dev.max_compute_units)
 
         if globalConstants.LIMIT_MAX_CPUS > 0:
         # emulate multiple devices
@@ -37,6 +39,8 @@ class StopsHandler:
 
             for i, dev in enumerate(cl_devices):
                 print('Emulated OpenCL device[%d]: %s, %s, max_cu: %d ' % (i, dev.name, dev.vendor, dev.max_compute_units))
+                globalConstants.results['OpenCL_device_name'] = \
+                    '"Emulated OpenCL device[%d]: %s, %s, max_cu: %d"' % (i, dev.name, dev.vendor, dev.max_compute_units)
 
         print()
         self.ctx = cl.Context(devices=cl_devices)
@@ -138,6 +142,8 @@ class StopsHandler:
         for stop in self.stops_object_list:
             stop.calculate_total_pass_in()
 
+        globalConstants.results['Total_stops'] = len(self.stops_object_list)
+
     def generate_pass_input(self):
         start_time = time.time()
 
@@ -197,6 +203,7 @@ class StopsHandler:
 
         print("generate_pass_input_queue stops time %d ms, grand total passengers: %d"
               % ((end_time - start_time) * 1000, self.grand_total_passengers))
+        globalConstants.results['Total_passengers'] = self.grand_total_passengers
 
     def prepare_cl(self):
         self.np_total_stops = np.uint32(len(self.stops_queue_list_g))

@@ -13,26 +13,23 @@ PASS_TOTAL_ARRIVAL_TIME = 3600  # In secs
 LOGGING_LEVEL = logging.ERROR
 STOP_MAX_PASS = 10000
 BUS_MAX_PASS = 250
-BUS_AVG_SPEED = 54*1000/3600
+BUS_AVG_SPEED = 54 * 1000 / 3600
 BUS_STOPPING_TIME = 20
-TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 20
 MAX_STOPS = 500
 PERFORMANCE_ODR = 100
 
 test_scenario = 30
 
-LIMIT_MAX_CPUS = 0              # 0 unlimited
+LIMIT_MAX_CPUS = 0  # 0 unlimited
 
 PANDA_3D_ENABLED = False
-SIM_ACCEL_RATE = 0              # 0 unlimited
-END_SIM_TIME = 3600*2
-
+SIM_ACCEL_RATE = 0  # 0 unlimited
+END_SIM_TIME = 3600 * 2
 
 USE_PYTHON = 0
 USE_PYOPENCL = 1
 USE_PYTHON_C = 0
-
 
 if test_scenario == 3:
     if 1:
@@ -53,7 +50,6 @@ BUS_TRAVELING = 20001
 BUS_FINISHED = 20002
 EMPTY_STOP_NUMBER = 20000
 
-
 # Output file names
 RESULTS_FOLDER_NAME = 'results'
 
@@ -66,6 +62,8 @@ GRAPH_COMMUTE_TIME_PER_STOP_FILE_NAME = 'commute_time_per_stop.eps'
 # Performance output files
 GRAPH_PERFORMANCE_TIMELINE_FILE_NAME = 'performance_timeline.eps'
 CSV_PERFORMANCE_TIMELINE_FILE_NAME = 'performance_timeline.csv'
+
+SIMULATION_BRIEF_FILE_NAME = 'simulation_brief.csv'
 
 # Masivo fixed constants, DO NOT MODIFY !!!!
 PASS_TYPE = np.dtype([('pass_id', 'u4'),
@@ -108,7 +106,6 @@ bpsl_type = np.dtype([('number', 'u2'),
 
 dest_vec_type = np.dtype([('dest_total', 'u4')])
 
-
 PASS_STATUS_EMPTY_255 = 255
 PASS_STATUS_EMPTY = 0
 PASS_STATUS_TO_ARRIVE = 1
@@ -123,7 +120,38 @@ if USE_PYOPENCL:
 else:
     cl_enabled = False
 
+results = {
+    'PASS_TOTAL_ARRIVAL_TIME': PASS_TOTAL_ARRIVAL_TIME,
+    'STOP_MAX_PASS': STOP_MAX_PASS,
+    'BUS_MAX_PASS': BUS_MAX_PASS,
+    'BUS_AVG_SPEED': BUS_AVG_SPEED,
+    'BUS_STOPPING_TIME': BUS_STOPPING_TIME,
+    'STOP_BUS_WINDOW_DISTANCE': STOP_BUS_WINDOW_DISTANCE,
+    'MAX_STOPS': MAX_STOPS,
+    'PERFORMANCE_ODR': PERFORMANCE_ODR,
+    'test_scenario': test_scenario,
+    'LIMIT_MAX_CPUS': LIMIT_MAX_CPUS,
+    'PANDA_3D_ENABLED': PANDA_3D_ENABLED,
+    'SIM_ACCEL_RATE': SIM_ACCEL_RATE,
+    'END_SIM_TIME': END_SIM_TIME,
+    'USE_PYTHON': USE_PYTHON,
+    'USE_PYOPENCL': USE_PYOPENCL,
+    'USE_PYTHON_C': USE_PYTHON_C,
+    'ODM_FILE': ODM_FILE,
+    'ROUTES_FILE': ROUTES_FILE,
+    'Total_stops': 0,
+    'Total_routes': 0,
+    'Total_buses': 0,
+    'Total_passengers': 0,
+    'Total_alighted_passengers': 0,
+    'Total_alighted_expected_passengers': 0,
+    'Total_average_commute_time': 0,
+    'Total_execution_time': 0,
+    'Average_real_time_factor': 0,
+    'Average_cpu_usage': 0,
+    'OpenCL_device_name': '',
+}  # To storage the simulation results brief
 
 # Default colors and markers for the graphs
 COLORS_TAB10 = [
-"#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
