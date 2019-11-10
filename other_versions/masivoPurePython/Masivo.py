@@ -17,7 +17,7 @@ class Masivo:
         # Configuring logging format
         # logging.basicConfig(format='%(asctime)s %(message)s', level=globalConstants.LOGGING_LEVEL)
         logging.basicConfig(format='%(message)s', level=globalConstants.LOGGING_LEVEL)
-        print("\n\n|||||||||| Starting Masivo public transport simulator ||||||||||\n")
+        print("\n\n|||||||||| Starting Masivo (Pure Python) public transport simulator ||||||||||\n")
 
         # Init objects
         self.graphs2d = Graphs2d()
@@ -94,6 +94,7 @@ class Masivo:
 
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
         self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
+        self.graphs2d.commute_time(self.stops_list)
 
         if 0:
             for stop in self.stops_list:

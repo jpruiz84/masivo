@@ -5,7 +5,7 @@ import globalConstants
 import numpy as np
 from matplotlib.ticker import MaxNLocator
 import os
-
+from struct import *
 
 class Graphs2d:
 
@@ -48,12 +48,7 @@ class Graphs2d:
         ax.legend(loc='lower left')
         ax2.legend(loc='lower right')
 
-        if globalConstants.USE_PYOPENCL:
-            ax.set(title='Performance using PythonCL, for %d stops' % len(stops_list))
-        elif globalConstants.USE_PYTHON_C:
-            ax.set(title='Performance using PythonC, for %d stops' % len(stops_list))
-        elif globalConstants.USE_PYTHON:
-            ax.set(title='Performance using pure python, for %d stops' % len(stops_list))
+        ax.set(title='Performance using Pure Python, for %d stops' % len(stops_list))
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
@@ -86,20 +81,25 @@ class Graphs2d:
 
         file.close()
 
-    def commute_time(self, pass_list):
+    def commute_time(self, stop_list):
         # Create output folders if not exist
 
+        total_commute_time = []
         stop_ct_we_array = []
         stop_ct_ew_array = []
-        for stops in pass_list:
+        for stop in stop_list:
             commute_time_we = []
             commute_time_ew = []
-            for pass_data in stops['spl']:
-                if pass_data['status'] == globalConstants.PASS_STATUS_ALIGHTED:
-                    if pass_data['orig_stop'] < pass_data['dest_stop']:
-                        commute_time_we.append(int(pass_data['alight_time']) - int(pass_data['arrival_time']))
-                    else:
-                        commute_time_ew.append(int(pass_data['alight_time']) - int(pass_data['arrival_time']))
+            for pass_pack in stop.pass_alight_list:
+                (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+                    unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+
+                diff_time = int(alight_time) - int(arrival_time)
+                if orig_stop < dest_stop:
+                    commute_time_we.append(diff_time)
+                else:
+                    commute_time_ew.append(diff_time)
+                total_commute_time.append(diff_time)
 
             if len(commute_time_we):
                 avg_commute_time = float(sum(commute_time_we)) / float(len(commute_time_we))
@@ -113,6 +113,13 @@ class Graphs2d:
                 avg_commute_time = 0
             stop_ct_ew_array.append(avg_commute_time/60)
 
+        if len(total_commute_time):
+            avg_total_commute_time = float(sum(total_commute_time)) / float(len(total_commute_time))
+        else:
+            avg_total_commute_time = 0
+
+        print("Average total commute time %f s" % avg_total_commute_time)
+
         width = 0.35  # the width of the bars
 
         x = np.arange(len(stop_ct_ew_array))  # the label location
@@ -122,9 +129,13 @@ class Graphs2d:
         ax.bar(x - width / 2, stop_ct_we_array, width, label='W-E')
         ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W')
 
-        ax.set(xlabel='Stop number', ylabel='Average commute time (min)')
+        ax.set(xlabel='Stop number', ylabel='Average commute time (min)',
+               title='Commute time per dest. stop (Pure Python)')
         ax.legend(title="Pass. direc.", loc='lower right')
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+        footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time/60.0))
+        plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
 
         #plt.show()
 
@@ -206,7 +217,12 @@ class Graphs2d:
 
         p1 = ax.bar(x, pass_alighted, width, label='Alighted')
         p2 = ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted')
-        ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers')
+        ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers (Pure Python)')
+        footnote =("Total alighted: %d/%d, %.2f%%" % (total_alighted_pass,
+                                                total_expected_alighted_pass,
+                                                100.0 * total_alighted_pass / total_expected_alighted_pass))
+        plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
+
 
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend()

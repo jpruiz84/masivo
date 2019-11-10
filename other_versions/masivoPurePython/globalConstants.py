@@ -41,7 +41,7 @@ if test_scenario == 3:
         ODM_FILE = '../../inputs/odm3small.csv'
         ROUTES_FILE = '../../inputs/routes3small.csv'
 if test_scenario == 30:
-    ODM_FILE = '../../inputs/odm30_downtown.csv'
+    ODM_FILE = '../../inputs/odm30_random.csv'
     ROUTES_FILE = '../../inputs/routes30.csv'
 if test_scenario == 300:
     ODM_FILE = '../../inputs/odm300.csv'
