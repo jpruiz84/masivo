@@ -194,10 +194,9 @@ __kernel void masivo_runner(
 
     } // End for each bus for(int i = 0; i < total_buses; ++i){
     return;
-  } // End if(gid == 0){
+  } // End if(gid == total_stops){
 
 #endif
-
   // **************** PASSENGERS ARRIVING ********************************
 #if 1
   //printf("gid: %d, sim_time: %d\n", gid, sim_time);
@@ -233,6 +232,7 @@ __kernel void masivo_runner(
 #endif
    
 #if 1
+
   // For each bus
   for(j = 0; j < total_buses; j++){
     
@@ -340,10 +340,10 @@ __kernel void masivo_runner(
       } // End For each pass in the stop for(int k = 0; k < STOP_MAX_PASS; k++)
 
     } // End If the bus is in the stop
-
   }// End For each bus for(int j = 0; j < total_buses; j++)
-
 #endif
+
+  barrier(CLK_GLOBAL_MEM_FENCE);
 }
 
 
