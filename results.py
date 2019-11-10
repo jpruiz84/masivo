@@ -19,6 +19,7 @@ def passengers_results(stops_hanlder, buses_handler):
     csv_writer.writeheader()
 
     total_pass = []
+    commute_time = []
 
     for stops in stops_hanlder.get_stops_arrival_list():
         for pass_data in stops['spl']:
@@ -34,6 +35,7 @@ def passengers_results(stops_hanlder, buses_handler):
         for pass_data in stops['spl']:
             if pass_data['status'] == globalConstants.PASS_STATUS_ALIGHTED:
                 total_pass.append(pass_data)
+                commute_time.append(int(pass_data['alight_time']) - int(pass_data['arrival_time']))
 
     for bus in buses_handler.get_final_bus_struc_list():
         for pass_data in bus['bpl']:
@@ -50,8 +52,12 @@ def passengers_results(stops_hanlder, buses_handler):
             'status_num': str(pass_data['status']),
             'status_text': globalConstants.STATUS_TEXT_ARRAY[pass_data['status']]
         })
+    if len(commute_time):
+        avg_commute_time = float(sum(commute_time)) / float(len(commute_time))
+    else:
+        avg_commute_time = 0
 
-
+    print("Average commute time %f s" % avg_commute_time)
 
     file.close()
 

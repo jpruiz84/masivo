@@ -11,8 +11,7 @@ class Bus:
         self.route = route
         self.max_capacity = globalConstants.BUS_MAX_PASS
         self.pass_queue = []
-        self.travel_speed_km_h = 50  # Km/h
-        self.travel_speed_m_s = self.travel_speed_km_h * 1000.0 / 3600.0  # Km/s
+        self.travel_speed_m_s = globalConstants.BUS_AVG_SPEED
         self.start_time = 0
         self.bus_struc = 0
         self.bus_struc_g = 0

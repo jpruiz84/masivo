@@ -97,13 +97,14 @@ class Masivo:
         print("Total stops: %d" % len(self.masivo_data["stops_list"]))
         print("")
 
-        if 0:
+        if 1:
             print('\nBuses list:')
             for i in range(len(self.buses_handler.get_final_bus_struc_list())):
-                print("Bus %s \t has %d pass, \t final pos %d" %
-                      (self.buses_list[i].number,
-                       self.buses_handler.get_final_bus_struc_list()[i]['total'],
-                       self.buses_handler.get_final_bus_struc_list()[i]['curr_pos']))
+                if self.buses_handler.get_final_bus_struc_list()[i]['total'] > 0:
+                    print("Bus %s , route %s \t has %d pass, \t final pos %d" %
+                          (self.buses_list[i].number, self.buses_list[i].route.name,
+                           self.buses_handler.get_final_bus_struc_list()[i]['total'],
+                           self.buses_handler.get_final_bus_struc_list()[i]['curr_pos']))
 
         results.passengers_results(self.stops_handler, self.buses_handler)
 

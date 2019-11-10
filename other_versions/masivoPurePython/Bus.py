@@ -9,14 +9,12 @@ class Bus:
   def __init__(self, number, route):
     self.number = number
     self.route = route
-    self.max_capacity = 200
+    self.max_capacity = globalConstants.BUS_MAX_PASS
     self.pass_queue = []
-    self.travel_speed_km_h = 50          # Km/h
-    self.travel_speed_m_s = self.travel_speed_km_h*1000.0/3600.0          # Km/s
-    self.stopping_time = 10
+    self.travel_speed_m_s = globalConstants.BUS_AVG_SPEED
     self.current_position = route.start_stop.x_pos
     self.in_the_stop = True
-    self.in_the_stop_counter = self.stopping_time
+    self.in_the_stop_counter = globalConstants.BUS_STOPPING_TIME
     self.current_stop = route.start_stop
     self.remaining_stops_num = copy.copy(self.route.stops_num_table)
 
@@ -59,7 +57,7 @@ class Bus:
     return False
 
   # Needs to be called each simulation second
-  def runner(self, stops_list):
+  def runner(self, stops_list, sim_time):
 
     # If waiting in the stop
     if self.in_the_stop:
@@ -85,7 +83,10 @@ class Bus:
           unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
         if dest_stop == self.current_stop.number:
           logging.info('ALIGHT, pass %d from stop %d alighted in stop %d' % (pass_id, orig_stop, dest_stop))
-          self.current_stop.pass_alight(pass_pack)
+          alight_time = sim_time
+          pass_pack2 = pack(globalConstants.PASS_DATA_FORMAT,
+                            alight_time, arrival_time, dest_stop, orig_stop, pass_id)
+          self.current_stop.pass_alight(pass_pack2)
           self.pass_queue.remove(pass_pack)
 
       # Check if we have to depart from the stop
@@ -110,7 +111,7 @@ class Bus:
           self.number, stop.name, self.current_position, str(self.is_full())))
           self.current_stop = stop
           self.in_the_stop = True
-          self.in_the_stop_counter = self.stopping_time
+          self.in_the_stop_counter = globalConstants.BUS_STOPPING_TIME
           break
 
 

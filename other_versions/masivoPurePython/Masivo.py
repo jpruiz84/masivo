@@ -6,8 +6,8 @@ import globalConstants
 from BusesHandler import BusesHandler
 from StopsHandler import StopsHandler
 from graphs2d.Graphs2d import Graphs2d
-import numpy as np
-#import results
+from struct import *
+import results
 import psutil
 
 
@@ -94,6 +94,16 @@ class Masivo:
 
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
         self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
+
+        if 0:
+            for stop in self.stops_list:
+                for pass_pack in stop.pass_alight_list:
+                    (alight_time, arrival_time, dest_stop, orig_stop, pass_id) = \
+                        unpack(globalConstants.PASS_DATA_FORMAT, pass_pack)
+                    print("pass_id %d \torig_stop %d \tdest_stop %d \tarrival_time %d \t alight_time %d" %
+                          (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
+
+        results.passengers_results(self.stops_list, self.buses_list)
 
     def get_masivo_data(self):
         return self.masivo_data

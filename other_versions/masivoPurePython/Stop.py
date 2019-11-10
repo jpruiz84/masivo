@@ -1,8 +1,7 @@
 import globalConstants
-import random
 from struct import *
 import logging
-import binascii
+
 
 
 class Stop:

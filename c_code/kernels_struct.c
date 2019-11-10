@@ -15,15 +15,14 @@
 #define PASS_STATUS_IN_BUS        3
 #define PASS_STATUS_ALIGHTED      4
 
-#define BUS_TRAVEL_SPEED_M_S         54*1000/3600
-#define BUS_STOPPING_TIME            20
+#define BUS_STOPPING_TIME        20
 
 #define BUS_NOT_STARTED_STOP  20000
 #define EMPTY_STOP_NUMBER     20000
 #define BUS_TRAVELING         20001
 #define BUS_FINISHED          20002
 
-#define STOP_BUS_WINDOW_DISTANCE     10
+#define STOP_BUS_WINDOW_DISTANCE     20
 
 
 #define FALSE  0

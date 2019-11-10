@@ -46,7 +46,7 @@ class BusesHandler:
 
     # Run the bus runner for each bus
     for bus in self.buses_list:
-      bus.runner(self.stops_list)
+      bus.runner(self.stops_list, sim_time)
       if bus.is_finished():
         self.finished_buses_list.append(bus)
         self.buses_list.remove(bus)
