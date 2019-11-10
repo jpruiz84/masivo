@@ -9,7 +9,7 @@ or download directly from:
         wget http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/15951/intel_sdk_for_opencl_applications_2019.5.345.tar.gz
         tar xvf intel_sdk_for_opencl_applications_2019.5.345.tar.gz 
         cd intel_sdk_for_opencl_applications_2019.5.345/
-        sed -i 's/ACCEPT_EULA=decline/ACCEPT_EULA=accep t/g' silent.cfg 
+        sed -i 's/ACCEPT_EULA=decline/ACCEPT_EULA=accept/g' silent.cfg 
         ./install.sh
 
 
@@ -18,10 +18,10 @@ Python libraries. For Windows, enter in the command line (Windows +
 R, cmd, and Enter), and run the installation script:
         
         apt update
-        apt install -y python3 python3-tk python3-pip git nano clinfo
+        apt install -y python3 python3-tk python3-pip git nano clinfo htop
         export LC_ALL=C
         python3 -m pip install --upgrade pip
-        python3 -m pip install panda3d pyopencl numpy matplotlib scipy 
+        python3 -m pip install panda3d pyopencl numpy matplotlib scipy psutil 
 
 
 Running

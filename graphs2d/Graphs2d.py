@@ -9,6 +9,12 @@ import os
 
 class Graphs2d:
 
+    def make_patch_spines_invisible(self, ax):
+        ax.set_frame_on(True)
+        ax.patch.set_visible(False)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+
     def filter_low_pass(self, x):
         fOrder = 3
         normal_cutoff = 0.2
@@ -29,24 +35,44 @@ class Graphs2d:
             return
 
         fig, ax = plt.subplots()
-        ax.plot(perf_data["time"], perf_data["rtf"], label='Not filtered')
-        ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='Low pass filtered')
+        fig.subplots_adjust(right=0.75)
+        p1, = ax.plot(perf_data["time"], perf_data["rtf"], label='RTF Not filtered')
+        p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='RTF Low pass filtered')
 
-        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor')
+        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
         ax.grid()
         # ax.set_yscale('log')
         [ymin, ymax] = ax.get_ylim()
         ax.set_ylim(0, ymax)
 
         ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
-        ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
+        ax3 = ax.twinx()  # instantiate a second axes that shares the same x-axis
+
+        # Offset the right spine of par2.  The ticks and label have already been
+        # placed on the right by twinx above.
+        ax3.spines["right"].set_position(("axes", 1.2))
+        # Having been created by twinx, par2 has its frame off, so the line of its
+        # detached spine is invisible.  First, activate the frame but make the patch
+        # and spines invisible.
+        self.make_patch_spines_invisible(ax3)
+        # Second, show the right spine.
+        ax3.spines["right"].set_visible(True)
+
+        p3, = ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
                  color='tab:green')
 
         ax2.set_ylim(0, 110)
         ax2.set_ylabel('CPU usage (%)')
 
-        ax.legend(loc='lower left')
-        ax2.legend(loc='lower right')
+        p4, = ax3.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_freq"]), label='CPU frequency',
+                 color='tab:red')
+        ax3.set_ylabel('CPU frequency (KHz)')
+        ax3.set_ylim(0, 5000)
+
+
+
+        lines = [p1, p2, p3, p4]
+        ax.legend(lines, [l.get_label() for l in lines])
 
         if globalConstants.USE_PYOPENCL:
             ax.set(title='Performance using PythonCL, for %d stops' % len(stops_list))
@@ -58,7 +84,7 @@ class Graphs2d:
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
 
-        # plt.show()
+        #plt.show()
         plt.close()
 
     def save_performance_csv(self, perf_data):
@@ -72,7 +98,7 @@ class Graphs2d:
                                  globalConstants.CSV_PERFORMANCE_TIMELINE_FILE_NAME))
 
         file = open(filename, 'w', encoding='utf-8')
-        field_names = ["time (s)", "RTF", "RTF filtered", "CPU usage (%)"]
+        field_names = ["time (s)", "RTF", "RTF filtered", "CPU usage (%)", "CPU freq (KHz)"]
         csv_writer = csv.DictWriter(file, fieldnames=field_names, dialect=csv.excel, lineterminator='\n')
         csv_writer.writeheader()
 
@@ -80,7 +106,8 @@ class Graphs2d:
             csv_writer.writerow({'time (s)': str(perf_data['time'][i]),
                                  'RTF': '{:0.2f}'.format(perf_data['rtf'][i]),
                                  'RTF filtered': '{:0.2f}'.format(filtered_data[i]),
-                                 'CPU usage (%)': perf_data['cpu_usage'][i]
+                                 'CPU usage (%)': perf_data['cpu_usage'][i],
+                                 'CPU freq (KHz)': int(perf_data['cpu_freq'][i])
                                  })
 
         file.close()
