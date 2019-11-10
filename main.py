@@ -6,7 +6,6 @@ import globalConstants
 import argparse
 
 parser = argparse.ArgumentParser(description="Run Masivo parallel traffic simulation")
-
 parser.add_argument("-m", "--max_cu", type=int, default=0,
                     help="Defines the max OpenCL compute units to use, defautl 0 unlimited.")
 # Parse arguments

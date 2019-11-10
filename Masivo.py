@@ -6,10 +6,9 @@ import globalConstants
 from BusesHandler import BusesHandler
 from StopsHandler import StopsHandler
 from graphs2d.Graphs2d import Graphs2d
-import numpy as np
+import os
 import results
 import psutil
-
 
 class Masivo:
     def __init__(self):
@@ -51,6 +50,11 @@ class Masivo:
         # Set masivo_data for panda3d
         self.masivo_data["stops_list"] = self.stops_list
         self.masivo_data["buses_list"] = self.buses_list
+
+        # Create output folders if not exist
+        if not os.path.exists(os.path.join(globalConstants.RESULTS_FOLDER_NAME)):
+            os.makedirs(os.path.join(globalConstants.RESULTS_FOLDER_NAME))
+
 
 
     # Main run

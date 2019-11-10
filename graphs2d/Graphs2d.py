@@ -18,7 +18,6 @@ class Graphs2d:
         return y
 
     def performance_graph(self, perf_data, stops_list):
-
         print("\nAverage real-time factor: %d, average CPU usage: %.2f%%" % (
             np.mean(perf_data["rtf"]),
             np.mean(perf_data["cpu_usage"])))
