@@ -446,7 +446,7 @@ void generate_pass(
 
 
     //Sort items by arrival time ascending
-    bubbleSort(paq[i].spl, STOP_MAX_PASS);
+    bubbleSort(paq[i].spl, paq[i].total);
 #endif
 
 }
