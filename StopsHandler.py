@@ -41,8 +41,10 @@ class StopsHandler:
                 print('Emulated OpenCL device[%d]: %s, %s, max_cu: %d ' % (i, dev.name, dev.vendor, dev.max_compute_units))
                 globalConstants.results['OpenCL_device_name'] = \
                     '"Emulated OpenCL device[%d]: %s, %s, max_cu: %d"' % (i, dev.name, dev.vendor, dev.max_compute_units)
-
         print()
+
+        globalConstants.results['LIMIT_MAX_CPUS'] = globalConstants.LIMIT_MAX_CPUS
+
         self.ctx = cl.Context(devices=cl_devices)
         self.queue = cl.CommandQueue(self.ctx)
         self.mf = cl.mem_flags
