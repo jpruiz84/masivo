@@ -17,7 +17,7 @@ BUS_STOPPING_TIME = 20
 TOTAL_BUSES = 100
 STOP_BUS_WINDOW_DISTANCE = 10
 MAX_STOPS = 500
-PERFORMANCE_ODR = 30
+PERFORMANCE_ODR = 100
 
 test_scenario = 30
 
@@ -41,7 +41,7 @@ if test_scenario == 3:
         ODM_FILE = 'inputs/odm3small.csv'
         ROUTES_FILE = 'inputs/routes3small.csv'
 if test_scenario == 30:
-    ODM_FILE = 'inputs/odm30.csv'
+    ODM_FILE = 'inputs/odm30_downtown.csv'
     ROUTES_FILE = 'inputs/routes30.csv'
 if test_scenario == 300:
     ODM_FILE = 'inputs/odm300.csv'

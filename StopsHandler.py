@@ -159,8 +159,7 @@ class StopsHandler:
                         self.stops_arrival_list[i]['spl'][k]['pass_id'] = globalConstants.pass_num
                         self.stops_arrival_list[i]['spl'][k]['orig_stop'] = int(self.stops_object_list[i].number)
                         self.stops_arrival_list[i]['spl'][k]['dest_stop'] = int(key)
-                        self.stops_arrival_list[i]['spl'][k]['arrival_time'] = \
-                            random.randint(0, globalConstants.PASS_TOTAL_ARRIVAL_TIME)
+                        self.stops_arrival_list[i]['spl'][k]['arrival_time'] = j*globalConstants.PASS_TOTAL_ARRIVAL_TIME/val["dest_total"]
                         self.stops_arrival_list[i]['spl'][k]['status'] = globalConstants.PASS_STATUS_TO_ARRIVE
                         self.stops_arrival_list[i]['total'] += 1
                         self.stops_arrival_list[i]['last_empty'] += 1
@@ -168,6 +167,10 @@ class StopsHandler:
 
                 # Sort items by arrival time ascending
                 self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
+                if 0:
+                    for p in self.stops_arrival_list[i]['spl']:
+                        if p['status'] == globalConstants.PASS_STATUS_TO_ARRIVE:
+                            print(p)
         else:
             # For each destination
             print("\nGenerating pass input queue all stops: %d" % len(self.stops_queue_list))
@@ -186,8 +189,10 @@ class StopsHandler:
                                        len(self.stops_object_list[i].destination_vector))
 
                 self.grand_total_passengers += int(self.stops_arrival_list[i]['total'])
-                #for p in self.stops_arrival_list[i]['spl']:
-                #    print(p)
+                if 0:
+                    for p in self.stops_arrival_list[i]['spl']:
+                        if p['status'] == globalConstants.PASS_STATUS_TO_ARRIVE:
+                            print(p)
         end_time = time.time()
 
         print("generate_pass_input_queue stops time %d ms, grand total passengers: %d"

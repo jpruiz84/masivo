@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import csv
 import globalConstants
 import numpy as np
+from matplotlib.ticker import MaxNLocator
 import os
 
 
@@ -10,7 +11,7 @@ class Graphs2d:
 
     def filter_low_pass(self, x):
         fOrder = 3
-        normal_cutoff = 0.1
+        normal_cutoff = 0.2
         b, a = butter(fOrder, normal_cutoff, btype='low', analog=False)
         y = filtfilt(b, a, x)
 
@@ -42,9 +43,9 @@ class Graphs2d:
                  color = 'tab:green')
 
         ax2.set_ylim(0, 110)
-        ax2.set_ylabel('CPU usage (%)',)
+        ax2.set_ylabel('CPU usage (%)')
 
-        ax.legend()
+        ax.legend(loc='lower left')
         ax2.legend(loc='lower right')
 
         if globalConstants.USE_PYOPENCL:
@@ -122,7 +123,8 @@ class Graphs2d:
         ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W')
 
         ax.set(xlabel='Stop number', ylabel='Average commute time (min)')
-        ax.legend(title="Passenger direction")
+        ax.legend(title="Pass. direc.", loc='lower right')
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
         #plt.show()
 
@@ -205,6 +207,8 @@ class Graphs2d:
         p1 = ax.bar(x, pass_alighted, width, label='Alighted')
         p2 = ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted')
         ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Destination stop passengers')
+
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend()
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,

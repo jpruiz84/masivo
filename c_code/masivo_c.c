@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef __OPENCL_VERSION__
 #define __kernel
@@ -373,6 +374,29 @@ __kernel void masivo_runner(
 }
 
 
+void swap(PassType *xp, PassType *yp)
+{
+	PassType temp;
+	memcpy(&temp, xp, sizeof(PassType));
+	memcpy(xp, yp, sizeof(PassType));
+	memcpy(yp, &temp, sizeof(PassType));
+}
+
+// A function to implement bubble sort
+void bubbleSort(PassType* arr, unsigned int n)
+{
+   unsigned int i, j;
+
+   for (i = 0; i < n-1; i++){
+       // Last i elements are already in place
+       for (j = 0; j < n-i-1; j++){
+           if (arr[j].arrival_time > arr[j+1].arrival_time){
+              swap(&arr[j], &arr[j+1]);
+           }
+       }
+   }
+}
+
 void generate_pass(
     SpslType *pwq,                      // Passengers Waiting Queue
     SpslType *paq,                      // Passengers Arrival Queue
@@ -411,7 +435,8 @@ void generate_pass(
             paq[i].spl[k].pass_id = i*1000000 + pass_count;
             paq[i].spl[k].orig_stop = i;
             paq[i].spl[k].dest_stop = key;
-            paq[i].spl[k].arrival_time = pass_count*PASS_TOTAL_ARRIVAL_TIME / total_pass ;
+            paq[i].spl[k].arrival_time =
+            		j * PASS_TOTAL_ARRIVAL_TIME / destination_vector[key];
             paq[i].spl[k].status = PASS_STATUS_TO_ARRIVE;
             paq[i].total += 1;
             paq[i].last_empty += 1;
@@ -421,7 +446,7 @@ void generate_pass(
 
 
     //Sort items by arrival time ascending
-    //self.stops_arrival_list[i]['spl'].sort(order=['status', 'arrival_time'])
+    bubbleSort(paq[i].spl, STOP_MAX_PASS);
 #endif
 
 }
