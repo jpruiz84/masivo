@@ -10,9 +10,6 @@ class Route:
     self.dir = csv_row['route_dir']
     self.notes = csv_row['route_notes']
     self.stops_table = [x.strip() for x in csv_row['route_stops_table'].split(',')]
-    self.buses_total = int(csv_row['route_buses'])
-
-    self.bus_counter = 0
 
     self.stops_num_table = []
     for stop_name in self.stops_table:

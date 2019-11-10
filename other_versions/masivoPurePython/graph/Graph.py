@@ -63,7 +63,7 @@ class Graph(ShowBase):
 
     if "buses_list" in masivo:
       for bus in masivo["buses_list"]:
-        bus = GraphBus(bus.max_capacity, bus.bus_struc["curr_pos"], bus.y_pos)
+        bus = GraphBus(bus.max_capacity, bus.current_position, bus.y_pos)
         self.buses_list.append(bus)
 
     self.accept("escape", sys.exit)
@@ -101,7 +101,7 @@ class Graph(ShowBase):
       if i >= len(self.masivo["buses_list"]):
         break
       # Update bus position and count
-      self.buses_list[i].set_pos(self.masivo["buses_list"][i].bus_struc["curr_pos"], self.masivo["buses_list"][i].y_pos)
+      self.buses_list[i].set_pos(self.masivo["buses_list"][i].current_position, self.masivo["buses_list"][i].y_pos)
       self.buses_list[i].set_pass(self.masivo["buses_list"][i].pass_count())
 
     return Task.cont
