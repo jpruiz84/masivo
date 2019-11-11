@@ -80,6 +80,8 @@ class Graphs2d:
         lines = [p1, p2, p3, p4]
         ax3.legend(lines, [l.get_label() for l in lines], loc='lower right', fontsize=8)
 
+        plt.tight_layout()
+
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
 
@@ -168,8 +170,8 @@ class Graphs2d:
         footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time / 60.0))
         plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
 
+        plt.tight_layout()
         # plt.show()
-
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_COMMUTE_TIME_PER_STOP_FILE_NAME))
 
@@ -262,9 +264,11 @@ class Graphs2d:
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend(fontsize=8)
 
+        plt.tight_layout()
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_SERVED_PASSENGERS_FILE_NAME))
 
         # plt.show()
+        plt.close()
 
         print('')

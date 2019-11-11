@@ -50,6 +50,7 @@ class Graphs2d:
 
         ax.set(title='Performance using Pure Python, for %d stops' % len(stops_list))
 
+        plt.tight_layout()
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
 
@@ -136,6 +137,7 @@ class Graphs2d:
 
         footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time/60.0))
         plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
+        plt.tight_layout()
 
         #plt.show()
 
@@ -226,10 +228,10 @@ class Graphs2d:
 
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend()
+        plt.tight_layout()
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_SERVED_PASSENGERS_FILE_NAME))
-
         #plt.show()
-
+        plt.close()
         print('')

@@ -48,6 +48,7 @@ with open(fileToOpen) as csv_file:
 
     plt.xlabel("Compute units")
     plt.ylabel("Simulation execution time (s)")
+    plt.tight_layout()
 
     os.path.splitext(fileToOpen)[0]
     plt.savefig(os.path.splitext(fileToOpen)[0] + '_sim_time.eps')
@@ -65,6 +66,7 @@ with open(fileToOpen) as csv_file:
 
     plt.xlabel("Compute units")
     plt.ylabel("Efficiency")
+    plt.tight_layout()
 
     os.path.splitext(fileToOpen)[0]
     plt.savefig(os.path.splitext(fileToOpen)[0] + '_efficiency.eps')
@@ -83,6 +85,7 @@ with open(fileToOpen) as csv_file:
 
     plt.xlabel("Compute units")
     plt.ylabel("Speed up factor")
+    plt.tight_layout()
 
     os.path.splitext(fileToOpen)[0]
     plt.savefig(os.path.splitext(fileToOpen)[0] + '_suf.eps')
@@ -100,6 +103,7 @@ with open(fileToOpen) as csv_file:
 
     plt.xlabel("Compute units")
     plt.ylabel("Real-time factor")
+    plt.tight_layout()
 
     os.path.splitext(fileToOpen)[0]
     plt.savefig(os.path.splitext(fileToOpen)[0] + '_rtf.eps')
