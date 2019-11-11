@@ -27,8 +27,8 @@ LIMIT_MAX_CPUS = 0              # 0 unlimited
 PANDA_3D_ENABLED = 0
 SIM_ACCEL_RATE = 0            # 0 unlimited
 
-USE_PYTHON = 0
-USE_PYOPENCL = 1
+USE_PYTHON = 1
+USE_PYOPENCL = 0
 USE_PYTHON_C = 0
 
 
@@ -62,6 +62,8 @@ GRAPH_COMMUTE_TIME_PER_STOP_FILE_NAME = 'commute_time_per_stop.eps'
 GRAPH_PERFORMANCE_TIMELINE_FILE_NAME = 'performance_timeline.eps'
 CSV_PERFORMANCE_TIMELINE_FILE_NAME = 'performance_timeline.csv'
 
+SIMULATION_BRIEF_FILE_NAME = 'simulation_brief.csv'
+
 # Masivo fixed constants, DO NOT MODIFY !!!!
 PASS_DATA_FORMAT = 'HHHHL'     # (alight_time, arrival_time, dest_stop, orig_stop, pass_id)
 PASS_TYPE = np.dtype([('pass_id', 'u4'), ('orig_stop', 'u2'), ('dest_stop', 'u2'),
@@ -79,3 +81,35 @@ PASS_STATUS_IN_BUS = 3
 PASS_STATUS_ALIGHTED = 4
 
 STATUS_TEXT_ARRAY = ['EMPTY', 'TO ARRIVE', 'ARRIVED', 'IN BUS', 'ALIGHTED']
+
+results = {
+    'PASS_TOTAL_ARRIVAL_TIME': PASS_TOTAL_ARRIVAL_TIME,
+    'STOP_MAX_PASS': STOP_MAX_PASS,
+    'BUS_MAX_PASS': BUS_MAX_PASS,
+    'BUS_AVG_SPEED': BUS_AVG_SPEED,
+    'BUS_STOPPING_TIME': BUS_STOPPING_TIME,
+    'STOP_BUS_WINDOW_DISTANCE': STOP_BUS_WINDOW_DISTANCE,
+    'MAX_STOPS': MAX_STOPS,
+    'PERFORMANCE_ODR': PERFORMANCE_ODR,
+    'test_scenario': test_scenario,
+    'LIMIT_MAX_CPUS': 0,
+    'PANDA_3D_ENABLED': PANDA_3D_ENABLED,
+    'SIM_ACCEL_RATE': SIM_ACCEL_RATE,
+    'END_SIM_TIME': END_SIM_TIME,
+    'USE_PYTHON': USE_PYTHON,
+    'USE_PYOPENCL': USE_PYOPENCL,
+    'USE_PYTHON_C': USE_PYTHON_C,
+    'ODM_FILE': ODM_FILE,
+    'ROUTES_FILE': ROUTES_FILE,
+    'Total_stops': 0,
+    'Total_routes': 0,
+    'Total_buses': 0,
+    'Total_passengers': 0,
+    'Total_alighted_passengers': 0,
+    'Total_alighted_expected_passengers': 0,
+    'Total_average_commute_time': 0,
+    'Total_execution_time': 0,
+    'Average_real_time_factor': 0,
+    'Average_cpu_usage': 0,
+    'OpenCL_device_name': '',
+}  # To storage the simulation results brief

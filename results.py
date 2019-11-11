@@ -73,6 +73,4 @@ def simulation_brief(results):
                (globalConstants.results['LIMIT_MAX_CPUS'],
                 globalConstants.results['Total_execution_time']))
 
-
-
     file.close()

@@ -48,4 +48,19 @@ def passengers_results(stops_list, buses_list):
 
     file.close()
 
+def simulation_brief(results):
+    # Create output folders if not exist
+    if not os.path.exists(os.path.join(globalConstants.RESULTS_FOLDER_NAME)):
+        os.makedirs(os.path.join(globalConstants.RESULTS_FOLDER_NAME))
+
+    file_name = os.path.join(globalConstants.RESULTS_FOLDER_NAME,
+                             globalConstants.SIMULATION_BRIEF_FILE_NAME)
+
+    file = open(file_name, 'w', encoding='utf-8')
+
+    for key in sorted(results):
+        file.write("%s,%s\r\n" % (key, str(results[key])))
+
+    file.close()
+
 
