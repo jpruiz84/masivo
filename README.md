@@ -10,7 +10,7 @@ or download directly from:
         tar xvf intel_sdk_for_opencl_applications_2019.5.345.tar.gz 
         cd intel_sdk_for_opencl_applications_2019.5.345/
         sed -i 's/ACCEPT_EULA=decline/ACCEPT_EULA=accept/g' silent.cfg 
-        ./install.sh
+        ./install.sh -s silent.cfg
 
 
 2. Install the unidecode, numpy, scipy, matplotlib, and wordcloud
