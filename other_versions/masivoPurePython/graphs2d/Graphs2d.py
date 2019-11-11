@@ -9,6 +9,12 @@ from struct import *
 
 class Graphs2d:
 
+    def make_patch_spines_invisible(self, ax):
+        ax.set_frame_on(True)
+        ax.patch.set_visible(False)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+
     def filter_low_pass(self, x):
         fOrder = 3
         normal_cutoff = 0.2
@@ -18,7 +24,6 @@ class Graphs2d:
         return y
 
     def performance_graph(self, perf_data, stops_list):
-
         print("\nAverage real-time factor: %d, average CPU usage: %.2f%%" % (
             np.mean(perf_data["rtf"]),
             np.mean(perf_data["cpu_usage"])))
@@ -27,35 +32,53 @@ class Graphs2d:
             return
 
         fig, ax = plt.subplots()
-        ax.plot(perf_data["time"], perf_data["rtf"], label='Not filtered')
-        ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='Low pass filtered')
+        fig.subplots_adjust(right=0.75)
+        p1, = ax.plot(perf_data["time"], perf_data["rtf"], label='RTF not filtered')
+        p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='RTF low-pass filtered')
 
-        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor')
+        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
         # ax.set_yscale('log')
         [ymin, ymax] = ax.get_ylim()
         ax.set_ylim(0, ymax)
 
-
-
         ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
-        ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
-                 color = 'tab:green')
+        ax3 = ax.twinx()  # instantiate a second axes that shares the same x-axis
+
+        # Offset the right spine of par2.  The ticks and label have already been
+        # placed on the right by twinx above.
+        ax3.spines["right"].set_position(("axes", 1.2))
+        # Having been created by twinx, par2 has its frame off, so the line of its
+        # detached spine is invisible.  First, activate the frame but make the patch
+        # and spines invisible.
+        self.make_patch_spines_invisible(ax3)
+        # Second, show the right spine.
+        ax3.spines["right"].set_visible(True)
+
+        p3, = ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
+                 color='tab:green')
 
         ax2.set_ylim(0, 110)
         ax2.set_ylabel('CPU usage (%)')
 
-        ax.legend(loc='lower left')
-        ax2.legend(loc='lower right')
+        p4, = ax3.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_freq"]), label='CPU frequency',
+                 color='tab:red')
+        ax3.set_ylabel('CPU frequency (KHz)')
+        ax3.set_ylim(0, 5000)
 
         ax.set(title='Performance using Pure Python, for %d stops' % len(stops_list))
+
+
+        lines = [p1, p2, p3, p4]
+        ax3.legend(lines, [l.get_label() for l in lines], loc='lower right', fontsize=8)
         ax.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
+
         plt.tight_layout()
+
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_PERFORMANCE_TIMELINE_FILE_NAME))
 
         #plt.show()
         plt.close()
-
 
     def save_performance_csv(self, perf_data):
 

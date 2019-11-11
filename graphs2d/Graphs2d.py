@@ -36,8 +36,8 @@ class Graphs2d:
 
         fig, ax = plt.subplots()
         fig.subplots_adjust(right=0.75)
-        p1, = ax.plot(perf_data["time"], perf_data["rtf"], label='RTF Not filtered')
-        p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='RTF Low pass filtered')
+        p1, = ax.plot(perf_data["time"], perf_data["rtf"], label='RTF not filtered')
+        p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='RTF low-pass filtered')
 
         ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
         # ax.set_yscale('log')
@@ -67,7 +67,6 @@ class Graphs2d:
                  color='tab:red')
         ax3.set_ylabel('CPU frequency (KHz)')
         ax3.set_ylim(0, 5000)
-
 
         if globalConstants.USE_PYOPENCL:
             ax.set(title='Performance using PythonCL, for %d stops' % len(stops_list))

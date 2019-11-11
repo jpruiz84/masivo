@@ -28,7 +28,7 @@ class Masivo:
         self.stops_list = []
         self.buses_list = []
         self.finished_buses_list = []
-        self.performance = {"time": [], "rtf": [], "cpu_usage": []}
+        self.performance = {"time": [], "rtf": [], "cpu_usage": [], "cpu_freq": []}
 
         # Init stops
         self.stops_handler = StopsHandler()
@@ -60,6 +60,7 @@ class Masivo:
                     self.performance["rtf"].append(
                         globalConstants.PERFORMANCE_ODR / (time.time() - start_perf_time))
                     self.performance["cpu_usage"].append(psutil.cpu_percent())
+                    self.performance["cpu_freq"].append(psutil.cpu_freq().current)
 
                 start_perf_time = time.time()
                 sys.stdout.write("\rtime: %d  " % sim_time)

@@ -24,9 +24,8 @@ test_scenario = 3
 
 LIMIT_MAX_CPUS = 0              # 0 unlimited
 
-PANDA_3D_ENABLED = False
-SIM_ACCEL_RATE = 0              # 0 unlimited
-END_SIM_TIME = 3600*2
+PANDA_3D_ENABLED = 0
+SIM_ACCEL_RATE = 0            # 0 unlimited
 
 USE_PYTHON = 0
 USE_PYOPENCL = 1
@@ -34,16 +33,19 @@ USE_PYTHON_C = 0
 
 
 if test_scenario == 3:
-    if 1:
+    END_SIM_TIME = 3600 * 2
+    if 0:
         ODM_FILE = '../../inputs/odm3.csv'
         ROUTES_FILE = '../../inputs/routes3.csv'
     else:
         ODM_FILE = '../../inputs/odm3small.csv'
         ROUTES_FILE = '../../inputs/routes3small.csv'
 if test_scenario == 30:
+    END_SIM_TIME = 3600 * 2
     ODM_FILE = '../../inputs/odm30_random.csv'
     ROUTES_FILE = '../../inputs/routes30.csv'
 if test_scenario == 300:
+    END_SIM_TIME = 3600 * 10
     ODM_FILE = '../../inputs/odm300.csv'
     ROUTES_FILE = '../../inputs/routes300.csv'
 
