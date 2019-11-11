@@ -72,17 +72,10 @@ class Masivo:
 
         total_end_time = time.time()
 
-        print("\nTotal execution time: %f s" % (total_end_time - total_start_time))
-
-        # END SIMULATION, log results
-        print("\nEND SIMULATION !!!!!")
-        print("Total present buses: %d" % len(self.buses_list))
-        print("Total finished buses: %d" % len(self.finished_buses_list))
-        print("Total stops: %d" % len(self.masivo_data["stops_list"]))
-        print("")
         for stop in self.masivo_data["stops_list"]:
             print("Stop %s have %d/%d pass, and %d/%d out" % (stop.name, stop.pass_count(), len(stop.pass_arrival_list),
                                                               stop.pass_alight_count(), stop.expected_alight_pass))
+        print("")
 
         if 0:
           for bus in self.finished_buses_list:
@@ -106,6 +99,13 @@ class Masivo:
                           (pass_id, orig_stop, dest_stop, arrival_time, alight_time))
 
         results.passengers_results(self.stops_list, self.buses_list)
+
+        # END SIMULATION, log results
+        print("\nEND SIMULATION !!!!!")
+        print("Total present buses: %d" % len(self.buses_list))
+        print("Total finished buses: %d" % len(self.finished_buses_list))
+        print("Total stops: %d" % len(self.masivo_data["stops_list"]))
+        print("\nTotal execution time: %f s" % (total_end_time - total_start_time))
 
     def get_masivo_data(self):
         return self.masivo_data

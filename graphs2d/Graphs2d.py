@@ -68,15 +68,11 @@ class Graphs2d:
         ax3.set_ylabel('CPU frequency (KHz)')
         ax3.set_ylim(0, 5000)
 
-        if globalConstants.USE_PYOPENCL:
-            ax.set(title='Performance using PythonCL, for %d stops' % len(stops_list))
-        elif globalConstants.USE_PYTHON_C:
-            ax.set(title='Performance using PythonC, for %d stops' % len(stops_list))
-        elif globalConstants.USE_PYTHON:
-            ax.set(title='Performance using only python, for %d stops' % len(stops_list))
+        #ax.set(title='Performance, for %d stops' % len(stops_list))
 
         lines = [p1, p2, p3, p4]
-        ax3.legend(lines, [l.get_label() for l in lines], loc='lower right', fontsize=8)
+        ax3.legend(lines, [l.get_label() for l in lines], loc='upper center',
+                   bbox_to_anchor=(0.5, 1.075), fontsize=8, ncol=2, fancybox=True, shadow=True)
         ax.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
 
         plt.tight_layout()
