@@ -24,7 +24,12 @@ R, cmd, and Enter), and run the installation script:
         python3 -m pip install panda3d pyopencl numpy matplotlib scipy psutil 
 
 3. Clone the repository
+        cd ~/
         git clone https://gitlab.taiosystems.com/juan.ruiz/masivo.git
+
+4. Compile the C source code components: 
+        cd masivo
+        gcc -shared -Wl,-soname, -o c_code/masivo_c.so -fPIC c_code/masivo_c.ccd
 
 
 Running
@@ -34,6 +39,3 @@ Running without C compilation:
     
     python3 main.py
 
-Running with C compilation:
-    
-    gcc -shared -Wl,-soname, -o c_code/masivo_c.so -fPIC c_code/masivo_c.c; python3 main.py

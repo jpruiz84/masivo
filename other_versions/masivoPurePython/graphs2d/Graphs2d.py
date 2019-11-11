@@ -40,6 +40,18 @@ class Graphs2d:
         ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
         ax3 = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
+        p1, = ax.plot(perf_data["time"], perf_data["rtf"], label='RTF not filtered')
+        p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]),
+                      label='RTF low-pass filtered')
+
+        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
+        # ax.set_yscale('log')
+        [ymin, ymax] = ax.get_ylim()
+        ax.set_ylim(0, ymax)
+
+        [xmin, xmax] = ax.get_xlim()
+        ax.set_xlim(0, xmax)
+
         # Offset the right spine of par2.  The ticks and label have already been
         # placed on the right by twinx above.
         ax3.spines["right"].set_position(("axes", 1.2))
@@ -51,34 +63,37 @@ class Graphs2d:
         ax3.spines["right"].set_visible(True)
 
         p3, = ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
-                 color='tab:green', zorder=3)
+                 color='tab:green')
 
         ax2.set_ylim(0, 110)
         ax2.set_ylabel('CPU usage (%)')
 
-        p4, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_freq"]), label='CPU frequency',
-                 color='tab:red', zorder=2)
-        ax.set_ylabel('CPU frequency (KHz)')
-        ax.set_ylim(0, 5000)
+        p4, = ax3.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_freq"]), label='CPU frequency',
+                 color='tab:red')
+        ax3.set_ylabel('CPU frequency (KHz)')
+        ax3.set_ylim(0, 5000)
 
-        p1, = ax3.plot(perf_data["time"], perf_data["rtf"], label='RTF not filtered', zorder=4)
-        p2, = ax3.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]),
-                      label='RTF low-pass filtered', zorder=5)
 
-        ax3.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
-        # ax.set_yscale('log')
-        [ymin, ymax] = ax3.get_ylim()
-        ax3.set_ylim(0, ymax)
 
         #ax.set(title='Performance, for %d stops' % len(stops_list))
 
         lines = [p1, p2, p3, p4]
-        ax3.legend(lines, [l.get_label() for l in lines], loc='upper center',
-                   bbox_to_anchor=(0.5, 1.11), fontsize=9, ncol=2, fancybox=True, shadow=True)
+
+        ax.set_zorder(4)  # put ax in front of ax2
+        ax.patch.set_visible(False)  # hide the 'canvas'
+        ax2.set_zorder(3)  # put ax in front of ax2
+        ax2.patch.set_visible(False)  # hide the 'canvas'
+        ax3.set_zorder(2)  # put ax in front of ax2
+        ax3.patch.set_visible(False)  # hide the 'canvas'
+
         ax.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
 
         footnote = ("Total sim. execution time: %0.3f s" % (total_executed_time))
         plt.figtext(0.99, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=9)
+
+        ax.legend(lines, [l.get_label() for l in lines], loc='upper center',
+                   bbox_to_anchor=(0.5, 1.11), fontsize=9, ncol=2, fancybox=True, shadow=True)
+
 
         plt.tight_layout()
 
