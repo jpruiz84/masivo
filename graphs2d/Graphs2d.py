@@ -40,7 +40,6 @@ class Graphs2d:
         p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='RTF Low pass filtered')
 
         ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
-        ax.grid()
         # ax.set_yscale('log')
         [ymin, ymax] = ax.get_ylim()
         ax.set_ylim(0, ymax)
@@ -79,6 +78,7 @@ class Graphs2d:
 
         lines = [p1, p2, p3, p4]
         ax3.legend(lines, [l.get_label() for l in lines], loc='lower right', fontsize=8)
+        ax.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
 
         plt.tight_layout()
 
@@ -157,10 +157,10 @@ class Graphs2d:
 
         x = np.arange(len(stop_ct_ew_array))  # the label location
         fig, ax = plt.subplots()
-        # ax.grid()
+        ax.yaxis.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
 
-        ax.bar(x - width / 2, stop_ct_we_array, width, label='W-E')
-        ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W')
+        ax.bar(x - width / 2, stop_ct_we_array, width, label='W-E', zorder=2)
+        ax.bar(x + width / 2, stop_ct_ew_array, width, label='E-W', zorder=2)
 
         ax.set(xlabel='Stop number', ylabel='Average commute time (min)',
                title='Commute time per dest. stop ')
@@ -245,15 +245,10 @@ class Graphs2d:
 
         x = np.arange(len(pass_waiting))
         fig, ax = plt.subplots()
-        # ax.grid()
 
-        # p1 = ax.bar(x, pass_boarded, width, label='Departed')
-        # p2 = ax.bar(x, pass_waiting, width, bottom=pass_boarded, label='Still waiting')
-        # ax.set(xlabel='Stop number', ylabel='Number of passengers', title = 'Origin stop passengers')
-        # ax.legend()
-
-        ax.bar(x, pass_alighted, width, label='Alighted')
-        ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted')
+        ax.yaxis.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
+        ax.bar(x, pass_alighted, width, label='Alighted', zorder=2)
+        ax.bar(x, pass_not_alighted, width, bottom=pass_alighted, label='Not alighted', zorder=2)
         ax.set(xlabel='Stop number', ylabel='Number of passengers', title='Destination stop passengers')
 
         footnote = ("Total alighted: %d/%d, %.2f%%" % (total_alighted_pass,
@@ -261,14 +256,16 @@ class Graphs2d:
                                                        100.0 * total_alighted_pass / total_expected_alighted_pass))
         plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
 
+        [ymin, ymax] = ax.get_ylim()
+        ax.set_ylim(0, ymax*1.1)
+
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend(fontsize=8)
-
         plt.tight_layout()
+
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
                                  globalConstants.GRAPH_SERVED_PASSENGERS_FILE_NAME))
-
-        # plt.show()
+        #plt.show()
         plt.close()
 
         print('')

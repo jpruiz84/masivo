@@ -20,7 +20,7 @@ STOP_BUS_WINDOW_DISTANCE = 20
 MAX_STOPS = 500
 PERFORMANCE_ODR = 100
 
-test_scenario = 30
+test_scenario = 3
 
 LIMIT_MAX_CPUS = 0              # 0 unlimited
 
