@@ -23,6 +23,9 @@ R, cmd, and Enter), and run the installation script:
         python3 -m pip install --upgrade pip
         python3 -m pip install panda3d pyopencl numpy matplotlib scipy psutil 
 
+3. Clone the repository
+        git clone https://gitlab.taiosystems.com/juan.ruiz/masivo.git
+
 
 Running
 =======

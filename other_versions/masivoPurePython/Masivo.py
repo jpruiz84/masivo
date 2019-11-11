@@ -101,7 +101,7 @@ class Masivo:
               bus.get_number(), bus.pass_count(), bus.current_position))
 
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
-        self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
+        self.graphs2d.performance_graph(self.performance, total_end_time - total_start_time)
         self.graphs2d.commute_time(self.stops_list)
 
         if 0:

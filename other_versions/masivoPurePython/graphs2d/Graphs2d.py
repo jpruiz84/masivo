@@ -1,9 +1,9 @@
 from scipy.signal import butter, filtfilt
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import csv
 import globalConstants
 import numpy as np
-from matplotlib.ticker import MaxNLocator
 import os
 from struct import *
 
@@ -23,23 +23,19 @@ class Graphs2d:
 
         return y
 
-    def performance_graph(self, perf_data, stops_list):
+    def performance_graph(self, perf_data, total_executed_time):
         print("\nAverage real-time factor: %d, average CPU usage: %.2f%%" % (
             np.mean(perf_data["rtf"]),
             np.mean(perf_data["cpu_usage"])))
+
+        globalConstants.results['Average_real_time_factor'] = '{:0.2f}'.format(np.mean(perf_data["rtf"]))
+        globalConstants.results['Average_cpu_usage'] = '{:0.2f}'.format(np.mean(perf_data["cpu_usage"]))
 
         if len(perf_data["time"]) <= 10:
             return
 
         fig, ax = plt.subplots()
         fig.subplots_adjust(right=0.75)
-        p1, = ax.plot(perf_data["time"], perf_data["rtf"], label='RTF not filtered')
-        p2, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]), label='RTF low-pass filtered')
-
-        ax.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
-        # ax.set_yscale('log')
-        [ymin, ymax] = ax.get_ylim()
-        ax.set_ylim(0, ymax)
 
         ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
         ax3 = ax.twinx()  # instantiate a second axes that shares the same x-axis
@@ -55,22 +51,34 @@ class Graphs2d:
         ax3.spines["right"].set_visible(True)
 
         p3, = ax2.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_usage"]), label='CPU usage',
-                 color='tab:green')
+                 color='tab:green', zorder=3)
 
         ax2.set_ylim(0, 110)
         ax2.set_ylabel('CPU usage (%)')
 
-        p4, = ax3.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_freq"]), label='CPU frequency',
-                 color='tab:red')
-        ax3.set_ylabel('CPU frequency (KHz)')
-        ax3.set_ylim(0, 5000)
+        p4, = ax.plot(perf_data["time"], self.filter_low_pass(perf_data["cpu_freq"]), label='CPU frequency',
+                 color='tab:red', zorder=2)
+        ax.set_ylabel('CPU frequency (KHz)')
+        ax.set_ylim(0, 5000)
 
-        #ax.set(title='Performance using Pure Python, for %d stops' % len(stops_list))
+        p1, = ax3.plot(perf_data["time"], perf_data["rtf"], label='RTF not filtered', zorder=4)
+        p2, = ax3.plot(perf_data["time"], self.filter_low_pass(perf_data["rtf"]),
+                      label='RTF low-pass filtered', zorder=5)
+
+        ax3.set(xlabel='Simulation time (s)', ylabel='Real-time factor (RTF)')
+        # ax.set_yscale('log')
+        [ymin, ymax] = ax3.get_ylim()
+        ax3.set_ylim(0, ymax)
+
+        #ax.set(title='Performance, for %d stops' % len(stops_list))
 
         lines = [p1, p2, p3, p4]
         ax3.legend(lines, [l.get_label() for l in lines], loc='upper center',
-                   bbox_to_anchor=(0.5, 1.075), fontsize=8, ncol=2, fancybox=True, shadow=True)
+                   bbox_to_anchor=(0.5, 1.11), fontsize=9, ncol=2, fancybox=True, shadow=True)
         ax.grid(linestyle='--', linewidth=0.5, dashes=(5, 10), zorder=1)
+
+        footnote = ("Total sim. execution time: %0.3f s" % (total_executed_time))
+        plt.figtext(0.99, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=9)
 
         plt.tight_layout()
 
@@ -143,6 +151,9 @@ class Graphs2d:
             avg_total_commute_time = 0
 
         print("Average total commute time %f s" % avg_total_commute_time)
+        globalConstants.results['Total_average_commute_time'] = \
+            '{:0.3f}'.format(avg_total_commute_time)
+
 
         width = 0.35  # the width of the bars
 
@@ -155,13 +166,13 @@ class Graphs2d:
 
         ax.set(xlabel='Stop number', ylabel='Average commute time (min)',
                title='Commute time per dest. stop (Pure Python)')
-        ax.legend(title="Pass. direc.", loc='lower right')
+        ax.legend(title="Pass. direc.", loc='lower right', fontsize=9)
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-        footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time/60.0))
-        plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
-        plt.tight_layout()
+        footnote = ("Total avg. comm. time: %0.2f min" % (avg_total_commute_time / 60.0))
+        plt.figtext(0.99, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=9)
 
+        plt.tight_layout()
         #plt.show()
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,
@@ -190,7 +201,6 @@ class Graphs2d:
                    stop.expected_alight_pass,
                    100 * stop.pass_alight_count() / stop.expected_alight_pass))
 
-
             csv_writer.writerow({
                 'stop num': str(stop.number),
                 'stop name': str(stop.name),
@@ -203,7 +213,6 @@ class Graphs2d:
             })
 
         file.close()
-
 
         # This data comes from stop.pass_count(), stop.total_pass_in
         pass_waiting = []
@@ -227,8 +236,13 @@ class Graphs2d:
             total_expected_alighted_pass += stop.expected_alight_pass
 
         print("Total alighted: %d/%d,  %.2f%%" % (total_alighted_pass,
-                                                total_expected_alighted_pass,
-                                                100.0 * total_alighted_pass / total_expected_alighted_pass))
+                                                  total_expected_alighted_pass,
+                                                  100.0 * total_alighted_pass / total_expected_alighted_pass))
+
+        globalConstants.results['Total_alighted_passengers'] = total_alighted_pass
+        globalConstants.results['Total_alighted_expected_passengers'] = total_expected_alighted_pass
+        globalConstants.results['Total_alighted_passengers_percentage'] = \
+            '{:0.2f}'.format(100.0 * total_alighted_pass / total_expected_alighted_pass)
 
         width = 0.5  # the width of the bars
 
@@ -242,13 +256,13 @@ class Graphs2d:
         footnote = ("Total alighted: %d/%d, %.2f%%" % (total_alighted_pass,
                                                        total_expected_alighted_pass,
                                                        100.0 * total_alighted_pass / total_expected_alighted_pass))
-        plt.figtext(0.95, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=8)
+        plt.figtext(0.99, 0.01, footnote, wrap=True, horizontalalignment='right', fontsize=9)
 
         [ymin, ymax] = ax.get_ylim()
         ax.set_ylim(0, ymax*1.1)
 
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.legend(fontsize=8)
+        ax.legend(fontsize=9)
         plt.tight_layout()
 
         fig.savefig(os.path.join(globalConstants.RESULTS_FOLDER_NAME,

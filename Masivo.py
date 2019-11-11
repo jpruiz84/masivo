@@ -112,7 +112,7 @@ class Masivo:
                            self.buses_handler.get_final_bus_struc_list()[i]['curr_pos']))
 
         self.graphs2d.served_passengers(self.masivo_data["stops_list"])
-        self.graphs2d.performance_graph(self.performance, self.masivo_data["stops_list"])
+        self.graphs2d.performance_graph(self.performance, total_end_time - total_start_time)
         self.graphs2d.save_performance_csv(self.performance)
         self.graphs2d.commute_time(self.stops_handler.get_stops_alight_list())
 
