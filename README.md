@@ -31,7 +31,7 @@ R, cmd, and Enter), and run the installation script:
 4. Compile the C source code components: 
         
         cd masivo
-        gcc -shared -Wl,-soname, -o c_code/masivo_c.so -fPIC c_code/masivo_c.ccd
+        gcc -shared -Wl,-soname, -o c_code/masivo_c.so -fPIC c_code/masivo_c.c
 
 
 Running
