@@ -1,5 +1,7 @@
 # Masivo public transport routes simulator
 
+Masivo is a new parallel simulation model based in OpenCL using a multi-core high performance platform for massive public transportation systems. Masivo works with predefined public transport system conditions, which include the stops’ total number, the stops’ capacity, and the Origin-Destination matrix (OD). This OD matrix and routes’ information are updated to this model via CSV files. Masivo gets the simulation results for total alighted passengers and average commute time. Similarly, it shows the performance indicators.
+
 Installation
 ============
 
